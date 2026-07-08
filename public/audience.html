@@ -415,7 +415,7 @@ function updateVoting(voting){
   // Show QR (generate once per session)
   const url = window.location.origin + '/vote.html';
     if(voteQrGeneratedFor !== url){
-      document.getElementById('aud-vote-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+      document.getElementById('aud-vote-qr-img').src = `https://quickchart.io/qr?text=${encodeURIComponent(url)}&size=200`;
       voteQrGeneratedFor = url;
     }
   qrEl.classList.add('on');

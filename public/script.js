@@ -145,20 +145,33 @@ async function toggleVoting() {
 // ══════════════════════════════════════════
 //  QR CODE
 // ══════════════════════════════════════════
+function generateQR(url, elementId, size = 150) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const apis = [
+    `https://quickchart.io/qr?text=${encodeURIComponent(url)}&size=${size}`,
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`,
+    `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&choe=UTF-8`
+  ];
+  let apiIndex = 0;
+  el.onerror = function() {
+    apiIndex += 1;
+    if (apiIndex < apis.length) {
+      console.warn(`[QR] API ${apiIndex} failed. Switching to next fallback.`);
+      el.src = apis[apiIndex];
+    } else {
+      console.error('[QR] All QR APIs failed for', url);
+      el.onerror = null;
+    }
+  };
+  el.src = apis[0];
+}
+
 function generateSetupQR() {
   const url = window.location.origin + '/players.html';
   const urlEl = document.getElementById('setup-qr-url');
   if (urlEl) urlEl.textContent = url.replace(/^https?:\/\//,'');
-  const img = document.getElementById('setup-qr-img');
-  if (img) {
-    const size = 150;
-    // Use QRServer as primary generator (fast, reliable)
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
-    img.onerror = () => {
-      // Fallback to Google Charts if QRServer fails
-      img.src = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&choe=UTF-8`;
-    };
-  }
+  generateQR(url, 'setup-qr-img', 150);
 }
 
 function showQRCode() {}

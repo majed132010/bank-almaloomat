@@ -98,7 +98,8 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
           <div class="qr-setup-desc">امسح الكود من جوّال كل متسابق للانضمام</div>
           <div class="qr-setup-inner">
             <div class="setup-qr-img-wrap">
-              <img id="setup-qr-img" width="150" height="150" alt="QR Code" style="display:block;border-radius:8px;" src="https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=https://bank-almaloomat-game.web.app/players.html&choe=UTF-8">
+              <img id="setup-qr-img" width="150" height="150" alt="QR Code" style="display:block;border-radius:8px;" src="https://quickchart.io/qr?text=https%3A%2F%2Fbank-almaloomat-game.web.app%2Fplayers.html&size=150" onerror="this.onerror=null;this.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fbank-almaloomat-game.web.app%2Fplayers.html'">
+              <noscript><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fbank-almaloomat-game.web.app%2Fplayers.html" alt="QR Code Backup"></noscript>
             </div>
             <div class="qr-setup-url" id="setup-qr-url">players.html</div>
           </div>
