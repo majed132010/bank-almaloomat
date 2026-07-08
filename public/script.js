@@ -10,6 +10,7 @@
 const FIREBASE_HOST = 'bank-almaloomat-game-default-rtdb.firebaseio.com';
 const FB_URL_STATE  = `https://${FIREBASE_HOST}/gameState.json`;
 const FB_URL_BUZZ   = `https://${FIREBASE_HOST}/gameState/buzzer.json`;
+const FB_URL_TEXT_ANS = `https://${FIREBASE_HOST}/gameState/textAnswers.json`;
 const FB_URL_SIG    = `https://${FIREBASE_HOST}/signaling`;
 
 async function syncToFirebase(data) {
@@ -67,6 +68,8 @@ async function syncQuestion(qItem, cat, value, timerSecs, timerMode) {
   };
   // Reset buzzer when a new question opens (unless bank/speed rounds skip buzzer)
   state.buzzer = { winnerId: null, winnerName: null, ts: 0 };
+  currentTextAnswers = {};
+  await fbPut(FB_URL_TEXT_ANS, {});
   await syncToFirebase(state);
 }
 
@@ -1069,6 +1072,7 @@ const catIcons = {
 let players=[], stage='silver', responder=null, cellRef=null;
 let speedLoc={stage:'silver',cat:0,q:0}, bankLoc={stage:'gold',cat:1,q:2};
 let bankMode=false, bankBet=0, speedIdx=0, diamondState=[], diamondPlayers=[];
+let currentTextAnswers = {};
 let gameDB = null;
 let selectedBankIndex = 0;
 let speedTimerInterval = null;
@@ -1084,6 +1088,7 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => initHostWebRTC().catch(()=>{}), 400);
   // Watch buzzer state (host listens for winner)
   watchBuzzerState();
+  watchTextAnswers();
 });
 
 function buildTopicGrid() {
@@ -1353,7 +1358,7 @@ function buildBoard(s) {
     col.questions.forEach((q,qi)=>{
       const b=document.createElement('button');
       b.className='q-btn'+(q.spent?' spent':'');
-      b.textContent=`${q.v} ن`;
+      b.textContent = q.v;
       if(!q.spent) b.onclick=()=>openModal(ci,qi);
       d.appendChild(b);
     });
@@ -1477,7 +1482,7 @@ function showBankBet() {
   } else {
     inp.min=cv; inp.max=p.score; inp.value=cv; inp.disabled=false;
     lim.style.color='var(--muted)';
-    lim.textContent=`الحد الأدنى: ${cv} ن  |  الحد الأقصى: ${p.score} ن`;
+    lim.textContent=`الحد الأدنى: ${cv} | الحد الأقصى: ${p.score}`;
   }
   document.getElementById('bank-bet-zone').style.display='block';
 }
@@ -1514,7 +1519,7 @@ function judge(ok) {
   const p=players.find(x=>x.id===responder);
 
   if(bankMode){
-    if(ok){ sfx.correct(); p.score+=bankBet; alert(`✨ رهان صحيح! +${bankBet} ن لـ ${p.name}`); }
+    if(ok){ sfx.correct(); p.score+=bankBet; alert(`✨ رهان صحيح! +${bankBet} لـ ${p.name}`); }
     else  { sfx.wrong(); const fl=p.isBanked?p.bankedValue:0; p.score=Math.max(fl,p.score-bankBet); alert(`❌ رهان خاطئ! −${bankBet} ن من ${p.name}`); }
   } else if(stage==='diamond'){
     if(ok){ sfx.correct(); diamondState[cellRef.ci].owner=p.id; } else sfx.wrong();
@@ -1622,6 +1627,67 @@ function watchBuzzerState() {
   }, 400);
 }
 
+function renderTextAnswers(answers) {
+  const panel = document.getElementById('modal-text-answers');
+  if (!panel) return;
+  let list = panel.querySelector('.text-answers-list');
+  if (!list) {
+    list = document.createElement('div');
+    list.className = 'text-answers-list';
+    panel.appendChild(list);
+  }
+  if (!answers || Object.keys(answers).length === 0) {
+    panel.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+  panel.style.display = 'block';
+  const lines = Object.keys(answers).map(key => {
+    const item = answers[key] || {};
+    const text = typeof item.text === 'string' ? item.text.trim() : '';
+    const name = item.playerName || item.playerId || 'متسابق';
+    return `<div class="answer-item"><span class="answer-name">${escapeHtml(name)}</span>: <span class="answer-text">${escapeHtml(text)}</span></div>`;
+  });
+  list.innerHTML = lines.join('');
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[tag]));
+}
+
+function watchTextAnswers() {
+  setInterval(async () => {
+    const data = await fbGet(FB_URL_TEXT_ANS);
+    currentTextAnswers = data || {};
+    renderTextAnswers(currentTextAnswers);
+  }, 800);
+}
+
+function showBuzzerWinnerFlash(name, id) {
+  if(!name) return;
+  let flash=document.getElementById('buzz-winner-flash');
+  if(!flash){
+    flash=document.createElement('div');
+    flash.id='buzz-winner-flash';
+    flash.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#f0a500,#ffd166);color:#1a0e00;padding:40px 80px;border-radius:30px;font-family:"Cairo",sans-serif;font-size:32pt;font-weight:900;z-index:99999;box-shadow:0 25px 80px rgba(240,165,0,0.6);text-align:center;pointer-events:none;transition:transform 0.4s,opacity 0.3s;opacity:0;';
+    document.body.appendChild(flash);
+  }
+  flash.innerHTML='<div style="font-size:56pt;margin-bottom:12px;">🔔</div><div style="font-size:14pt;opacity:0.8;margin-bottom:8px;">أول من ضغط البازر</div><div style="font-size:40pt;">'+escapeHtml(name)+'</div>';
+  flash.style.display='block';
+  requestAnimationFrame(()=>{flash.style.transform='translate(-50%,-50%) scale(1)';flash.style.opacity='1';});
+  setTimeout(()=>{flash.style.transform='translate(-50%,-50%) scale(0.8)';flash.style.opacity='0';setTimeout(()=>{flash.style.display='none';},300);},4000);
+  document.querySelectorAll('.player-card,.score-card').forEach(c=>{c.style.border='';c.style.transform='';c.style.boxShadow='';});
+  let c=document.getElementById('pc-'+id);
+  if(!c) c=document.querySelector('[data-player-id="'+id+'"],[data-pid="'+id+'"]');
+  if(c){
+    c.style.border='3px solid #f0a500';
+    c.style.transform='scale(1.08)';
+    c.style.boxShadow='0 0 30px rgba(240,165,0,0.5)';
+    c.style.transition='all 0.3s ease';
+    setTimeout(()=>{c.style.border='';c.style.transform='';c.style.boxShadow='';},4000);
+  }
+}
+
 function updateBuzzerUI(data) {
   const modalBuzz = document.getElementById('modal-buzz-winner');
   const modalName = document.getElementById('modal-buzz-name');
@@ -1632,6 +1698,7 @@ function updateBuzzerUI(data) {
     modalBuzz.style.display = 'block';
     flashName.textContent = data.winnerName;
     flash.classList.add('on');
+    showBuzzerWinnerFlash(data.winnerName, data.winnerId);
     // Auto-select responder for judging
     if (data.winnerId !== null && data.winnerId !== undefined && document.getElementById('modal-overlay').style.display === 'flex') {
       selectResponder(Number(data.winnerId));
@@ -1663,7 +1730,7 @@ function buildSpeedBtns() {
   const list=stage==='diamond'?diamondPlayers:players;
   list.forEach((p,i)=>{
     const b=document.createElement('button'); b.className='speed-btn';
-    b.textContent=`✓ ${p.name} +100 ن`;
+    b.textContent=`✓ ${p.name} +100`;
     b.onclick=()=>{ sfx.correct(); p.score+=100; refreshScores(); speedIdx++; loadSpeedQ(); };
     c1.appendChild(b);
     if(stage==='diamond'){
@@ -1729,7 +1796,7 @@ function showWinnerPage(winner) {
     const medals=['🥇','🥈','🥉'];
     const d=document.createElement('div');
     d.className=`rank-item rank-${i+1}`;
-    d.innerHTML=`${medals[i]||'④'} ${p.name} — <strong>${p.score} ن</strong>`;
+    d.innerHTML=`${medals[i]||'④'} ${p.name} — <strong>${p.score}</strong>`;
     rankEl.appendChild(d);
   });
   goTo('winner');

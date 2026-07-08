@@ -6,7 +6,7 @@
 <title>بنك المعلومات — المُقدِّم</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=202607081200">
+<link rel="stylesheet" href="style.css?v=20260708204949">
 <style>
 /* Host-only additions */
 /* WEBRTC panel: fixed bottom-left; hidden on landing/setup */
@@ -174,7 +174,10 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
         <div style="font-size:16pt;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(240,165,0,.6)"><span id="modal-buzz-name">—</span></div>
         <button data-testid="btn-reset-buzzer" onclick="resetBuzzer()" style="margin-top:8px;background:rgba(4,4,16,.6);border:1px solid rgba(148,163,184,.3);color:#e2e8f0;padding:5px 14px;border-radius:20px;font-size:9pt;cursor:pointer;font-family:'Tajawal',sans-serif;">🔄 إعادة تفعيل Buzzer</button>
       </div>
-
+      <div id="modal-text-answers" class="modal-text-answers" style="display:none;margin:12px 0;padding:14px 18px;background:rgba(7,10,24,.95);border:1px solid rgba(148,163,184,.22);border-radius:18px;max-height:220px;overflow:auto;">
+        <div class="text-answers-title" style="font-size:10pt;color:#cbd5e1;margin-bottom:10px;letter-spacing:1px;">📨 إجابات نصية واردة</div>
+        <div class="text-answers-list" style="display:grid;gap:8px;font-size:11pt;color:#e2e8f0;"></div>
+      </div>
       <div id="modal-responder" class="modal-responder">
         <div class="modal-responder-label">اختر الفارس المستجيب</div>
         <div id="modal-responder-btns" class="modal-responder-btns"></div>
@@ -265,12 +268,17 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
 .judge-btn.judge-reveal.revealed{background:rgba(16,185,129,.4);border-color:rgba(16,185,129,.6);color:#a7f3d0;cursor:not-allowed}
 .judge-btn.judge-vote{background:linear-gradient(135deg,rgba(240,165,0,.85),rgba(180,120,0,.85));color:#fff;border-color:rgba(240,165,0,.6)}
 .judge-btn.judge-vote:hover:not(:disabled){background:linear-gradient(135deg,#f0a500,#d97706);transform:translateY(-2px);box-shadow:0 8px 20px rgba(240,165,0,.4)}
-.judge-btn.judge-vote.active{background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;color:#fff;box-shadow:0 0 15px rgba(16,185,129,.5)}
-</style>
+.judge-btn.judge-vote.active{background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;color:#fff;box-shadow:0 0 15px rgba(16,185,129,.5)}.modal-text-answers{background:rgba(7,10,24,.98);border:1px solid rgba(148,163,184,.2);border-radius:18px;padding:14px;}
+.modal-text-answers .text-answers-title{font-size:10pt;color:#94a3b8;margin-bottom:10px;}
+.modal-text-answers .answer-item{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.12);}
+.modal-text-answers .answer-item:last-child{border-bottom:none;}
+.modal-text-answers .answer-name{font-weight:800;color:#f8fafc;}
+.modal-text-answers .answer-text{color:#e2e8f0;}</style>
 
 <script src="new_banks.js?v202607081200"></script>
 <script src="script.js?v202607081200"></script>
 </body>
 </html>
+
 
 

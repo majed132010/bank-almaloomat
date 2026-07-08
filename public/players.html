@@ -90,7 +90,14 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 /* Waiting states */
 .play-waiting{text-align:center;padding:30px 20px;font-size:11pt;color:var(--muted);letter-spacing:1px}
 .play-waiting-icon{font-size:44pt;margin-bottom:14px;animation:waitBob 2s ease-in-out infinite alternate}
-@keyframes waitBob{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.text-answer-wrap{margin-top:16px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.16);border-radius:18px}
+.text-answer-label{display:block;margin-bottom:10px;font-size:10pt;color:#cbd5e1;font-weight:700}
+.text-answer-row{display:flex;gap:10px;align-items:center}
+.text-answer-input{flex:1;background:rgba(15,23,42,.95);border:1px solid rgba(148,163,184,.24);border-radius:14px;padding:12px 14px;color:#eef2ff;font-size:13pt;outline:none}
+.text-answer-input:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+.text-answer-btn{background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;color:#fff;padding:12px 18px;border-radius:14px;font-size:13pt;font-weight:700;cursor:pointer;transition:transform .18s}
+.text-answer-btn:hover{transform:translateY(-1px)}
+.text-answer-hint{margin-top:10px;font-size:9.5pt;color:#94a3b8;line-height:1.4}
 
 @media(max-width:380px){
   .buzz-btn{font-size:20pt}
@@ -150,11 +157,19 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
     </button>
     <div class="buzz-hint" id="buzz-hint">اضغط الزر فور معرفة الإجابة</div>
   </div>
+  <div class="text-answer-wrap">
+    <label class="text-answer-label" for="text-answer-input">📨 إرسال إجابة نصية</label>
+    <div class="text-answer-row">
+      <input id="text-answer-input" class="text-answer-input" type="text" placeholder="اكتب إجابة مختصرة" autocomplete="off">
+      <button class="text-answer-btn" id="text-answer-btn" onclick="submitTextAnswer()">إرسال</button>
+    </div>
+    <div class="text-answer-hint" id="text-answer-hint">يمكنك إرسال إجابة نصية أثناء السؤال.</div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getDatabase, ref, onValue, runTransaction, set, remove, onDisconnect, push, onChildAdded, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { getDatabase, ref, get, onValue, runTransaction, set, remove, onDisconnect, push, onChildAdded, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 const firebaseConfig = {
   apiKey:"AIzaSyD0sfgaMmNl0bbe4M4CSkczbjjRqjQYojE",
@@ -167,6 +182,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+window.db = db;
 
 // ==============================
 //   STATE
@@ -222,6 +238,16 @@ window.joinAsPlayer = async function(){
   // Initialize WebRTC audio (peer to host)
   try { await initPlayerWebRTC(); } catch(e){ console.warn('WebRTC init failed', e); }
 
+  const answerInput = document.getElementById('text-answer-input');
+  if(answerInput){
+    answerInput.addEventListener('keydown', (evt) => {
+      if(evt.key === 'Enter'){
+        evt.preventDefault();
+        submitTextAnswer();
+      }
+    });
+  }
+
   applyStateToPlayer(latestState);
 };
 
@@ -244,6 +270,9 @@ function applyStateToPlayer(state){
   const q = state.question;
   const qCat = document.getElementById('p-q-cat');
   const qText = document.getElementById('p-q-text');
+  const answerInput = document.getElementById('text-answer-input');
+  const answerBtn = document.getElementById('text-answer-btn');
+  const answerHint = document.getElementById('text-answer-hint');
   if(q && q.active){
     qCat.textContent = q.cat || 'سؤال';
     qText.textContent = q.text || '';
@@ -255,6 +284,9 @@ function applyStateToPlayer(state){
       localLocked = false;
       resetBuzzUI();
     }
+    if(answerInput) answerInput.disabled = false;
+    if(answerBtn) answerBtn.disabled = false;
+    if(answerHint) answerHint.textContent = '📨 أرسل إجابتك النصية قبل انتهاء السؤال.';
   } else {
     qCat.textContent = 'في انتظار سؤال';
     qText.textContent = 'سيظهر السؤال هنا حين يبدأ المُقدِّم…';
@@ -262,6 +294,9 @@ function applyStateToPlayer(state){
     currentQuestionId = null;
     localLocked = false;
     resetBuzzUI();
+    if(answerInput) answerInput.disabled = true;
+    if(answerBtn) answerBtn.disabled = true;
+    if(answerHint) answerHint.textContent = '📨 ستعمل الإجابة النصية عندما يبدأ سؤال جديد.';
   }
 
   // Buzzer state — check winner
@@ -330,6 +365,31 @@ window.pressBuzzer = async function(){
   } catch(e){
     console.warn('Buzzer transaction failed', e);
     localLocked = false;
+  }
+};
+
+window.submitTextAnswer = async function(){
+  if(!myPlayer) return;
+  const input = document.getElementById('text-answer-input');
+  const hint = document.getElementById('text-answer-hint');
+  if(!input) return;
+  const text = input.value.trim();
+  if(!text){ alert('اكتب إجابة قبل الإرسال'); return; }
+  if(!latestState || !latestState.question || !latestState.question.active){
+    alert('لا يوجد سؤال نشط الآن');
+    return;
+  }
+  try {
+    await set(ref(db, `gameState/textAnswers/${myPlayer.id}`), {
+      playerId: myPlayer.id,
+      playerName: myPlayer.name,
+      text,
+      submittedAt: Date.now()
+    });
+    if(hint) hint.textContent = '✅ تم الإرسال. يمكنك تعديل الإجابة قبل نهاية السؤال.';
+  } catch(e){
+    console.warn('Text answer submit failed', e);
+    alert('حدث خطأ أثناء إرسال الإجابة. حاول مرة أخرى.');
   }
 };
 
@@ -426,6 +486,39 @@ window.addEventListener('beforeunload', () => {
   try { if(pc) pc.close(); } catch(e){}
   try { if(localStream) localStream.getTracks().forEach(t => t.stop()); } catch(e){}
 });
+</script>
+<script>
+(function(){
+  const pid = localStorage.getItem('playerId') || 'p_'+Math.random().toString(36).substr(2,9);
+  const pname = localStorage.getItem('playerName') || 'متسابق';
+  if(!localStorage.getItem('playerId')) localStorage.setItem('playerId', pid);
+  if(!localStorage.getItem('playerName')) localStorage.setItem('playerName', pname);
+  window.sendBuzz = async function(){
+    if(typeof db==='undefined'){ alert('⚠️ لا يوجد اتصال'); return; }
+    try {
+      await set(ref(db,'gameState/buzzer'), {
+        winnerId: pid,
+        winnerName: pname,
+        ts: Date.now(),
+        serverTs: serverTimestamp()
+      });
+      const b = document.getElementById('buzz-btn');
+      if(b){ b.style.background = '#10b981'; b.innerHTML = '<span style="font-size:24pt">✓</span><br>تم الإرسال'; setTimeout(()=>{ b.style.background = ''; b.innerHTML = '<span style="font-size:32pt">🔔</span><br>اضغط للإجابة'; }, 2000); }
+    } catch(e){
+      console.warn('sendBuzz failed', e);
+      alert('فشل إرسال البازر. حاول مرة أخرى.');
+    }
+  };
+  setInterval(async ()=>{
+    if(typeof db==='undefined') return;
+    try {
+      const snap = await get(ref(db,'gameState/buzzer'));
+      const v = snap.val();
+      if(v && v.ts && Date.now() - v.ts > 5000) await remove(ref(db,'gameState/buzzer'));
+    } catch(e){ }
+  },3000);
+  console.log('[Buzz] Ready:',pname,pid);
+})();
 </script>
 </body>
 </html>
