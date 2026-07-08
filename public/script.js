@@ -152,9 +152,11 @@ function generateSetupQR() {
   const img = document.getElementById('setup-qr-img');
   if (img) {
     const size = 150;
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
+    // Use Google Charts QR generator as primary (more reliable in some networks)
+    img.src = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&choe=UTF-8`;
     img.onerror = () => {
-      img.src = `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
+      // Fallback to qrserver if Google Charts fails
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
     };
   }
 }
@@ -1108,6 +1110,53 @@ function buildTopicGrid() {
   rand.onclick = () => selectTopic(rand, -1);
   grid.appendChild(rand);
 }
+
+// ══════════════════════════════════════════
+//  NEW TOPICS — 6 Additional Banks
+// ══════════════════════════════════════════
+function addNewTopics() {
+  const newTopics = [
+    {id:'health', name:'الطب والصحة', icon:'🏥', desc:'أسئلة في الطب والصحة'},
+    {id:'sports', name:'الرياضة', icon:'⚽', desc:'أسئلة في الرياضة والألعاب'},
+    {id:'space', name:'الفضاء والفلك', icon:'🚀', desc:'أسئلة في الفضاء والنجوم'},
+    {id:'food', name:'الطبخ والمأكولات', icon:'🍳', desc:'أسئلة في الطبخ والأطعمة'},
+    {id:'animals', name:'الحيوانات والطبيعة', icon:'🦁', desc:'أسئلة في الحيوانات'},
+    {id:'worldHistory', name:'التاريخ العالمي', icon:'🌍', desc:'أسئلة في التاريخ العالمي'}
+  ];
+
+  if (typeof questionBanks !== 'undefined' && window.ALL_BANKS && typeof window.ALL_BANKS === 'object') {
+    newTopics.forEach(t => {
+      if (window.ALL_BANKS[t.id] && !questionBanks.find(b => b.name === t.name)) {
+        const raw = window.ALL_BANKS[t.id] || [];
+        const conv = raw.map(it => ({ v: it.value || it.v || 100, q: it.text || it.q || '', a: it.answer || it.a || '' }));
+        const bankObj = { name: t.name, silver: [ { cat: t.name, questions: conv.slice(0,9) } ], gold: [ { cat: t.name, questions: conv.slice(0,6) } ], speedBank: conv.slice(0,12).map(x=>({q:x.q,a:x.a})) };
+        questionBanks.push(bankObj);
+      }
+    });
+  }
+
+  const grid = document.getElementById('topic-grid');
+  if (grid) {
+    newTopics.forEach(t => {
+      // avoid duplicates in the DOM
+      if (Array.from(grid.querySelectorAll('button')).some(b => b.textContent && b.textContent.includes(t.name))) return;
+      const btn = document.createElement('button');
+      btn.className = 'topic-btn';
+      btn.dataset.topic = t.name;
+      btn.innerHTML = '<span class="topic-icon">' + t.icon + '</span><span class="topic-name">' + t.name + '</span>';
+      btn.onclick = function() {
+        const idx = questionBanks.findIndex(b => b.name === t.name);
+        selectTopic(btn, idx === -1 ? 0 : idx);
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  console.log('[Topics] Added ' + newTopics.length + ' new topics');
+}
+
+const originalBuildTopicGrid = window.buildTopicGrid;
+window.buildTopicGrid = function() { if (originalBuildTopicGrid) originalBuildTopicGrid(); addNewTopics(); };
 
 function selectTopic(btn, idx) {
   document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
