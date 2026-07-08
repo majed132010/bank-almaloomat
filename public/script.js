@@ -152,11 +152,11 @@ function generateSetupQR() {
   const img = document.getElementById('setup-qr-img');
   if (img) {
     const size = 150;
-    // Use Google Charts QR generator as primary (more reliable in some networks)
-    img.src = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&choe=UTF-8`;
+    // Use QRServer as primary generator (fast, reliable)
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
     img.onerror = () => {
-      // Fallback to qrserver if Google Charts fails
-      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
+      // Fallback to Google Charts if QRServer fails
+      img.src = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&choe=UTF-8`;
     };
   }
 }
