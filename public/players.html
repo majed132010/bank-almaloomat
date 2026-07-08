@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>بنك المعلومات — شاشة المتسابق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f0a500;--gold-lt:#ffd166;--purple:#6d28d9;--purple-lt:#8b5cf6;--cyan:#06b6d4;--silver:#94a3b8;--success:#10b981;--danger:#ef4444;--bg:#07071a;--text:#f0f0ff;--muted:#64748b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(109,40,217,.18),transparent 60%),radial-gradient(ellipse 60% 40% at 50% 100%,rgba(6,182,212,.12),transparent 55%)}
+
+/* Stage themes */
+body.stage-silver{--stage-color:var(--silver);--stage-color-lt:#cbd5e1;--stage-glow:rgba(148,163,184,.4)}
+body.stage-gold{--stage-color:var(--gold);--stage-color-lt:var(--gold-lt);--stage-glow:rgba(240,165,0,.5)}
+body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-glow:rgba(6,182,212,.5)}
+
+/* ── JOIN SCREEN ── */
+.join-screen{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:20px}
+.join-logo{font-family:'Cairo',sans-serif;font-size:24pt;font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(240,165,0,.5);letter-spacing:2px}
+.join-sub{font-size:11pt;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.join-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:28px 22px;width:100%;max-width:420px;backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.join-label{font-size:9pt;letter-spacing:2px;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.join-select{width:100%;background:rgba(4,4,16,.7);border:1.5px solid rgba(109,40,217,.35);border-radius:14px;padding:14px 18px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:14pt;font-weight:700;margin-bottom:18px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:14px center;padding-left:44px}
+.join-select option{background:#0a0a24;color:var(--text)}
+.join-btn{width:100%;background:linear-gradient(135deg,var(--purple),var(--purple-lt));border:none;color:#fff;font-family:'Cairo',sans-serif;font-size:15pt;font-weight:900;padding:16px;border-radius:14px;cursor:pointer;letter-spacing:2px;box-shadow:0 8px 24px rgba(109,40,217,.4);transition:all .25s}
+.join-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(109,40,217,.55)}
+.join-btn:active{transform:translateY(0)}
+.join-notice{margin-top:14px;font-size:9.5pt;color:var(--muted);text-align:center;line-height:1.6}
+
+/* ── PLAYER VIEW ── */
+.play-screen{display:none;position:relative;z-index:2;min-height:100vh;flex-direction:column;padding:14px}
+.play-screen.on{display:flex}
+
+.play-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(4,4,16,.6);border:1px solid rgba(255,255,255,.06);border-radius:14px;backdrop-filter:blur(10px);margin-bottom:14px}
+.play-name-box{display:flex;flex-direction:column;gap:2px}
+.play-me{font-size:8pt;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.play-name{font-family:'Cairo',sans-serif;font-size:14pt;font-weight:800;color:var(--stage-color-lt)}
+.play-stage-badge{padding:6px 14px;border-radius:50px;font-size:9.5pt;font-weight:800;border:1px solid var(--stage-color);color:var(--stage-color);background:rgba(0,0,0,.4)}
+.play-score-box{text-align:center}
+.play-score-lbl{font-size:8pt;color:var(--muted);letter-spacing:2px}
+.play-score-val{font-family:'Cairo',sans-serif;font-size:20pt;font-weight:900;color:var(--gold);text-shadow:0 0 15px rgba(240,165,0,.4);line-height:1}
+
+/* Category & question card */
+.q-box{background:linear-gradient(160deg,rgba(4,4,16,.85),rgba(15,10,40,.7));border:1.5px solid var(--stage-color);border-radius:18px;padding:22px 18px;margin-bottom:18px;box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 30px var(--stage-glow) inset;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.q-cat{font-size:9pt;letter-spacing:3px;color:var(--stage-color-lt);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed rgba(255,255,255,.1);font-weight:800}
+.q-text{font-family:'Cairo',sans-serif;font-size:17pt;font-weight:700;line-height:1.6;color:var(--text)}
+.q-empty{font-size:12pt;color:var(--muted);font-style:italic}
+
+/* Buzzer */
+.buzz-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px 0 20px}
+.buzz-btn{
+  width:min(85vw,320px); height:min(85vw,320px); max-height:60vh;
+  border-radius:50%; border:6px solid var(--stage-color);
+  background:radial-gradient(circle at 30% 30%,var(--stage-color-lt),var(--stage-color) 55%,#1a0e00 100%);
+  color:#fff; font-family:'Cairo',sans-serif; font-size:24pt; font-weight:900;
+  cursor:pointer; letter-spacing:2px;
+  box-shadow:0 20px 60px var(--stage-glow),0 0 80px var(--stage-glow),inset 0 -10px 30px rgba(0,0,0,.4);
+  transition:transform .1s ease-out, box-shadow .2s;
+  text-shadow:0 3px 12px rgba(0,0,0,.6);
+  user-select:none;
+  animation:buzzIdle 2.6s ease-in-out infinite;
+}
+@keyframes buzzIdle{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+.buzz-btn:active{transform:scale(.92)!important;box-shadow:0 10px 30px var(--stage-glow),inset 0 -6px 20px rgba(0,0,0,.5)}
+.buzz-btn.locked{background:radial-gradient(circle at 30% 30%,#475569,#1e293b 60%,#0a0f1a);border-color:#334155;color:#94a3b8;cursor:not-allowed;animation:none;box-shadow:none;filter:grayscale(.4)}
+.buzz-btn.won{background:radial-gradient(circle at 30% 30%,#fcd34d,#f0a500 55%,#7c2d12);border-color:#fcd34d;color:#fff;animation:buzzWon 1s ease infinite alternate}
+@keyframes buzzWon{from{box-shadow:0 20px 60px rgba(240,165,0,.7),0 0 100px rgba(240,165,0,.7)}to{box-shadow:0 30px 80px rgba(240,165,0,.9),0 0 140px rgba(252,211,77,.9)}}
+.buzz-hint{font-size:10pt;color:var(--muted);letter-spacing:2px;text-align:center;min-height:16px}
+
+/* Status pills */
+.play-status{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.status-pill{padding:6px 14px;border-radius:50px;font-size:9pt;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.status-live{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--success)}
+.status-live .dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 6px var(--success);animation:livePulse 1.4s ease infinite}
+.status-mic{background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.28);color:#cbd5e1;cursor:pointer;transition:all .2s}
+.status-mic.on{background:rgba(6,182,212,.18);border-color:rgba(6,182,212,.4);color:var(--cyan)}
+.status-mic.on .dot{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.status-mic .dot{width:7px;height:7px;border-radius:50%;background:#64748b;box-shadow:0 0 6px currentColor}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Winner notice */
+.winner-notice{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;padding:12px 24px;background:linear-gradient(135deg,rgba(240,165,0,.95),rgba(252,211,77,.9));color:#1a0e00;border-radius:50px;font-family:'Cairo',sans-serif;font-size:12pt;font-weight:900;letter-spacing:1px;box-shadow:0 10px 30px rgba(240,165,0,.5);display:none;animation:winPop .4s cubic-bezier(.34,1.56,.64,1)}
+.winner-notice.on{display:block}
+@keyframes winPop{from{transform:translate(-50%,-30px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+
+/* Waiting states */
+.play-waiting{text-align:center;padding:30px 20px;font-size:11pt;color:var(--muted);letter-spacing:1px}
+.play-waiting-icon{font-size:44pt;margin-bottom:14px;animation:waitBob 2s ease-in-out infinite alternate}
+@keyframes waitBob{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+
+@media(max-width:380px){
+  .buzz-btn{font-size:20pt}
+  .play-name{font-size:12pt}
+  .play-score-val{font-size:16pt}
+  .q-text{font-size:14pt}
+}
+</style>
+</head>
+<body class="stage-silver">
+
+<div class="winner-notice" id="winner-notice"><span id="winner-notice-name">—</span> يجيب!</div>
+
+<!-- JOIN SCREEN -->
+<div class="join-screen" id="join-screen">
+  <div class="join-logo">🏛️ بنك المعلومات</div>
+  <div class="join-sub">شاشة المتسابق — Buzzer</div>
+  <div class="join-card">
+    <div class="join-label">اختر اسمك من قائمة الفرسان</div>
+    <select class="join-select" id="join-select" data-testid="join-select">
+      <option value="">— في انتظار بدء المسابقة —</option>
+    </select>
+    <button class="join-btn" data-testid="join-btn" onclick="joinAsPlayer()">🎮 انضم للمسابقة</button>
+    <div class="join-notice">
+      عند الانضمام، سيُطلب منك الإذن بالميكروفون لتفعيل البث الصوتي الحي مع المُقدِّم.
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER SCREEN -->
+<div class="play-screen" id="play-screen">
+  <div class="play-header">
+    <div class="play-name-box">
+      <span class="play-me">أنا</span>
+      <span class="play-name" id="my-name">—</span>
+    </div>
+    <div class="play-stage-badge" id="play-stage-badge">⚪ الفضية</div>
+    <div class="play-score-box">
+      <div class="play-score-lbl">النقاط</div>
+      <div class="play-score-val" id="my-score">0</div>
+    </div>
+  </div>
+
+  <div class="play-status">
+    <div class="status-pill status-live"><div class="dot"></div><span>متصل</span></div>
+    <div class="status-pill status-mic" id="mic-pill" data-testid="mic-toggle" onclick="togglePlayerMic()"><div class="dot"></div><span id="mic-label">تفعيل الميكروفون</span></div>
+  </div>
+
+  <div class="q-box">
+    <div class="q-cat" id="p-q-cat">في انتظار سؤال</div>
+    <div class="q-text q-empty" id="p-q-text">سيظهر السؤال هنا حين يبدأ المُقدِّم…</div>
+  </div>
+
+  <div class="buzz-wrap">
+    <button class="buzz-btn" id="buzz-btn" data-testid="buzzer" onclick="pressBuzzer()">
+      اضغط أسرع!
+    </button>
+    <div class="buzz-hint" id="buzz-hint">اضغط الزر فور معرفة الإجابة</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, onValue, runTransaction, set, remove, onDisconnect, push, onChildAdded, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyD0sfgaMmNl0bbe4M4CSkczbjjRqjQYojE",
+  authDomain:"bank-almaloomat-game.firebaseapp.com",
+  databaseURL:"https://bank-almaloomat-game-default-rtdb.firebaseio.com",
+  projectId:"bank-almaloomat-game",
+  storageBucket:"bank-almaloomat-game.firebasestorage.app",
+  messagingSenderId:"96937409574",
+  appId:"1:96937409574:web:d04cbfe31fa4369e9e3ae7"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ==============================
+//   STATE
+// ==============================
+let myPlayer = null;             // { id, name }
+let currentQuestionId = null;    // used to detect new questions & reset buzzer local lock
+let localLocked = false;
+let latestState = null;
+
+// ==============================
+//   POPULATE PLAYER LIST
+// ==============================
+onValue(ref(db,'gameState'), (snap)=>{
+  const state = snap.val();
+  latestState = state;
+  const sel = document.getElementById('join-select');
+  if(!state || !state.players || state.players.length === 0){
+    sel.innerHTML = '<option value="">— في انتظار بدء المسابقة —</option>';
+    return;
+  }
+  // Rebuild dropdown only if not joined yet
+  if(!myPlayer){
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— اختر اسمك —</option>' +
+      state.players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if(cur) sel.value = cur;
+  }
+  // If joined, apply current state
+  if(myPlayer) applyStateToPlayer(state);
+});
+
+// ==============================
+//   JOIN
+// ==============================
+window.joinAsPlayer = async function(){
+  const sel = document.getElementById('join-select');
+  const id = sel.value;
+  if(id === '' || id === null){ alert('اختر اسمك أولاً من القائمة'); return; }
+  if(!latestState || !latestState.players){ alert('لم تبدأ المسابقة بعد'); return; }
+  const p = latestState.players.find(x => String(x.id) === String(id));
+  if(!p){ alert('المتسابق غير موجود'); return; }
+  myPlayer = { id: Number(p.id), name: p.name };
+
+  // Register presence in /presence/players/{id}
+  const presenceRef = ref(db, `presence/players/${myPlayer.id}`);
+  await set(presenceRef, { name: myPlayer.name, joinedAt: Date.now(), online: true });
+  onDisconnect(presenceRef).remove();
+
+  document.getElementById('join-screen').style.display = 'none';
+  document.getElementById('play-screen').classList.add('on');
+  document.getElementById('my-name').textContent = myPlayer.name;
+
+  // Initialize WebRTC audio (peer to host)
+  try { await initPlayerWebRTC(); } catch(e){ console.warn('WebRTC init failed', e); }
+
+  applyStateToPlayer(latestState);
+};
+
+// ==============================
+//   APPLY STATE TO PLAYER VIEW
+// ==============================
+function applyStateToPlayer(state){
+  if(!state || !myPlayer) return;
+  const me = (state.players || []).find(p => Number(p.id) === myPlayer.id);
+  if(me){
+    document.getElementById('my-score').textContent = me.score || 0;
+  }
+  // Stage
+  const stage = state.stage || 'silver';
+  document.body.className = 'stage-' + stage;
+  const badgeMap = { silver:'⚪ الفضية', gold:'🥇 الذهبية', diamond:'💎 الماسية' };
+  document.getElementById('play-stage-badge').textContent = badgeMap[stage] || stage;
+
+  // Question
+  const q = state.question;
+  const qCat = document.getElementById('p-q-cat');
+  const qText = document.getElementById('p-q-text');
+  if(q && q.active){
+    qCat.textContent = q.cat || 'سؤال';
+    qText.textContent = q.text || '';
+    qText.classList.remove('q-empty');
+    // New question? reset local buzzer state.
+    const qid = q.id || (q.cat + '|' + (q.text||'').slice(0,40));
+    if(qid !== currentQuestionId){
+      currentQuestionId = qid;
+      localLocked = false;
+      resetBuzzUI();
+    }
+  } else {
+    qCat.textContent = 'في انتظار سؤال';
+    qText.textContent = 'سيظهر السؤال هنا حين يبدأ المُقدِّم…';
+    qText.classList.add('q-empty');
+    currentQuestionId = null;
+    localLocked = false;
+    resetBuzzUI();
+  }
+
+  // Buzzer state — check winner
+  const b = state.buzzer;
+  const notice = document.getElementById('winner-notice');
+  const buzzBtn = document.getElementById('buzz-btn');
+  const buzzHint = document.getElementById('buzz-hint');
+  if(b && (b.winnerId !== null && b.winnerId !== undefined)){
+    document.getElementById('winner-notice-name').textContent = b.winnerName || '—';
+    notice.classList.add('on');
+    if(Number(b.winnerId) === myPlayer.id){
+      buzzBtn.classList.remove('locked'); buzzBtn.classList.add('won');
+      buzzBtn.textContent = '🏆 أجب!';
+      buzzHint.textContent = 'أنت الأسرع — أجب الآن!';
+    } else {
+      buzzBtn.classList.remove('won'); buzzBtn.classList.add('locked');
+      buzzBtn.textContent = '🔒 مقفل';
+      buzzHint.textContent = `${b.winnerName || 'متسابق آخر'} ضغط أولاً`;
+    }
+  } else {
+    notice.classList.remove('on');
+    resetBuzzUI();
+  }
+}
+
+function resetBuzzUI(){
+  const buzzBtn = document.getElementById('buzz-btn');
+  const buzzHint = document.getElementById('buzz-hint');
+  buzzBtn.classList.remove('locked','won');
+  buzzBtn.textContent = 'اضغط أسرع!';
+  buzzHint.textContent = 'اضغط الزر فور معرفة الإجابة';
+}
+
+// ==============================
+//   BUZZER — atomic transaction
+// ==============================
+window.pressBuzzer = async function(){
+  if(!myPlayer){ return; }
+  if(localLocked) return;
+  // Only allow if question is active
+  if(!latestState || !latestState.question || !latestState.question.active){
+    const hint = document.getElementById('buzz-hint');
+    hint.textContent = '⏳ لا يوجد سؤال نشط الآن';
+    setTimeout(()=>{ if(!latestState?.buzzer?.winnerId && latestState?.question?.active) resetBuzzUI(); }, 1500);
+    return;
+  }
+  localLocked = true;
+  const buzzerRef = ref(db, 'gameState/buzzer');
+  try {
+    const result = await runTransaction(buzzerRef, (current)=>{
+      // If already claimed, abort
+      if(current && current.winnerId !== null && current.winnerId !== undefined){
+        return; // abort
+      }
+      return {
+        winnerId: myPlayer.id,
+        winnerName: myPlayer.name,
+        ts: Date.now(),
+        serverTs: serverTimestamp()
+      };
+    });
+    if(!result.committed){
+      // Someone else won
+      localLocked = true;
+    }
+  } catch(e){
+    console.warn('Buzzer transaction failed', e);
+    localLocked = false;
+  }
+};
+
+// ==============================
+//   WEBRTC — PLAYER SIDE (peer to host)
+// ==============================
+let pc = null;           // RTCPeerConnection
+let localStream = null;
+let micEnabled = false;
+let signalingBase = null; // /signaling/{playerId}
+
+const rtcConfig = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+async function initPlayerWebRTC(){
+  if(!myPlayer) return;
+  signalingBase = `signaling/players/${myPlayer.id}`;
+
+  pc = new RTCPeerConnection(rtcConfig);
+
+  // Remote audio playback (host voice)
+  const remoteAudio = new Audio();
+  remoteAudio.autoplay = true;
+  pc.ontrack = (evt) => {
+    if(evt.streams && evt.streams[0]){
+      remoteAudio.srcObject = evt.streams[0];
+      remoteAudio.play().catch(()=>{});
+    }
+  };
+
+  // Push local ICE candidates to signaling
+  pc.onicecandidate = async (evt) => {
+    if(evt.candidate){
+      const candRef = push(ref(db, `${signalingBase}/candidatesFromPlayer`));
+      await set(candRef, evt.candidate.toJSON());
+    }
+  };
+
+  // Get microphone
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    localStream.getAudioTracks().forEach(track => {
+      track.enabled = false; // start muted, user can enable
+      pc.addTrack(track, localStream);
+    });
+  } catch(e){
+    console.warn('Microphone access denied', e);
+    // Continue with receive-only (add a transceiver)
+    pc.addTransceiver('audio', { direction: 'recvonly' });
+  }
+
+  // Create offer
+  const offer = await pc.createOffer({ offerToReceiveAudio: true });
+  await pc.setLocalDescription(offer);
+  await set(ref(db, `${signalingBase}/offer`), { type: offer.type, sdp: offer.sdp, ts: Date.now() });
+
+  // Listen for answer from host
+  onValue(ref(db, `${signalingBase}/answer`), async (snap) => {
+    const ans = snap.val();
+    if(ans && pc.signalingState !== 'stable' && !pc.currentRemoteDescription){
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription({ type: ans.type, sdp: ans.sdp }));
+      } catch(e){ console.warn('setRemoteDescription failed', e); }
+    }
+  });
+
+  // Listen for ICE candidates from host
+  onChildAdded(ref(db, `${signalingBase}/candidatesFromHost`), async (snap) => {
+    const cand = snap.val();
+    if(cand && pc.remoteDescription){
+      try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch(e){ console.warn('addIceCandidate', e); }
+    }
+  });
+
+  // Cleanup on disconnect
+  onDisconnect(ref(db, signalingBase)).remove();
+}
+
+window.togglePlayerMic = function(){
+  const pill = document.getElementById('mic-pill');
+  const label = document.getElementById('mic-label');
+  if(!localStream){ alert('الميكروفون غير متوفر — تحقق من صلاحية المتصفح'); return; }
+  micEnabled = !micEnabled;
+  localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
+  if(micEnabled){ pill.classList.add('on'); label.textContent = 'الميكروفون مفعّل'; }
+  else { pill.classList.remove('on'); label.textContent = 'تفعيل الميكروفون'; }
+};
+
+window.addEventListener('beforeunload', () => {
+  try { if(pc) pc.close(); } catch(e){}
+  try { if(localStream) localStream.getTracks().forEach(t => t.stop()); } catch(e){}
+});
+</script>
+</body>
+</html>

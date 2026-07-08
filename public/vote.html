@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>بنك المعلومات — تصويت الجمهور</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f0a500;--gold-lt:#ffd166;--purple:#6d28d9;--purple-lt:#8b5cf6;--cyan:#06b6d4;--success:#10b981;--danger:#ef4444;--bg:#07071a;--text:#f0f0ff;--muted:#64748b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(109,40,217,.22),transparent 60%),radial-gradient(ellipse 60% 40% at 50% 100%,rgba(240,165,0,.12),transparent 55%)}
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;padding:18px}
+.head{text-align:center;margin-bottom:20px}
+.logo{font-family:'Cairo',sans-serif;font-size:20pt;font-weight:900;color:var(--gold);text-shadow:0 0 25px rgba(240,165,0,.5);letter-spacing:2px;margin-bottom:6px}
+.sub{font-size:10pt;color:var(--muted);letter-spacing:3px}
+.q-card{background:linear-gradient(160deg,rgba(4,4,16,.85),rgba(15,10,40,.6));border:1.5px solid rgba(109,40,217,.4);border-radius:18px;padding:22px 18px;margin-bottom:22px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.q-cat{font-size:9pt;letter-spacing:3px;color:var(--purple-lt);text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed rgba(255,255,255,.1);font-weight:800}
+.q-text{font-family:'Cairo',sans-serif;font-size:15pt;font-weight:700;line-height:1.7;color:var(--text);min-height:60px}
+.instructions{font-size:10pt;color:var(--muted);text-align:center;margin-bottom:16px;letter-spacing:1px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1}
+.opt{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:24px 10px;border-radius:18px;border:2.5px solid;cursor:pointer;user-select:none;
+  font-family:'Cairo',sans-serif;font-weight:900;transition:all .2s ease-out;position:relative;overflow:hidden;
+  min-height:120px;
+}
+.opt:active{transform:scale(.95)}
+.opt-A{background:linear-gradient(160deg,rgba(240,165,0,.22),rgba(120,80,0,.4));border-color:var(--gold);color:var(--gold-lt)}
+.opt-B{background:linear-gradient(160deg,rgba(139,92,246,.22),rgba(60,20,120,.4));border-color:var(--purple-lt);color:#c4b5fd}
+.opt-C{background:linear-gradient(160deg,rgba(6,182,212,.22),rgba(10,60,80,.4));border-color:var(--cyan);color:#67e8f9}
+.opt-D{background:linear-gradient(160deg,rgba(16,185,129,.22),rgba(10,80,60,.4));border-color:var(--success);color:#6ee7b7}
+.opt-letter{font-size:34pt;line-height:1;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+.opt-lbl{font-size:11pt;letter-spacing:2px}
+.opt.voted{transform:scale(.95);opacity:.7}
+.opt.chosen{box-shadow:0 0 30px currentColor,inset 0 0 30px rgba(0,0,0,.3);border-width:4px;animation:chosenPulse 1s ease infinite alternate}
+@keyframes chosenPulse{from{transform:scale(1)}to{transform:scale(1.04)}}
+.disabled .opt{cursor:not-allowed;filter:grayscale(.6)}
+.state-msg{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:50px;font-family:'Cairo',sans-serif;font-size:11pt;font-weight:900;letter-spacing:1px;box-shadow:0 8px 25px rgba(0,0,0,.5);z-index:10;display:none;animation:msgPop .35s cubic-bezier(.34,1.56,.64,1)}
+.state-msg.on{display:block}
+.state-msg.success{background:linear-gradient(135deg,var(--success),#059669);color:#fff}
+.state-msg.warn{background:linear-gradient(135deg,var(--danger),#b91c1c);color:#fff}
+.state-msg.info{background:linear-gradient(135deg,var(--purple),var(--purple-lt));color:#fff}
+@keyframes msgPop{from{transform:translate(-50%,-30px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+.no-active{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+.no-active-icon{font-size:48pt;animation:idleFloat 2.4s ease-in-out infinite alternate}
+@keyframes idleFloat{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.no-active-title{font-family:'Cairo',sans-serif;font-size:18pt;font-weight:900;color:var(--gold)}
+.no-active-sub{font-size:10pt;color:var(--muted);letter-spacing:1px;max-width:280px;line-height:1.6}
+.footer{text-align:center;font-size:8.5pt;color:var(--muted);margin-top:14px;letter-spacing:2px}
+@media(max-height:600px){.q-card{padding:14px 12px;margin-bottom:12px}.q-text{font-size:13pt;min-height:0}.opt{padding:16px 8px;min-height:90px}.opt-letter{font-size:26pt}}
+</style>
+</head>
+<body>
+<div class="state-msg" id="msg"></div>
+<div class="wrap">
+  <div class="head">
+    <div class="logo">🏛️ بنك المعلومات</div>
+    <div class="sub">صوّت الآن مع الجمهور</div>
+  </div>
+
+  <div id="active-panel" style="display:none;flex-direction:column;flex:1">
+    <div class="q-card">
+      <div class="q-cat" id="v-cat">—</div>
+      <div class="q-text" id="v-q">—</div>
+    </div>
+    <div class="instructions">اختر ما تعتقد أنه الإجابة الصحيحة:</div>
+    <div class="opts" id="opts">
+      <div class="opt opt-A" data-testid="vote-A" data-choice="A" onclick="castVote('A')"><span class="opt-letter">أ</span><span class="opt-lbl">الخيار الأول</span></div>
+      <div class="opt opt-B" data-testid="vote-B" data-choice="B" onclick="castVote('B')"><span class="opt-letter">ب</span><span class="opt-lbl">الخيار الثاني</span></div>
+      <div class="opt opt-C" data-testid="vote-C" data-choice="C" onclick="castVote('C')"><span class="opt-letter">ج</span><span class="opt-lbl">الخيار الثالث</span></div>
+      <div class="opt opt-D" data-testid="vote-D" data-choice="D" onclick="castVote('D')"><span class="opt-letter">د</span><span class="opt-lbl">الخيار الرابع</span></div>
+    </div>
+    <div class="footer">صوتك يظهر مباشرة على شاشة الجمهور 📺</div>
+  </div>
+
+  <div id="idle-panel" class="no-active">
+    <div class="no-active-icon">🗳️</div>
+    <div class="no-active-title">لا يوجد تصويت نشط</div>
+    <div class="no-active-sub">سيظهر التصويت هنا حين يفتحه المُقدِّم أثناء السؤال. أبقِ الصفحة مفتوحة!</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, onValue, runTransaction } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyD0sfgaMmNl0bbe4M4CSkczbjjRqjQYojE",
+  authDomain:"bank-almaloomat-game.firebaseapp.com",
+  databaseURL:"https://bank-almaloomat-game-default-rtdb.firebaseio.com",
+  projectId:"bank-almaloomat-game",
+  storageBucket:"bank-almaloomat-game.firebasestorage.app",
+  messagingSenderId:"96937409574",
+  appId:"1:96937409574:web:d04cbfe31fa4369e9e3ae7"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Voter unique ID (avoid double voting per question — localStorage tracks per-qid)
+const voterKey = () => 'bam_vote_' + (currentQid || 'x');
+let currentQid = null;
+let myChoice = null;
+
+function showMsg(text, cls='info', ms=2500) {
+  const m = document.getElementById('msg');
+  m.className = 'state-msg on ' + cls;
+  m.textContent = text;
+  clearTimeout(showMsg._t);
+  showMsg._t = setTimeout(() => m.classList.remove('on'), ms);
+}
+
+function applyState(state) {
+  const active = state && state.voting && state.voting.active;
+  const idle = document.getElementById('idle-panel');
+  const panel = document.getElementById('active-panel');
+  if (!active) {
+    idle.style.display = 'flex';
+    panel.style.display = 'none';
+    currentQid = null;
+    myChoice = null;
+    return;
+  }
+  idle.style.display = 'none';
+  panel.style.display = 'flex';
+  const q = state.question || {};
+  document.getElementById('v-cat').textContent = q.cat || 'سؤال المُقدِّم';
+  document.getElementById('v-q').textContent = q.text || 'أنصت للسؤال من المُقدِّم…';
+  const qid = state.voting.qid || q.id || 'default';
+  if (qid !== currentQid) {
+    currentQid = qid;
+    // Reset UI for new question
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('voted','chosen'));
+    document.getElementById('opts').classList.remove('disabled');
+    // Check localStorage for previous vote (same qid)
+    const prev = localStorage.getItem(voterKey());
+    if (prev) {
+      myChoice = prev;
+      document.querySelector(`.opt[data-choice="${prev}"]`)?.classList.add('chosen');
+      document.getElementById('opts').classList.add('disabled');
+    } else {
+      myChoice = null;
+    }
+  }
+}
+
+onValue(ref(db, 'gameState'), (snap) => applyState(snap.val()));
+
+window.castVote = async function(choice) {
+  if (!currentQid) { showMsg('لا يوجد سؤال نشط', 'warn'); return; }
+  if (myChoice) { showMsg('لقد صوّتّ من قبل!', 'warn'); return; }
+  const btn = document.querySelector(`.opt[data-choice="${choice}"]`);
+  btn.classList.add('chosen');
+  document.getElementById('opts').classList.add('disabled');
+  myChoice = choice;
+  localStorage.setItem(voterKey(), choice);
+
+  // Atomic increment
+  try {
+    await runTransaction(ref(db, `gameState/voting/counts/${choice}`), (v) => (v || 0) + 1);
+    await runTransaction(ref(db, `gameState/voting/total`), (v) => (v || 0) + 1);
+    showMsg('✅ تم تسجيل صوتك!', 'success', 2000);
+  } catch (e) {
+    console.warn('vote failed', e);
+    showMsg('تعذّر تسجيل الصوت — أعد المحاولة', 'warn');
+    // Rollback UI
+    btn.classList.remove('chosen');
+    document.getElementById('opts').classList.remove('disabled');
+    localStorage.removeItem(voterKey());
+    myChoice = null;
+  }
+};
+</script>
+</body>
+</html>

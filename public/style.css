@@ -1,4 +1,4 @@
-/* ============================================
+﻿/* ============================================
    بنك المعلومات — النسخة المتطورة
    style.css — كل الصفحات
    ============================================ */
@@ -706,8 +706,23 @@ input{font-family:'Tajawal',sans-serif;outline:none}
   .player-card.dp1{background:linear-gradient(135deg,rgba(239,68,68,.22),rgba(120,20,20,.4));border-color:var(--danger)}
   .player-card.dp2{background:linear-gradient(135deg,rgba(6,182,212,.22),rgba(10,60,80,.4));border-color:var(--cyan)}
   .game-main{flex:1;padding:10px;overflow-y:auto;display:block;min-height:0}
+  .game-main{padding-bottom:70px!important}
+    /* ─── LANDSCAPE: Categories side-by-side ─── */
+  @media (orientation: landscape) and (max-width:900px){
+    .board{flex-direction:row!important;gap:10px;height:auto}
+    .cat-col{flex:1;min-height:0;height:auto}
+    .q-btn{flex:none;padding:10px 6px;margin-bottom:4px;display:block}
+    .game-body{flex-direction:column;height:auto;min-height:calc(100vh - 56px)}
+    .game-sidebar{width:100%;height:auto;display:flex;gap:6px;overflow-x:auto;padding:6px 10px;border-left:none;border-bottom:1px solid var(--border);flex-shrink:0}
+  }
+  @media (orientation: portrait) and (max-width:900px){
+    .board{flex-direction:column;gap:8px;height:auto}
+    .cat-col{min-height:170px}
+  .cat-col:last-child{margin-bottom:60px}
+  }
   .board{flex-direction:column;gap:8px;height:auto}
   .cat-col{min-height:170px}
+  .cat-col:last-child{margin-bottom:60px}
   .q-btn{flex:none;padding:12px 8px;margin-bottom:6px;display:block}
   .diamond-board{grid-template-columns:repeat(3,1fr) !important;gap:8px}
   .modal-inner{padding:16px 14px}
@@ -764,3 +779,4 @@ input{font-family:'Tajawal',sans-serif;outline:none}
   .stage-diamond .player-card{padding:8px 12px;flex:1 1 45%}
   .stage-diamond .sidebar-label::before{font-size:9.5pt;margin-bottom:2px}
 }
+
