@@ -1,0 +1,64 @@
+# ==========================================
+# .firebaseignore - ملف الاستبعاد الحيوي
+# ==========================================
+# هذا الملف يمنع رفع الملفات غير الضرورية
+# عند تنفيذ أمر: firebase deploy
+# ==========================================
+
+# ❌ استبعاد مجلد حزم Node (السبب الرئيسي للـ 174,000 ملف!)
+node_modules/
+**/node_modules/**
+
+# ❌ استبعاد ملفات Git
+.git/
+.gitignore
+
+# ❌ استبعاد ملفات Firebase المؤقتة
+.firebase/
+.firebaserc.local
+
+# ❌ استبعاد ملفات البيئة والأسرار
+.env
+.env.local
+.env.*.local
+*.env
+
+# ❌ استبعاد ملفات السجلات
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ❌ استبعاد مجلدات البناء المؤقتة
+dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.output/
+out/
+
+# ❌ استبعاد ملفات المحررات
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ❌ استبعاد ملفات الاختبار
+__tests__/
+*.test.js
+*.spec.js
+coverage/
+
+# ❌ استبعاد ملفات الضغط المؤقتة
+*.zip
+*.tar.gz
+*.rar
+
+# ✅ ما سيتم رفعه فقط (مجلد public):
+# public/index.html
+# public/style.css
+# public/script.js
