@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بنك المعلومات — شاشة الجمهور</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=777">
+<style>
+:root {
+  --gold: #f0a500;
+  --gold-lt: #ffd166;
+  --purple: #6d28d9;
+  --purple-lt: #8b5cf6;
+  --cyan: #06b6d4;
+  --silver: #94a3b8;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg: #07071a;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --text: #f0f0ff;
+  --muted: #64748b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ── AMBIENT ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(109,40,217,.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 0% 100%, rgba(6,182,212,.08) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 100% 100%, rgba(240,165,0,.06) 0%, transparent 50%);
+}
+
+/* ── HEADER ── */
+.aud-header {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 30px;
+  background: rgba(7,7,26,.95);
+  border-bottom: 1px solid rgba(109,40,217,.3);
+  backdrop-filter: blur(20px);
+}
+
+.aud-logo {
+  font-family: 'Cairo', sans-serif;
+  font-size: 18pt; font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(240,165,0,.4);
+}
+
+.aud-stage-badge {
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 11pt; font-weight: 700;
+  border: 1px solid;
+  letter-spacing: 1px;
+}
+.badge-silver { background: rgba(148,163,184,.1); border-color: rgba(148,163,184,.3); color: var(--silver); }
+.badge-gold   { background: rgba(240,165,0,.1);   border-color: rgba(240,165,0,.3);   color: var(--gold); }
+.badge-diamond{ background: rgba(6,182,212,.1);   border-color: rgba(6,182,212,.3);   color: var(--cyan); }
+
+.aud-waiting {
+  font-size: 10pt; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.aud-live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: livePulse 1.5s ease infinite;
+}
+@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+/* ── MAIN LAYOUT ── */
+.aud-body {
+  position: relative; z-index: 10;
+  display: flex; height: calc(100vh - 60px);
+}
+
+/* ── SCORES PANEL ── */
+.aud-scores {
+  width: 260px; flex-shrink: 0;
+  padding: 20px 14px;
+  background: rgba(255,255,255,.02);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.scores-title {
+  font-size: 9pt; letter-spacing: 3px; color: var(--muted);
+  text-align: center; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.score-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px;
+  text-align: center;
+  transition: all .4s;
+  position: relative; overflow: hidden;
+}
+.score-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--purple), transparent);
+  opacity: 0; transition: opacity .3s;
+}
+.score-card.rank-1 { border-color: rgba(240,165,0,.4); background: rgba(20,15,0,.5); }
+.score-card.rank-1::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 1; }
+.score-card.rank-2 { border-color: rgba(148,163,184,.25); }
+.score-card.rank-2::before { background: linear-gradient(90deg, transparent, var(--silver), transparent); opacity: .6; }
+.score-card.rank-3 { border-color: rgba(184,115,10,.2); }
+
+.rank-medal { font-size: 20pt; margin-bottom: 4px; display: block; }
+.sc-name { font-size: 12pt; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.sc-score {
+  font-size: 28pt; font-weight: 900; color: var(--gold); line-height: 1;
+  text-shadow: 0 0 20px rgba(240,165,0,.3);
+  transition: all .5s;
+}
+.sc-score.updated { animation: scoreGlow .6s ease; }
+@keyframes scoreGlow {
+  0%{transform:scale(1)} 40%{transform:scale(1.3);color:#fff;text-shadow:0 0 30px #fff} 100%{transform:scale(1)}
+}
+.sc-banked {
+  display: none; margin-top: 6px; font-size: 8pt;
+  padding: 3px 10px; background: rgba(16,185,129,.15);
+  border: 1px solid rgba(16,185,129,.25); border-radius: 20px;
+  color: var(--success);
+}
+
+/* ── MAIN CONTENT ── */
+.aud-main {
+  flex: 1; padding: 20px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+
+/* ── QUESTION DISPLAY ── */
+.aud-question-panel {
+  display: none;
+  flex: 1; flex-direction: column;
+}
+.aud-question-panel.active { display: flex; }
+
+.q-cat-badge {
+  font-size: 9pt; letter-spacing: 3px; color: var(--purple-lt);
+  text-transform: uppercase; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid rgba(109,40,217,.2);
+}
+
+.q-big-box {
+  flex: 1;
+  background: rgba(4,4,16,.7);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 20px; padding: 40px;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center; position: relative; overflow: hidden;
+}
+
+.q-big-box::before {
+  content: '؟';
+  position: absolute; bottom: -20px; left: 20px;
+  font-size: 120pt; color: rgba(109,40,217,.04);
+  font-family: 'Cairo', sans-serif; line-height: 1; pointer-events: none;
+}
+
+.q-value-chip {
+  display: inline-block;
+  padding: 6px 20px; margin-bottom: 24px;
+  background: rgba(109,40,217,.2); border: 1px solid rgba(109,40,217,.4);
+  border-radius: 50px; font-size: 13pt; font-weight: 900; color: var(--gold-lt);
+}
+
+.q-text-big {
+  font-size: clamp(16pt, 3vw, 24pt);
+  font-weight: 700; color: var(--text);
+  line-height: 1.7; max-width: 800px;
+}
+
+/* Typewriter cursor */
+.tw-cur {
+  display: inline-block; width: 3px; height: 1em;
+  background: var(--purple-lt); margin-right: 4px;
+  vertical-align: text-bottom;
+  animation: curBlink .7s step-end infinite;
+}
+@keyframes curBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── TIMER BAR ── */
+.aud-timer-wrap {
+  margin-top: 20px; position: relative;
+}
+.aud-timer-num {
+  text-align: center; font-size: 14pt; font-weight: 900;
+  color: var(--purple-lt); letter-spacing: 2px; margin-bottom: 8px;
+}
+.aud-timer-track {
+  height: 10px; background: rgba(255,255,255,.05);
+  border-radius: 5px; overflow: hidden;
+}
+.aud-timer-fill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--purple-lt), var(--gold-lt));
+  transition: width 1s linear;
+  border-radius: 5px; box-shadow: 0 0 12px rgba(109,40,217,.4);
+}
+.aud-timer-fill.danger {
+  background: linear-gradient(90deg, #7f1d1d, var(--danger));
+  animation: timerFlash .4s ease infinite alternate;
+}
+@keyframes timerFlash { from{opacity:1} to{opacity:.6} }
+
+/* ── BOARD DISPLAY (when no question) ── */
+.aud-board-panel {
+  flex: 1; display: flex; flex-direction: column;
+}
+.aud-board-panel.hidden { display: none; }
+
+.aud-board-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 16pt; font-weight: 700;
+  margin-bottom: 16px; color: var(--purple-lt);
+}
+
+.aud-board {
+  display: flex; gap: 14px; flex: 1;
+}
+
+.aud-cat-col {
+  flex: 1;
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px;
+  display: flex; flex-direction: column;
+}
+
+.aud-cat-icon { font-size: 20pt; text-align: center; margin-bottom: 6px; }
+.aud-cat-name {
+  font-size: 10.5pt; font-weight: 800; color: var(--gold);
+  text-align: center; padding-bottom: 10px; margin-bottom: 10px;
+  border-bottom: 1px solid rgba(240,165,0,.15);
+  min-height: 40px; display: flex; align-items: center; justify-content: center;
+}
+
+.aud-q-slot {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px; border-radius: 10px;
+  font-size: 14pt; font-weight: 900; letter-spacing: 1px;
+  transition: all .3s;
+}
+.aud-q-slot:last-child { margin-bottom: 0; }
+.aud-q-slot.available {
+  background: linear-gradient(160deg, rgba(109,40,217,.2), rgba(109,40,217,.08));
+  border: 1px solid rgba(109,40,217,.3); color: var(--gold-lt);
+}
+.aud-q-slot.spent {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.04);
+  color: rgba(255,255,255,.12);
+}
+
+/* ── DIAMOND GRID ── */
+.aud-diamond-panel { display: none; flex: 1; }
+.aud-diamond-panel.active { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+.aud-diamond-cell {
+  background: linear-gradient(160deg, rgba(6,182,212,.08), rgba(7,7,26,.9));
+  border: 1px solid rgba(6,182,212,.25); border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; font-size: 12pt; font-weight: 700;
+  color: var(--text); padding: 14px; position: relative; overflow: hidden;
+}
+.aud-diamond-cell::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(6,182,212,.06), transparent 70%);
+}
+.aud-diamond-cell.spent { opacity: .4; }
+.aud-jewel { font-size: 44pt; filter: drop-shadow(0 0 14px currentColor); animation: jPulse 2s ease-in-out infinite; }
+@keyframes jPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.aud-jewel-r { color: var(--danger); }
+.aud-jewel-b { color: var(--cyan); }
+
+/* ── WAITING SCREEN ── */
+.aud-waiting-screen {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+}
+.aud-waiting-screen.hidden { display: none; }
+.aud-wait-icon { font-size: 60pt; animation: waitFloat 2s ease-in-out infinite alternate; }
+@keyframes waitFloat { from{transform:translateY(0)} to{transform:translateY(-15px)} }
+.aud-wait-title { font-family: 'Cairo', sans-serif; font-size: 24pt; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(240,165,0,.4); }
+.aud-wait-sub { font-size: 12pt; color: var(--muted); letter-spacing: 2px; }
+
+/* ── SURPRISE OVERLAY ── */
+.aud-surprise {
+  position: fixed; inset: 0; z-index: 100;
+  background: radial-gradient(ellipse at center, #150a35 0%, #04040f 100%);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+}
+.aud-surprise.active { display: flex; }
+.aud-surp-icon { font-size: 90pt; filter: drop-shadow(0 0 30px currentColor); animation: siBounce .5s ease-in-out infinite alternate; }
+@keyframes siBounce { from{transform:scale(1) rotate(-4deg)} to{transform:scale(1.1) rotate(4deg)} }
+.aud-surp-text { font-family: 'Cairo', sans-serif; font-size: 44pt; font-weight: 900; letter-spacing: 6px; text-shadow: 0 0 40px currentColor; }
+
+/* ── STAGE TRANSITION ── */
+.aud-transition {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(4,4,16,.92); backdrop-filter: blur(20px);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+}
+.aud-transition.active { display: flex; }
+.aud-trans-icon { font-size: 80pt; filter: drop-shadow(0 0 30px currentColor); animation: transFloat .6s ease-in-out infinite alternate; }
+@keyframes transFloat { from{transform:scale(1) translateY(0)} to{transform:scale(1.08) translateY(-10px)} }
+.aud-trans-title { font-family: 'Cairo', sans-serif; font-size: 38pt; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 40px currentColor; }
+.aud-trans-sub { font-size: 11pt; color: var(--muted); letter-spacing: 4px; text-transform: uppercase; }
+
+/* ── STAGE COLORS ── */
+.stage-silver .aud-header { border-bottom-color: rgba(148,163,184,.3); }
+.stage-silver .aud-board-title { color: var(--silver); }
+.stage-silver .aud-q-slot.available { background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.3); color: #e2e8f0; }
+.stage-gold .aud-header { border-bottom-color: rgba(240,165,0,.3); background: rgba(7,5,1,.95); }
+.stage-gold .aud-board-title { color: var(--gold); }
+.stage-gold .aud-q-slot.available { background: rgba(240,165,0,.12); border-color: rgba(240,165,0,.3); color: var(--gold-lt); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .aud-body { flex-direction: column; height: auto; min-height: calc(100vh - 56px); }
+  .aud-scores {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 50px !important;
+    padding: 5px !important;
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .score-card {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 100px !important;
+    max-width: 150px !important;
+    height: 35px !important;
+    min-height: 35px !important;
+    max-height: 35px !important;
+    padding: 2px 8px !important;
+    margin: 0 5px !important;
+    flex-shrink: 0;
+  }
+  .score-card .rank-medal,
+  .score-card .sc-score,
+  .score-card .sc-banked { display: none !important; }
+  .score-card .sc-name {
+    display: block !important;
+    font-size: 8pt !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .scores-title { display: none; }
+  .aud-board { flex-direction: column; }
+  .aud-cat-col { min-height: 120px; }
+  .q-text-big { font-size: 16pt; }
+  .aud-main { padding: 12px; }
+  .q-big-box { padding: 24px; }
+  .aud-header { padding: 12px 16px; }
+  .aud-logo { font-size: 14pt; }
+}
+
+@media(max-width:480px){
+  .aud-header { padding: 10px 14px; }
+  .aud-logo { font-size: 12pt; }
+  .aud-stage-badge { font-size: 9pt; padding: 6px 14px; }
+  .score-card { min-width: 100px; padding: 2px 8px; height: 35px; min-height: 35px; }
+  .sc-name { font-size: 8pt; }
+  .q-text-big { font-size: 15pt; line-height: 1.6; }
+  .q-value-chip { font-size: 11pt; padding: 5px 16px; }
+  .aud-timer-num { font-size: 12pt; }
+  .aud-wait-title { font-size: 18pt; }
+  .aud-surp-text { font-size: 32pt; }
+  .aud-surp-icon { font-size: 70pt; }
+  .aud-trans-title { font-size: 28pt; }
+}
+</style>
+</head>
+<body id="aud-body-el" class="stage-silver">
+
+<!-- Surprise Overlay -->
+<div class="aud-surprise" id="aud-surprise">
+  <div class="aud-surp-icon" id="aud-surp-icon">🏛️</div>
+  <div class="aud-surp-text" id="aud-surp-text">البنك!</div>
+</div>
+
+<!-- Stage Transition -->
+<div class="aud-transition" id="aud-transition">
+  <div class="aud-trans-icon" id="aud-trans-icon"></div>
+  <div class="aud-trans-title" id="aud-trans-title"></div>
+  <div class="aud-trans-sub" id="aud-trans-sub"></div>
+</div>
+
+<!-- Header -->
+<div class="aud-header">
+  <div class="aud-logo">🏛️ بنك المعلومات</div>
+  <div class="aud-stage-badge badge-silver" id="aud-stage-badge">⚪ الشاشة الفضية</div>
+  <div class="aud-waiting">
+    <div class="aud-live-dot"></div>
+    <span>بث مباشر</span>
+  </div>
+</div>
+
+<!-- Body -->
+<div class="aud-body">
+
+  <!-- Scores Sidebar -->
+  <div class="aud-scores" style="display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;">
+    <div class="scores-title">لوحة المتسابقين</div>
+    <div id="aud-scores-list"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="aud-main">
+
+    <!-- Waiting Screen -->
+    <div class="aud-waiting-screen" id="aud-waiting-screen">
+      <div class="aud-wait-icon">🏛️</div>
+      <div class="aud-wait-title">بنك المعلومات</div>
+      <div class="aud-wait-sub">في انتظار بدء المسابقة</div>
+    </div>
+
+    <!-- Board Panel (Silver/Gold) -->
+    <div class="aud-board-panel hidden" id="aud-board-panel">
+      <div class="aud-board-title" id="aud-board-title">⚪ الشاشة الفضية — التصفيات</div>
+      <div class="aud-board" id="aud-board"></div>
+    </div>
+
+    <!-- Diamond Panel -->
+    <div class="aud-diamond-panel" id="aud-diamond-panel"></div>
+
+    <!-- Question Panel -->
+    <div class="aud-question-panel" id="aud-q-panel">
+      <div class="q-cat-badge" id="aud-q-cat"></div>
+      <div class="q-big-box">
+        <div class="q-value-chip" id="aud-q-value">100 نقطة</div>
+        <div class="q-text-big" id="aud-q-text"></div>
+      </div>
+      <div class="aud-timer-wrap">
+        <div class="aud-timer-num" id="aud-timer-num">30</div>
+        <div class="aud-timer-track">
+          <div class="aud-timer-fill" id="aud-timer-fill"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD0sfgaMmNl0bbe4M4CSkczbjjRqjQYojE",
+  authDomain: "bank-almaloomat-game.firebaseapp.com",
+  databaseURL: "https://bank-almaloomat-game-default-rtdb.firebaseio.com",
+  projectId: "bank-almaloomat-game",
+  storageBucket: "bank-almaloomat-game.firebasestorage.app",
+  messagingSenderId: "96937409574",
+  appId: "1:96937409574:web:d04cbfe31fa4369e9e3ae7",
+  measurementId: "G-2VCSPP98Q2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const catIcons = {
+  'قادة ورؤساء':'👑','في يوم في شهر في سنة':'📅','كشكول':'📚',
+  'كيف ولماذا؟':'🔬','الصفة المشتركة':'🔗','أكبر .. أصغر ..':'⚖️',
+  'فكر بسرعة!':'⚡','علوم وآداب':'🎭','رياضة وعالم':'⚽',
+  'الخلفاء الراشدون':'☪️','الفتوحات الإسلامية':'🏹','العلماء والحضارة':'📖',
+  'غزوات النبي ﷺ':'⚔️','الدول الإسلامية':'🕌','السيرة النبوية':'🌙',
+  'الجغرافيا العربية':'🗺️','عالم الحيوان':'🦁','الكون والفضاء':'🌌',
+  'الاختراعات والاكتشافات':'💡','العلوم والكيمياء':'🧪','عجائب العالم':'🏛️',
+  'كرة القدم':'⚽','الرياضات الأولمبية':'🥇','الفنون والموسيقى':'🎨',
+  'أبطال رياضيون':'🏆','السينما والتلفزيون':'🎬','الأدب العالمي':'📚',
+  'قادة ورؤساء':'👑','ثقافة عامة':'🌍','تاريخ إسلامي':'☪️',
+  'جغرافيا':'🗺️','علوم':'🔬','رياضة':'⚽','أدب وشعر':'📚',
+  'فكر بسرعة!':'⚡'
+};
+
+let timerInterval = null;
+let lastStage = null;
+let lastQuestion = null;
+
+function typewrite(el, text, speed=35) {
+  el.innerHTML = '';
+  const cur = document.createElement('span');
+  cur.className = 'tw-cur'; el.appendChild(cur);
+  let i = 0;
+  const iv = setInterval(() => {
+    if(i < text.length) { el.insertBefore(document.createTextNode(text[i]), cur); i++; }
+    else { clearInterval(iv); cur.remove(); }
+  }, speed);
+}
+
+function updateScores(players, stage, diamondPlayers) {
+  const list = document.getElementById('aud-scores-list');
+  list.innerHTML = '';
+  if (!players) return;
+  const sorted = [...players].sort((a,b) => b.score - a.score);
+  const medals = ['🥇','🥈','🥉','④','⑤'];
+  sorted.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = `score-card rank-${i+1}`;
+    if (stage === 'diamond' && diamondPlayers) {
+      if (p.id === diamondPlayers[0]?.id) card.classList.add('dp1');
+      if (p.id === diamondPlayers[1]?.id) card.classList.add('dp2');
+    }
+    card.innerHTML = `
+      <span class="rank-medal">${medals[i]||'•'}</span>
+      <div class="sc-name">${p.name}</div>
+      <div class="sc-score" id="aud-sc-${p.id}">${p.score}</div>
+      ${p.isBanked ? `<div class="sc-banked" style="display:block">🔒 ${p.bankedValue}</div>` : ''}
+    `;
+    list.appendChild(card);
+  });
+}
+
+function updateStageBadge(stage) {
+  const badge = document.getElementById('aud-stage-badge');
+  const body = document.getElementById('aud-body-el');
+  const boardTitle = document.getElementById('aud-board-title');
+  body.className = `stage-${stage}`;
+
+  if (stage === 'silver') {
+    badge.className = 'aud-stage-badge badge-silver';
+    badge.textContent = '⚪ الشاشة الفضية';
+    if(boardTitle) boardTitle.textContent = '⚪ الشاشة الفضية — التصفيات';
+  } else if (stage === 'gold') {
+    badge.className = 'aud-stage-badge badge-gold';
+    badge.textContent = '🥇 الشاشة الذهبية';
+    if(boardTitle) boardTitle.textContent = '🥇 الشاشة الذهبية — مضاعفة النقاط';
+  } else if (stage === 'diamond') {
+    badge.className = 'aud-stage-badge badge-diamond';
+    badge.textContent = '💎 الشاشة الماسية';
+  }
+}
+
+function buildBoard(boardData, stage) {
+  const container = document.getElementById('aud-board');
+  container.innerHTML = '';
+  if (!boardData) return;
+  boardData.forEach(col => {
+    const div = document.createElement('div');
+    div.className = 'aud-cat-col';
+    const icon = catIcons[col.cat] || '❓';
+    div.innerHTML = `<div class="aud-cat-icon">${icon}</div><div class="aud-cat-name">${col.cat}</div>`;
+    col.questions.forEach(q => {
+      const slot = document.createElement('div');
+      slot.className = 'aud-q-slot ' + (q.spent ? 'spent' : 'available');
+      slot.textContent = q.spent ? '✓' : `${q.v} ن`;
+      div.appendChild(slot);
+    });
+    container.appendChild(div);
+  });
+}
+
+function buildDiamond(diamondState, diamondPlayers) {
+  const container = document.getElementById('aud-diamond-panel');
+  container.innerHTML = '';
+  if (!diamondState) return;
+  diamondState.forEach(cell => {
+    const div = document.createElement('div');
+    div.className = 'aud-diamond-cell' + (cell.spent && !cell.owner ? ' spent' : '');
+    if (cell.spent && cell.owner !== null && diamondPlayers) {
+      const isP1 = cell.owner === diamondPlayers[0]?.id;
+      div.innerHTML = `<span class="aud-jewel ${isP1 ? 'aud-jewel-r' : 'aud-jewel-b'}">♦</span>`;
+    } else if (!cell.spent) {
+      div.textContent = cell.category;
+    }
+    container.appendChild(div);
+  });
+}
+
+function startTimer(secs, mode) {
+  clearInterval(timerInterval);
+  const fill = document.getElementById('aud-timer-fill');
+  const num = document.getElementById('aud-timer-num');
+  fill.className = 'aud-timer-fill' + (mode === 'speed' ? ' danger' : '');
+  fill.style.width = '100%';
+  num.textContent = secs;
+  let rem = secs;
+  timerInterval = setInterval(() => {
+    rem--;
+    fill.style.width = `${(rem / secs) * 100}%`;
+    num.textContent = rem;
+    if (rem <= 5) fill.classList.add('danger');
+    if (rem <= 0) clearInterval(timerInterval);
+  }, 1000);
+}
+
+// ── LISTEN TO FIREBASE ──
+onValue(ref(db, 'gameState'), (snapshot) => {
+  const state = snapshot.val();
+  if (!state) return;
+
+  const { stage, players, question, board, diamondState, diamondPlayers, transition, surprise } = state;
+
+  // Stage change transition
+  if (stage !== lastStage && lastStage !== null) {
+    const stageInfo = {
+      gold:    { icon: '🥇', title: 'الشاشة الذهبية',  sub: 'مضاعفة النقاط',   color: 'var(--gold)' },
+      diamond: { icon: '💎', title: 'الشاشة الماسية', sub: 'الحسم النهائي',    color: 'var(--cyan)' }
+    };
+    if (stageInfo[stage]) {
+      const { icon, title, sub, color } = stageInfo[stage];
+      const ov = document.getElementById('aud-transition');
+      document.getElementById('aud-trans-icon').textContent = icon;
+      document.getElementById('aud-trans-icon').style.color = color;
+      document.getElementById('aud-trans-title').textContent = title;
+      document.getElementById('aud-trans-title').style.color = color;
+      document.getElementById('aud-trans-sub').textContent = sub;
+      ov.classList.add('active');
+      setTimeout(() => ov.classList.remove('active'), 3500);
+    }
+  }
+  lastStage = stage;
+
+  // Surprise screen
+  const surpriseEl = document.getElementById('aud-surprise');
+  if (surprise && surprise.active) {
+    document.getElementById('aud-surp-icon').textContent = surprise.icon || '🏛️';
+    document.getElementById('aud-surp-text').textContent = surprise.text || '';
+    document.getElementById('aud-surp-text').style.color = surprise.color || '#fff';
+    surpriseEl.classList.add('active');
+  } else {
+    surpriseEl.classList.remove('active');
+  }
+
+  // Update scores
+  updateScores(players, stage, diamondPlayers);
+  updateStageBadge(stage);
+
+  const waitScreen   = document.getElementById('aud-waiting-screen');
+  const boardPanel   = document.getElementById('aud-board-panel');
+  const diamondPanel = document.getElementById('aud-diamond-panel');
+  const qPanel       = document.getElementById('aud-q-panel');
+
+  // Show question
+  if (question && question.active) {
+    waitScreen.classList.add('hidden');
+    boardPanel.classList.add('hidden');
+    diamondPanel.classList.remove('active');
+    qPanel.classList.add('active');
+
+    document.getElementById('aud-q-cat').textContent = question.cat || '';
+    document.getElementById('aud-q-value').textContent = question.value ? `${question.value} نقطة` : '';
+
+    if (question.text !== lastQuestion) {
+      typewrite(document.getElementById('aud-q-text'), question.text || '');
+      lastQuestion = question.text;
+    }
+
+    if (question.timerSecs) startTimer(question.timerSecs, question.timerMode);
+
+  } else {
+    // Show board
+    qPanel.classList.remove('active');
+    lastQuestion = null;
+    clearInterval(timerInterval);
+
+    if (stage === 'diamond') {
+      waitScreen.classList.add('hidden');
+      boardPanel.classList.add('hidden');
+      diamondPanel.classList.add('active');
+      buildDiamond(diamondState, diamondPlayers);
+    } else if (board) {
+      waitScreen.classList.add('hidden');
+      boardPanel.classList.remove('hidden');
+      diamondPanel.classList.remove('active');
+      buildBoard(board, stage);
+    } else {
+      waitScreen.classList.remove('hidden');
+      boardPanel.classList.add('hidden');
+      diamondPanel.classList.remove('active');
+    }
+  }
+});
+</script>
+</body>
+</html>

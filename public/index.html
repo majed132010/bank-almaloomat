@@ -1,71 +1,69 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بنك المعلومات</title>
+<title>بنك المعلومات — المُقدِّم</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=777">
+<link rel="stylesheet" href="style.css?v202607080555">
+<style>
+/* Host-only additions */
+/* WEBRTC panel: fixed bottom-left; hidden on landing/setup */
+.rtc-panel{position:fixed;bottom:14px;left:14px;z-index:2500;display:none;gap:8px;align-items:center;background:rgba(4,4,16,.85);backdrop-filter:blur(12px);border:1px solid rgba(6,182,212,.3);border-radius:50px;padding:8px 14px;font-family:'Tajawal',sans-serif;font-size:10pt;color:#e2e8f0;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
+.rtc-panel .rtc-dot{width:9px;height:9px;border-radius:50%;background:#64748b;box-shadow:0 0 8px currentColor}
+.rtc-panel.live .rtc-dot{background:#10b981;animation:rtcPulse 1.4s ease infinite}
+@keyframes rtcPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.rtc-panel button{background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.35);color:#67e8f9;font-family:inherit;font-size:9pt;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s}
+.rtc-panel button:hover{background:rgba(6,182,212,.28)}
+.rtc-panel button.muted{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4);color:#fca5a5}
+.rtc-peers{font-size:8.5pt;color:#94a3b8;letter-spacing:1px}
+
+/* Buzzer winner flash — global visual cue */
+.buzz-flash{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:2400;background:linear-gradient(135deg,rgba(240,165,0,.95),rgba(252,211,77,.95));color:#1a0e00;padding:14px 28px;border-radius:50px;font-family:'Cairo',sans-serif;font-size:14pt;font-weight:900;letter-spacing:1.5px;box-shadow:0 8px 30px rgba(240,165,0,.5);display:none;animation:buzzPop .35s cubic-bezier(.34,1.56,.64,1)}
+.buzz-flash.on{display:block}
+.buzz-flash::before{content:'⚡';margin-left:10px;font-size:16pt}
+@keyframes buzzPop{from{transform:translate(-50%,-30px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+</style>
 </head>
 <body>
+
+<!-- BUZZER WINNER FLASH -->
+<div id="buzz-flash" class="buzz-flash"><span id="buzz-flash-name">—</span> يجيب!</div>
 
 <!-- ████ PAGE 1: LANDING ████ -->
 <div id="page-landing" class="page active">
   <div class="landing-bg">
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
+    <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
     <div class="grid-lines"></div>
   </div>
-
   <nav class="landing-nav">
     <div class="nav-logo">🏛️ بنك المعلومات</div>
     <div class="nav-badge">النسخة المتطورة</div>
   </nav>
-
   <div class="landing-hero">
     <div class="hero-tag">برنامج المسابقات الذكية</div>
     <h1 class="hero-title">بنك المعلومات</h1>
-    <p class="hero-desc">منصة مسابقات تفاعلية متكاملة — ثلاث مراحل درامية، موسيقى أوركسترا حية، وأسئلة تُولَّد بالذكاء الاصطناعي لكل جلسة</p>
-
+    <p class="hero-desc">منصة مسابقات تفاعلية متكاملة — ثلاث مراحل درامية، بث صوتي مباشر بين الشاشات، وزر أسرع متسابق بدقة الميلي ثانية</p>
     <div class="hero-stats">
       <div class="stat"><span class="stat-num">3</span><span class="stat-label">مراحل</span></div>
       <div class="stat-div"></div>
-      <div class="stat"><span class="stat-num">∞</span><span class="stat-label">سؤال AI</span></div>
+      <div class="stat"><span class="stat-num">11</span><span class="stat-label">بنك أسئلة</span></div>
       <div class="stat-div"></div>
-      <div class="stat"><span class="stat-num">🏆</span><span class="stat-label">فائز واحد</span></div>
+      <div class="stat"><span class="stat-num">🎙️</span><span class="stat-label">بث صوتي حي</span></div>
     </div>
-
-    <button class="btn-hero" onclick="goToSetup()">
+    <button class="btn-hero" data-testid="btn-start-hero" onclick="goToSetup()">
       <span>ابدأ المسابقة</span>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </button>
   </div>
-
   <div class="landing-features">
-    <div class="feature-card">
-      <div class="feature-icon">⚡</div>
-      <h3>دقيقة السرعة</h3>
-      <p>جولة أسئلة متتالية بإيقاع سريع مع موسيقى تصاعدية مثيرة</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏛️</div>
-      <h3>فقرة البنك</h3>
-      <p>راهن برصيدك أو حصّنه — قرار استراتيجي يقلب موازين اللعبة</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💎</div>
-      <h3>الشاشة الماسية</h3>
-      <p>حسم درامي عبر شبكة الجواهر — من يوصّل الخط أولاً يفوز</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🤖</div>
-      <h3>أسئلة بالذكاء الاصطناعي</h3>
-      <p>أسئلة جديدة تُولَّد لحظياً بالذكاء الاصطناعي لكل مسابقة</p>
-    </div>
+    <div class="feature-card"><div class="feature-icon">⚡</div><h3>دقيقة السرعة (120 ث)</h3><p>جولة أسئلة سريعة لمدة دقيقتين مع موسيقى تصاعدية مثيرة</p></div>
+    <div class="feature-card"><div class="feature-icon">🏛️</div><h3>فقرة البنك</h3><p>راهن برصيدك أو حصّنه — قرار استراتيجي يقلب موازين اللعبة</p></div>
+    <div class="feature-card"><div class="feature-icon">💎</div><h3>الشاشة الماسية</h3><p>حسم درامي عبر شبكة الجواهر — من يوصّل الخط أولاً يفوز</p></div>
+    <div class="feature-card"><div class="feature-icon">🎙️</div><h3>صوت حي + Buzzer</h3><p>محادثة صوتية بين الشاشات وزر أسرع متسابق بدقة عالية</p></div>
   </div>
-
   <div class="landing-stages">
     <div class="stage-pill silver-pill">⚪ الشاشة الفضية</div>
     <div class="stage-arrow">→</div>
@@ -77,22 +75,15 @@
 
 <!-- ████ PAGE 2: SETUP ████ -->
 <div id="page-setup" class="page">
-  <div class="setup-bg">
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-  </div>
-
+  <div class="setup-bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
   <div class="setup-container">
     <button class="btn-back" onclick="goTo('landing')">← رجوع</button>
-
     <div class="setup-header">
       <div class="setup-icon-wrap">🎯</div>
       <h2>إعداد المسابقة</h2>
-      <p>أدخل أسماء الفرسان واختر طريقة الأسئلة</p>
+      <p>أدخل أسماء الفرسان واختر بنك الأسئلة</p>
     </div>
-
     <div class="setup-grid">
-      <!-- Players -->
       <div class="setup-card">
         <h3 class="setup-card-title"><span>👥</span> الفرسان المتسابقون</h3>
         <div id="players-zone">
@@ -100,119 +91,93 @@
           <div class="p-row"><span class="p-num">٢</span><input class="p-input" type="text" value="الفارس الثاني" placeholder="اسم المتسابق"></div>
           <div class="p-row"><span class="p-num">٣</span><input class="p-input" type="text" value="الفارس الثالث" placeholder="اسم المتسابق"></div>
         </div>
-        <button class="btn-add" onclick="addPlayer()">＋ إضافة فارس</button>
+        <button class="btn-add" data-testid="btn-add-player" onclick="addPlayer()">＋ إضافة فارس</button>
 
-        <!-- QR Code للمتسابقين -->
         <div class="qr-setup-box">
-          <div class="qr-setup-title">📱 شاشة المتسابقين</div>
-          <div class="qr-setup-desc">امسح الكود لمتابعة المسابقة على جوالك</div>
+          <div class="qr-setup-title">📱 شاشة المتسابقين — زر Buzzer</div>
+          <div class="qr-setup-desc">امسح الكود من جوّال كل متسابق للانضمام</div>
           <div class="qr-setup-inner">
             <div class="setup-qr-img-wrap">
-              <img id="setup-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fbank-almaloomat-game.web.app%2Faudience.html" width="150" height="150" alt="QR Code" style="display:block;border-radius:8px;">
+              <img id="setup-qr-img" width="150" height="150" alt="QR Code" style="display:block;border-radius:8px;">
             </div>
-            <div class="qr-setup-url">https://bank-almaloomat-game.web.app/audience.html</div>
+            <div class="qr-setup-url" id="setup-qr-url">players.html</div>
           </div>
         </div>
       </div>
 
-      <!-- Question Topics -->
       <div class="setup-card ai-card">
-        <h3 class="setup-card-title"><span>🎯</span> اختر موضوع الأسئلة</h3>
-        <p class="ai-desc">اختر الموضوع المفضل وسيتم تحميل بنك أسئلة متنوع لكل مرحلة</p>
-
-        <div class="topic-grid">
-          <button class="topic-btn active" data-topic="ثقافة عامة" onclick="selectTopic(this,0)">🌍 ثقافة عامة</button>
-          <button class="topic-btn" data-topic="تاريخ إسلامي" onclick="selectTopic(this,1)">☪️ تاريخ إسلامي</button>
-          <button class="topic-btn" data-topic="علوم وجغرافيا" onclick="selectTopic(this,2)">🔬 علوم وجغرافيا</button>
-          <button class="topic-btn" data-topic="رياضة وفنون" onclick="selectTopic(this,3)">⚽ رياضة وفنون</button>
-          <button class="topic-btn" data-topic="عشوائي" onclick="selectTopic(this,-1)">🎲 عشوائي</button>
-        </div>
-
+        <h3 class="setup-card-title"><span>🎯</span> اختر بنك الأسئلة</h3>
+        <p class="ai-desc">11 بنك أسئلة متخصصة من فقرات البرنامج الأصلي</p>
+        <div class="topic-grid" id="topic-grid"></div>
         <div class="ai-status" id="ai-status">
           <div class="ai-dot done"></div>
           <span id="ai-status-text">✅ بنك أسئلة جاهز — اضغط ابدأ المسابقة</span>
         </div>
-
         <div id="ai-preview" class="ai-preview" style="display:block">
-          <div class="ai-preview-title">📚 عينة من أسئلة الموضوع المختار:</div>
+          <div class="ai-preview-title">📚 عينة من أسئلة البنك المختار:</div>
           <div id="ai-preview-list" class="ai-preview-list"></div>
         </div>
       </div>
     </div>
-
-    <button class="btn-start-game" onclick="startGame()">
-      🚀 ابدأ المسابقة الآن
-    </button>
+    <button class="btn-start-game" data-testid="btn-start-game" onclick="startGame()">🚀 ابدأ المسابقة الآن</button>
   </div>
 </div>
 
 <!-- ████ PAGE 3: GAME ████ -->
 <div id="page-game" class="page">
-
-  <!-- Top Bar -->
   <div class="game-topbar">
     <button class="btn-exit" onclick="if(confirm('خروج من المسابقة؟')) goTo('landing')">✕</button>
     <div class="game-topbar-center">
       <div class="topbar-stage-label">المرحلة</div>
       <div id="topbar-stage-name" class="topbar-stage-name">الشاشة الفضية</div>
     </div>
-    <div class="topbar-actions">
-      <button id="btn-advance" class="btn-advance" onclick="advanceStage()">التالي ←</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="btn-advance" data-testid="btn-advance" class="btn-advance" onclick="advanceStage()">التالي ←</button>
     </div>
   </div>
-
-  <!-- Game Layout -->
   <div class="game-body">
-
-    <!-- Sidebar -->
-    <div id="game-sidebar" class="game-sidebar">
+    <div class="game-sidebar">
       <div class="sidebar-label">الفرسان</div>
-      <div id="sidebar-players" class="players-list"></div>
+      <div id="sidebar-players"></div>
     </div>
-
-    <!-- Board -->
-    <div id="game-main" class="game-main">
+    <div class="game-main">
       <div id="board-silver" class="board"></div>
-      <div id="board-gold"   class="board" style="display:none"></div>
+      <div id="board-gold" class="board" style="display:none"></div>
       <div id="board-diamond" class="board diamond-board" style="display:none"></div>
     </div>
-
   </div>
 </div>
 
 <!-- ████ QUESTION MODAL ████ -->
 <div id="modal-overlay" class="modal-overlay">
   <div class="modal-box">
-
-    <!-- Surprise Screen -->
     <div id="modal-surprise" class="modal-surprise">
       <div id="surprise-particles" class="surprise-particles"></div>
       <div id="surprise-icon" class="surprise-icon">🏛️</div>
       <div id="surprise-text" class="surprise-text">البنك!</div>
     </div>
-
     <div class="modal-inner">
       <div id="modal-cat" class="modal-cat">الفئة</div>
-
       <div class="modal-q-box">
         <div id="modal-q" class="modal-q"></div>
         <div id="modal-a" class="modal-a"></div>
       </div>
-
       <div class="modal-timer-wrap">
         <div id="modal-timer-num" class="modal-timer-num">30</div>
-        <div class="modal-timer-track">
-          <div id="modal-timer-bar" class="modal-timer-bar"></div>
-        </div>
+        <div class="modal-timer-track"><div id="modal-timer-bar" class="modal-timer-bar"></div></div>
       </div>
 
-      <!-- Responder -->
+      <!-- BUZZER WINNER DISPLAY (host modal) -->
+      <div id="modal-buzz-winner" style="display:none;margin:12px 0;padding:12px 20px;background:linear-gradient(135deg,rgba(240,165,0,.22),rgba(252,211,77,.15));border:1.5px solid rgba(240,165,0,.55);border-radius:14px;text-align:center;font-family:'Cairo',sans-serif;">
+        <div style="font-size:9pt;letter-spacing:2px;color:#fcd34d;margin-bottom:4px">⚡ زر أسرع متسابق</div>
+        <div style="font-size:16pt;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(240,165,0,.6)"><span id="modal-buzz-name">—</span></div>
+        <button data-testid="btn-reset-buzzer" onclick="resetBuzzer()" style="margin-top:8px;background:rgba(4,4,16,.6);border:1px solid rgba(148,163,184,.3);color:#e2e8f0;padding:5px 14px;border-radius:20px;font-size:9pt;cursor:pointer;font-family:'Tajawal',sans-serif;">🔄 إعادة تفعيل Buzzer</button>
+      </div>
+
       <div id="modal-responder" class="modal-responder">
         <div class="modal-responder-label">اختر الفارس المستجيب</div>
         <div id="modal-responder-btns" class="modal-responder-btns"></div>
       </div>
-
-      <!-- Bank Panel -->
       <div id="modal-bank" class="modal-bank" style="display:none">
         <div class="bank-title">🏛️ فقرة البنك الاستثمارية</div>
         <p class="bank-subtitle">اسأل الفارس عن رغبته الاستراتيجية</p>
@@ -222,18 +187,13 @@
         </div>
         <div id="bank-bet-zone" class="bank-bet-zone" style="display:none">
           <label>مبلغ الرهان</label>
-          <div class="bank-bet-row">
-            <input id="bank-bet-input" type="number" value="400">
-            <span>ن</span>
-          </div>
+          <div class="bank-bet-row"><input id="bank-bet-input" type="number" value="400"><span>ن</span></div>
           <div id="bank-bet-limits" class="bank-bet-limits"></div>
           <button class="bank-confirm-btn" onclick="confirmBankBet()">تثبيت الرهان 🚀</button>
         </div>
       </div>
-
-      <!-- Speed Panel -->
       <div id="modal-speed" class="modal-speed" style="display:none">
-        <div class="speed-title">⚡ دقيقة السرعة</div>
+        <div class="speed-title">⚡ دقيقة السرعة (120 ثانية)</div>
         <div id="speed-btns" class="speed-btns"></div>
         <div id="speed-diamond-zone" class="speed-diamond-zone" style="display:none">
           <div class="speed-diamond-label">منح الجوهرة للفائز</div>
@@ -241,12 +201,12 @@
         </div>
         <button class="btn-end-speed" onclick="closeModal()">🏁 إنهاء السرعة</button>
       </div>
-
-      <!-- Judge -->
       <div id="modal-judge" class="modal-judge">
-        <button class="judge-btn judge-wrong"   onclick="judge(false)">✕ خاطئة</button>
-        <button class="judge-btn judge-skip"    onclick="closeModal()">تخطي</button>
-        <button class="judge-btn judge-correct" onclick="judge(true)">✓ صحيحة</button>
+        <button data-testid="btn-judge-wrong" class="judge-btn judge-wrong" onclick="judge(false)">✕ خاطئة</button>
+        <button data-testid="btn-toggle-voting" id="btn-toggle-voting" class="judge-btn judge-vote" onclick="toggleVoting()">🗳️ فتح تصويت</button>
+        <button data-testid="btn-reveal-answer" id="btn-reveal-answer" class="judge-btn judge-reveal" onclick="revealAnswer()">👁️ كشف الإجابة للجمهور</button>
+        <button data-testid="btn-judge-skip" class="judge-btn judge-skip" onclick="closeModal()">تخطي</button>
+        <button data-testid="btn-judge-correct" class="judge-btn judge-correct" onclick="judge(true)">✓ صحيحة</button>
       </div>
     </div>
   </div>
@@ -276,22 +236,38 @@
   <div id="transition-sub" class="transition-sub"></div>
 </div>
 
-<!-- ████ QR CODE MODAL ████ -->
-<div id="qr-modal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(4,4,16,.95);backdrop-filter:blur(16px);align-items:center;justify-content:center;">
-  <div style="background:linear-gradient(160deg,#1a1a35,#12122a);border:1px solid rgba(6,182,212,.4);border-radius:20px;padding:40px;text-align:center;max-width:400px;width:90%;position:relative;">
-    <button onclick="hideQRCode()" style="position:absolute;top:14px;left:14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#ef4444;padding:6px 12px;border-radius:8px;font-size:11pt;cursor:pointer;">✕</button>
-    <div style="font-size:13pt;font-weight:800;color:var(--cyan);margin-bottom:6px;letter-spacing:1px;">📱 شاشة الجمهور</div>
-    <div style="font-size:9pt;color:var(--muted);margin-bottom:24px;letter-spacing:2px;">امسح QR Code للمتابعة المباشرة</div>
-    <div id="qr-container" style="background:white;border-radius:14px;padding:16px;display:inline-block;margin-bottom:20px;box-shadow:0 0 30px rgba(6,182,212,.3);">
-      <canvas id="qr-canvas"></canvas>
-    </div>
-    <div style="font-size:9pt;color:var(--muted);margin-bottom:16px;">أو افتح الرابط مباشرة:</div>
-    <a id="qr-link" href="https://bank-almaloomat-game.web.app/audience.html" target="_blank" style="display:block;padding:12px 20px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);border-radius:10px;color:var(--cyan);font-size:10pt;font-weight:700;text-decoration:none;word-break:break-all;transition:all .2s;">
-      https://bank-almaloomat-game.web.app/audience.html
-    </a>
+<!-- WEBRTC AUDIO CONTROL PANEL (HOST) -->
+<div class="rtc-panel" id="rtc-panel">
+  <div class="rtc-dot" id="rtc-dot"></div>
+  <span id="rtc-status">جاري تجهيز البث الصوتي…</span>
+  <button data-testid="btn-mic-toggle" id="btn-mic-toggle" onclick="toggleHostMic()">🎙️ تفعيل الميكروفون</button>
+  <button data-testid="btn-record-toggle" id="btn-record-toggle" onclick="toggleRecording()" class="btn-rec">🔴 تسجيل الجلسة</button>
+  <span class="rtc-peers" id="rtc-peers">0 اتصال</span>
+  <div class="rtc-participants-box" data-testid="rtc-participants-box">
+    <span class="rtc-p-icon">👥</span>
+    <span class="rtc-p-count" id="rtc-participants" data-testid="rtc-participants">0</span>
+    <span class="rtc-p-lbl">متسابق نشط</span>
   </div>
 </div>
 
-<script src="script.js?v=99"></script>
+<style>
+.rtc-participants-box{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(6,182,212,.12));border:1px solid rgba(16,185,129,.38);color:#a7f3d0;padding:6px 12px;border-radius:20px;font-size:9.5pt;font-weight:800;font-family:'Cairo',sans-serif;letter-spacing:.5px}
+.rtc-p-icon{font-size:11pt}
+.rtc-p-count{font-size:13pt;color:#fff;text-shadow:0 0 10px rgba(16,185,129,.6);min-width:14px;text-align:center}
+.rtc-p-lbl{font-size:8.5pt;color:#6ee7b7}
+.btn-rec{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;font-family:inherit;font-size:9pt;font-weight:800;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.btn-rec:hover{background:rgba(239,68,68,.28)}
+.btn-rec.recording{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border-color:#ef4444;animation:recBlink 1.2s ease infinite}
+@keyframes recBlink{0%,100%{box-shadow:0 0 6px #ef4444}50%{box-shadow:0 0 18px #ef4444}}
+.judge-btn.judge-reveal{background:linear-gradient(135deg,rgba(139,92,246,.85),rgba(109,40,217,.85));color:#fff;border-color:rgba(139,92,246,.6)}
+.judge-btn.judge-reveal:hover:not(:disabled){background:linear-gradient(135deg,rgba(139,92,246,1),rgba(109,40,217,1));transform:translateY(-2px);box-shadow:0 8px 20px rgba(109,40,217,.4)}
+.judge-btn.judge-reveal.revealed{background:rgba(16,185,129,.4);border-color:rgba(16,185,129,.6);color:#a7f3d0;cursor:not-allowed}
+.judge-btn.judge-vote{background:linear-gradient(135deg,rgba(240,165,0,.85),rgba(180,120,0,.85));color:#fff;border-color:rgba(240,165,0,.6)}
+.judge-btn.judge-vote:hover:not(:disabled){background:linear-gradient(135deg,#f0a500,#d97706);transform:translateY(-2px);box-shadow:0 8px 20px rgba(240,165,0,.4)}
+.judge-btn.judge-vote.active{background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;color:#fff;box-shadow:0 0 15px rgba(16,185,129,.5)}
+</style>
+
+<script src="script.js?v202607080555"></script>
 </body>
 </html>
+

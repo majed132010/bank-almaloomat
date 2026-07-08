@@ -1,386 +1,27 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بنك المعلومات — شاشة الجمهور</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=777">
 <style>
-:root {
-  --gold: #f0a500;
-  --gold-lt: #ffd166;
-  --purple: #6d28d9;
-  --purple-lt: #8b5cf6;
-  --cyan: #06b6d4;
-  --silver: #94a3b8;
-  --success: #10b981;
-  --danger: #ef4444;
-  --bg: #07071a;
-  --card: rgba(255,255,255,0.04);
-  --border: rgba(255,255,255,0.08);
-  --text: #f0f0ff;
-  --muted: #64748b;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Tajawal', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  direction: rtl;
-  min-height: 100vh;
-  overflow: hidden;
-}
-
-/* ── AMBIENT ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(109,40,217,.15) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 0% 100%, rgba(6,182,212,.08) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 30% at 100% 100%, rgba(240,165,0,.06) 0%, transparent 50%);
-}
-
-/* ── HEADER ── */
-.aud-header {
-  position: relative; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 30px;
-  background: rgba(7,7,26,.95);
-  border-bottom: 1px solid rgba(109,40,217,.3);
-  backdrop-filter: blur(20px);
-}
-
-.aud-logo {
-  font-family: 'Cairo', sans-serif;
-  font-size: 18pt; font-weight: 900;
-  color: var(--gold);
-  text-shadow: 0 0 20px rgba(240,165,0,.4);
-}
-
-.aud-stage-badge {
-  padding: 8px 20px;
-  border-radius: 50px;
-  font-size: 11pt; font-weight: 700;
-  border: 1px solid;
-  letter-spacing: 1px;
-}
-.badge-silver { background: rgba(148,163,184,.1); border-color: rgba(148,163,184,.3); color: var(--silver); }
-.badge-gold   { background: rgba(240,165,0,.1);   border-color: rgba(240,165,0,.3);   color: var(--gold); }
-.badge-diamond{ background: rgba(6,182,212,.1);   border-color: rgba(6,182,212,.3);   color: var(--cyan); }
-
-.aud-waiting {
-  font-size: 10pt; color: var(--muted);
-  display: flex; align-items: center; gap: 8px;
-}
-.aud-live-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 8px var(--success);
-  animation: livePulse 1.5s ease infinite;
-}
-@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
-
-/* ── MAIN LAYOUT ── */
-.aud-body {
-  position: relative; z-index: 10;
-  display: flex; height: calc(100vh - 60px);
-}
-
-/* ── SCORES PANEL ── */
-.aud-scores {
-  width: 260px; flex-shrink: 0;
-  padding: 20px 14px;
-  background: rgba(255,255,255,.02);
-  border-left: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 12px;
-}
-
-.scores-title {
-  font-size: 9pt; letter-spacing: 3px; color: var(--muted);
-  text-align: center; text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.score-card {
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 14px; padding: 16px;
-  text-align: center;
-  transition: all .4s;
-  position: relative; overflow: hidden;
-}
-.score-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, transparent, var(--purple), transparent);
-  opacity: 0; transition: opacity .3s;
-}
-.score-card.rank-1 { border-color: rgba(240,165,0,.4); background: rgba(20,15,0,.5); }
-.score-card.rank-1::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 1; }
-.score-card.rank-2 { border-color: rgba(148,163,184,.25); }
-.score-card.rank-2::before { background: linear-gradient(90deg, transparent, var(--silver), transparent); opacity: .6; }
-.score-card.rank-3 { border-color: rgba(184,115,10,.2); }
-
-.rank-medal { font-size: 20pt; margin-bottom: 4px; display: block; }
-.sc-name { font-size: 12pt; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.sc-score {
-  font-size: 28pt; font-weight: 900; color: var(--gold); line-height: 1;
-  text-shadow: 0 0 20px rgba(240,165,0,.3);
-  transition: all .5s;
-}
-.sc-score.updated { animation: scoreGlow .6s ease; }
-@keyframes scoreGlow {
-  0%{transform:scale(1)} 40%{transform:scale(1.3);color:#fff;text-shadow:0 0 30px #fff} 100%{transform:scale(1)}
-}
-.sc-banked {
-  display: none; margin-top: 6px; font-size: 8pt;
-  padding: 3px 10px; background: rgba(16,185,129,.15);
-  border: 1px solid rgba(16,185,129,.25); border-radius: 20px;
-  color: var(--success);
-}
-
-/* ── MAIN CONTENT ── */
-.aud-main {
-  flex: 1; padding: 20px;
-  overflow: hidden; display: flex; flex-direction: column;
-}
-
-/* ── QUESTION DISPLAY ── */
-.aud-question-panel {
-  display: none;
-  flex: 1; flex-direction: column;
-}
-.aud-question-panel.active { display: flex; }
-
-.q-cat-badge {
-  font-size: 9pt; letter-spacing: 3px; color: var(--purple-lt);
-  text-transform: uppercase; margin-bottom: 16px;
-  padding-bottom: 12px; border-bottom: 1px solid rgba(109,40,217,.2);
-}
-
-.q-big-box {
-  flex: 1;
-  background: rgba(4,4,16,.7);
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 20px; padding: 40px;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  text-align: center; position: relative; overflow: hidden;
-}
-
-.q-big-box::before {
-  content: '؟';
-  position: absolute; bottom: -20px; left: 20px;
-  font-size: 120pt; color: rgba(109,40,217,.04);
-  font-family: 'Cairo', sans-serif; line-height: 1; pointer-events: none;
-}
-
-.q-value-chip {
-  display: inline-block;
-  padding: 6px 20px; margin-bottom: 24px;
-  background: rgba(109,40,217,.2); border: 1px solid rgba(109,40,217,.4);
-  border-radius: 50px; font-size: 13pt; font-weight: 900; color: var(--gold-lt);
-}
-
-.q-text-big {
-  font-size: clamp(16pt, 3vw, 24pt);
-  font-weight: 700; color: var(--text);
-  line-height: 1.7; max-width: 800px;
-}
-
-/* Typewriter cursor */
-.tw-cur {
-  display: inline-block; width: 3px; height: 1em;
-  background: var(--purple-lt); margin-right: 4px;
-  vertical-align: text-bottom;
-  animation: curBlink .7s step-end infinite;
-}
-@keyframes curBlink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-/* ── TIMER BAR ── */
-.aud-timer-wrap {
-  margin-top: 20px; position: relative;
-}
-.aud-timer-num {
-  text-align: center; font-size: 14pt; font-weight: 900;
-  color: var(--purple-lt); letter-spacing: 2px; margin-bottom: 8px;
-}
-.aud-timer-track {
-  height: 10px; background: rgba(255,255,255,.05);
-  border-radius: 5px; overflow: hidden;
-}
-.aud-timer-fill {
-  height: 100%; width: 100%;
-  background: linear-gradient(90deg, var(--purple), var(--purple-lt), var(--gold-lt));
-  transition: width 1s linear;
-  border-radius: 5px; box-shadow: 0 0 12px rgba(109,40,217,.4);
-}
-.aud-timer-fill.danger {
-  background: linear-gradient(90deg, #7f1d1d, var(--danger));
-  animation: timerFlash .4s ease infinite alternate;
-}
-@keyframes timerFlash { from{opacity:1} to{opacity:.6} }
-
-/* ── BOARD DISPLAY (when no question) ── */
-.aud-board-panel {
-  flex: 1; display: flex; flex-direction: column;
-}
-.aud-board-panel.hidden { display: none; }
-
-.aud-board-title {
-  font-family: 'Cairo', sans-serif;
-  font-size: 16pt; font-weight: 700;
-  margin-bottom: 16px; color: var(--purple-lt);
-}
-
-.aud-board {
-  display: flex; gap: 14px; flex: 1;
-}
-
-.aud-cat-col {
-  flex: 1;
-  background: rgba(255,255,255,.02);
-  border: 1px solid var(--border);
-  border-radius: 14px; padding: 16px;
-  display: flex; flex-direction: column;
-}
-
-.aud-cat-icon { font-size: 20pt; text-align: center; margin-bottom: 6px; }
-.aud-cat-name {
-  font-size: 10.5pt; font-weight: 800; color: var(--gold);
-  text-align: center; padding-bottom: 10px; margin-bottom: 10px;
-  border-bottom: 1px solid rgba(240,165,0,.15);
-  min-height: 40px; display: flex; align-items: center; justify-content: center;
-}
-
-.aud-q-slot {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  margin-bottom: 8px; border-radius: 10px;
-  font-size: 14pt; font-weight: 900; letter-spacing: 1px;
-  transition: all .3s;
-}
-.aud-q-slot:last-child { margin-bottom: 0; }
-.aud-q-slot.available {
-  background: linear-gradient(160deg, rgba(109,40,217,.2), rgba(109,40,217,.08));
-  border: 1px solid rgba(109,40,217,.3); color: var(--gold-lt);
-}
-.aud-q-slot.spent {
-  background: rgba(255,255,255,.02);
-  border: 1px solid rgba(255,255,255,.04);
-  color: rgba(255,255,255,.12);
-}
-
-/* ── DIAMOND GRID ── */
-.aud-diamond-panel { display: none; flex: 1; }
-.aud-diamond-panel.active { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-
-.aud-diamond-cell {
-  background: linear-gradient(160deg, rgba(6,182,212,.08), rgba(7,7,26,.9));
-  border: 1px solid rgba(6,182,212,.25); border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  text-align: center; font-size: 12pt; font-weight: 700;
-  color: var(--text); padding: 14px; position: relative; overflow: hidden;
-}
-.aud-diamond-cell::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(6,182,212,.06), transparent 70%);
-}
-.aud-diamond-cell.spent { opacity: .4; }
-.aud-jewel { font-size: 44pt; filter: drop-shadow(0 0 14px currentColor); animation: jPulse 2s ease-in-out infinite; }
-@keyframes jPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
-.aud-jewel-r { color: var(--danger); }
-.aud-jewel-b { color: var(--cyan); }
-
-/* ── WAITING SCREEN ── */
-.aud-waiting-screen {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 20px;
-}
-.aud-waiting-screen.hidden { display: none; }
-.aud-wait-icon { font-size: 60pt; animation: waitFloat 2s ease-in-out infinite alternate; }
-@keyframes waitFloat { from{transform:translateY(0)} to{transform:translateY(-15px)} }
-.aud-wait-title { font-family: 'Cairo', sans-serif; font-size: 24pt; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(240,165,0,.4); }
-.aud-wait-sub { font-size: 12pt; color: var(--muted); letter-spacing: 2px; }
-
-/* ── SURPRISE OVERLAY ── */
-.aud-surprise {
-  position: fixed; inset: 0; z-index: 100;
-  background: radial-gradient(ellipse at center, #150a35 0%, #04040f 100%);
-  display: none; flex-direction: column;
-  align-items: center; justify-content: center; gap: 20px;
-}
-.aud-surprise.active { display: flex; }
-.aud-surp-icon { font-size: 90pt; filter: drop-shadow(0 0 30px currentColor); animation: siBounce .5s ease-in-out infinite alternate; }
-@keyframes siBounce { from{transform:scale(1) rotate(-4deg)} to{transform:scale(1.1) rotate(4deg)} }
-.aud-surp-text { font-family: 'Cairo', sans-serif; font-size: 44pt; font-weight: 900; letter-spacing: 6px; text-shadow: 0 0 40px currentColor; }
-
-/* ── STAGE TRANSITION ── */
-.aud-transition {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(4,4,16,.92); backdrop-filter: blur(20px);
-  display: none; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px;
-}
-.aud-transition.active { display: flex; }
-.aud-trans-icon { font-size: 80pt; filter: drop-shadow(0 0 30px currentColor); animation: transFloat .6s ease-in-out infinite alternate; }
-@keyframes transFloat { from{transform:scale(1) translateY(0)} to{transform:scale(1.08) translateY(-10px)} }
-.aud-trans-title { font-family: 'Cairo', sans-serif; font-size: 38pt; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 40px currentColor; }
-.aud-trans-sub { font-size: 11pt; color: var(--muted); letter-spacing: 4px; text-transform: uppercase; }
-
-/* ── STAGE COLORS ── */
-.stage-silver .aud-header { border-bottom-color: rgba(148,163,184,.3); }
-.stage-silver .aud-board-title { color: var(--silver); }
-.stage-silver .aud-q-slot.available { background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.3); color: #e2e8f0; }
-.stage-gold .aud-header { border-bottom-color: rgba(240,165,0,.3); background: rgba(7,5,1,.95); }
-.stage-gold .aud-board-title { color: var(--gold); }
-.stage-gold .aud-q-slot.available { background: rgba(240,165,0,.12); border-color: rgba(240,165,0,.3); color: var(--gold-lt); }
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
+/* MOBILE: Horizontal Player Row */
+@media (max-width: 768px) {
   .aud-body { flex-direction: column; height: auto; min-height: calc(100vh - 56px); }
   .aud-scores {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    white-space: nowrap !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: 50px !important;
-    padding: 5px !important;
-    border-left: none;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+    overflow-x: auto !important; overflow-y: hidden !important; white-space: nowrap !important;
+    width: 100% !important; height: auto !important; max-height: 50px !important;
+    padding: 5px !important; border-left: none; border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   .score-card {
-    display: inline-flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 100px !important;
-    max-width: 150px !important;
-    height: 35px !important;
-    min-height: 35px !important;
-    max-height: 35px !important;
-    padding: 2px 8px !important;
-    margin: 0 5px !important;
-    flex-shrink: 0;
+    display: inline-flex !important; flex-direction: row !important; align-items: center !important;
+    justify-content: center !important; min-width: 100px !important; max-width: 150px !important;
+    height: 35px !important; min-height: 35px !important; max-height: 35px !important;
+    padding: 2px 8px !important; margin: 0 5px !important; flex-shrink: 0;
   }
-  .score-card .rank-medal,
-  .score-card .sc-score,
-  .score-card .sc-banked { display: none !important; }
+  .score-card .rank-medal, .score-card .sc-score, .score-card .sc-banked { display: none !important; }
   .score-card .sc-name {
-    display: block !important;
-    font-size: 8pt !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    display: block !important; font-size: 8pt !important; line-height: 1 !important;
+    margin: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important;
   }
   .scores-title { display: none; }
   .aud-board { flex-direction: column; }
@@ -391,8 +32,7 @@ body::before {
   .aud-header { padding: 12px 16px; }
   .aud-logo { font-size: 14pt; }
 }
-
-@media(max-width:480px){
+@media (max-width: 480px) {
   .aud-header { padding: 10px 14px; }
   .aud-logo { font-size: 12pt; }
   .aud-stage-badge { font-size: 9pt; padding: 6px 14px; }
@@ -407,94 +47,340 @@ body::before {
   .aud-trans-title { font-size: 28pt; }
 }
 </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بنك المعلومات — شاشة الجمهور</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f0a500;--gold-lt:#ffd166;--purple:#6d28d9;--purple-lt:#8b5cf6;--cyan:#06b6d4;--silver:#94a3b8;--success:#10b981;--danger:#ef4444;--bg:#07071a;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08);--text:#f0f0ff;--muted:#64748b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(109,40,217,.15) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 0% 100%,rgba(6,182,212,.08) 0%,transparent 50%),radial-gradient(ellipse 40% 30% at 100% 100%,rgba(240,165,0,.06) 0%,transparent 50%)}
+.aud-header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 30px;background:rgba(7,7,26,.95);border-bottom:1px solid rgba(109,40,217,.3);backdrop-filter:blur(20px)}
+.aud-logo{font-family:'Cairo',sans-serif;font-size:18pt;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(240,165,0,.4)}
+.aud-stage-badge{padding:8px 20px;border-radius:50px;font-size:11pt;font-weight:700;border:1px solid;letter-spacing:1px}
+.badge-silver{background:rgba(148,163,184,.1);border-color:rgba(148,163,184,.3);color:var(--silver)}
+.badge-gold{background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.3);color:var(--gold)}
+.badge-diamond{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.3);color:var(--cyan)}
+.aud-waiting{font-size:10pt;color:var(--muted);display:flex;align-items:center;gap:8px}
+.aud-live-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:livePulse 1.5s ease infinite}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.aud-body{position:relative;z-index:10;display:flex;height:calc(100vh - 60px)}
+.aud-scores{width:260px;flex-shrink:0;padding:20px 14px;background:rgba(255,255,255,.02);border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
+.scores-title{font-size:9pt;letter-spacing:3px;color:var(--muted);text-align:center;text-transform:uppercase;margin-bottom:4px}
+.score-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;transition:all .4s;position:relative;overflow:hidden}
+.score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0;transition:opacity .3s}
+.score-card.rank-1{border-color:rgba(240,165,0,.4);background:rgba(20,15,0,.5)}
+.score-card.rank-1::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:1}
+.score-card.rank-2{border-color:rgba(148,163,184,.25)}
+.score-card.rank-2::before{background:linear-gradient(90deg,transparent,var(--silver),transparent);opacity:.6}
+.score-card.rank-3{border-color:rgba(184,115,10,.2)}
+.score-card.buzz-active{border-color:var(--gold)!important;background:linear-gradient(160deg,rgba(240,165,0,.25),rgba(20,15,0,.7))!important;box-shadow:0 0 30px rgba(240,165,0,.5);animation:buzzGlow 1s ease infinite alternate}
+@keyframes buzzGlow{from{transform:scale(1)}to{transform:scale(1.04)}}
+.rank-medal{font-size:20pt;margin-bottom:4px;display:block}
+.sc-name{font-size:12pt;font-weight:700;color:var(--text);margin-bottom:6px}
+.sc-score{font-size:28pt;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 20px rgba(240,165,0,.3);transition:all .5s}
+.sc-score.updated{animation:scoreGlow .6s ease}
+@keyframes scoreGlow{0%{transform:scale(1)}40%{transform:scale(1.3);color:#fff;text-shadow:0 0 30px #fff}100%{transform:scale(1)}}
+.sc-banked{display:none;margin-top:6px;font-size:8pt;padding:3px 10px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.25);border-radius:20px;color:var(--success)}
+.aud-main{flex:1;padding:20px;overflow:hidden;display:flex;flex-direction:column}
+.aud-question-panel{display:none;flex:1;flex-direction:column}
+.aud-question-panel.active{display:flex}
+.q-cat-badge{font-size:9pt;letter-spacing:3px;color:var(--purple-lt);text-transform:uppercase;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(109,40,217,.2)}
+.q-big-box{flex:1;background:rgba(4,4,16,.7);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:40px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;overflow:hidden}
+.q-big-box::before{content:'؟';position:absolute;bottom:-20px;left:20px;font-size:120pt;color:rgba(109,40,217,.04);font-family:'Cairo',sans-serif;line-height:1;pointer-events:none}
+.q-value-chip{display:inline-block;padding:6px 20px;margin-bottom:24px;background:rgba(109,40,217,.2);border:1px solid rgba(109,40,217,.4);border-radius:50px;font-size:13pt;font-weight:900;color:var(--gold-lt)}
+.q-text-big{font-size:clamp(16pt,3vw,24pt);font-weight:700;color:var(--text);line-height:1.7;max-width:800px}
+
+/* Reveal Answer — dramatic entrance */
+.q-answer-reveal{margin-top:26px;max-width:800px;padding:20px 30px;background:linear-gradient(135deg,rgba(16,185,129,.22),rgba(6,182,212,.15));border:2px solid rgba(16,185,129,.55);border-radius:18px;font-family:'Cairo',sans-serif;text-align:center;box-shadow:0 12px 40px rgba(16,185,129,.25);display:none;transform-origin:center;animation:answerReveal .7s cubic-bezier(.34,1.56,.64,1)}
+.q-answer-reveal.on{display:block}
+.q-answer-reveal .lbl{font-size:9pt;letter-spacing:4px;color:#6ee7b7;margin-bottom:8px;text-transform:uppercase}
+.q-answer-reveal .txt{font-size:clamp(15pt,2.6vw,22pt);font-weight:900;color:#a7f3d0;text-shadow:0 0 20px rgba(16,185,129,.4);line-height:1.4}
+.q-answer-reveal .txt::before{content:'✅ ';margin-left:8px}
+@keyframes answerReveal{
+  0%{transform:scale(.7) translateY(20px);opacity:0;filter:blur(8px)}
+  60%{transform:scale(1.06) translateY(-4px);opacity:1;filter:blur(0)}
+  100%{transform:scale(1) translateY(0);opacity:1}
+}
+.tw-cur{display:inline-block;width:3px;height:1em;background:var(--purple-lt);margin-right:4px;vertical-align:text-bottom;animation:curBlink .7s step-end infinite}
+@keyframes curBlink{0%,100%{opacity:1}50%{opacity:0}}
+.aud-timer-wrap{margin-top:20px;position:relative}
+.aud-timer-num{text-align:center;font-size:14pt;font-weight:900;color:var(--purple-lt);letter-spacing:2px;margin-bottom:8px}
+.aud-timer-track{height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden}
+.aud-timer-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--purple),var(--purple-lt),var(--gold-lt));transition:width 1s linear;border-radius:5px;box-shadow:0 0 12px rgba(109,40,217,.4)}
+.aud-timer-fill.danger{background:linear-gradient(90deg,#7f1d1d,var(--danger));animation:timerFlash .4s ease infinite alternate}
+@keyframes timerFlash{from{opacity:1}to{opacity:.6}}
+.aud-board-panel{flex:1;display:flex;flex-direction:column}
+.aud-board-panel.hidden{display:none}
+.aud-board-title{font-family:'Cairo',sans-serif;font-size:16pt;font-weight:700;margin-bottom:16px;color:var(--purple-lt)}
+.aud-board{display:flex;gap:14px;flex:1}
+.aud-cat-col{flex:1;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column}
+.aud-cat-icon{font-size:20pt;text-align:center;margin-bottom:6px}
+.aud-cat-name{font-size:10.5pt;font-weight:800;color:var(--gold);text-align:center;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid rgba(240,165,0,.15);min-height:40px;display:flex;align-items:center;justify-content:center}
+.aud-q-slot{flex:1;display:flex;align-items:center;justify-content:center;margin-bottom:8px;border-radius:10px;font-size:14pt;font-weight:900;letter-spacing:1px;transition:all .3s}
+.aud-q-slot:last-child{margin-bottom:0}
+.aud-q-slot.available{background:linear-gradient(160deg,rgba(109,40,217,.2),rgba(109,40,217,.08));border:1px solid rgba(109,40,217,.3);color:var(--gold-lt)}
+.aud-q-slot.spent{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.12)}
+.aud-diamond-panel{display:none;flex:1}
+.aud-diamond-panel.active{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.aud-diamond-cell{background:linear-gradient(160deg,rgba(6,182,212,.08),rgba(7,7,26,.9));border:1px solid rgba(6,182,212,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12pt;font-weight:700;color:var(--text);padding:14px;position:relative;overflow:hidden}
+.aud-diamond-cell::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(6,182,212,.06),transparent 70%)}
+.aud-diamond-cell.spent{opacity:.4}
+.aud-jewel{font-size:44pt;filter:drop-shadow(0 0 14px currentColor);animation:jPulse 2s ease-in-out infinite}
+@keyframes jPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.aud-jewel-r{color:var(--danger)}
+.aud-jewel-b{color:var(--cyan)}
+.aud-waiting-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.aud-waiting-screen.hidden{display:none}
+.aud-wait-icon{font-size:60pt;animation:waitFloat 2s ease-in-out infinite alternate}
+@keyframes waitFloat{from{transform:translateY(0)}to{transform:translateY(-15px)}}
+.aud-wait-title{font-family:'Cairo',sans-serif;font-size:24pt;font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(240,165,0,.4)}
+.aud-wait-sub{font-size:12pt;color:var(--muted);letter-spacing:2px}
+.aud-surprise{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at center,#150a35 0%,#04040f 100%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.aud-surprise.active{display:flex}
+.aud-surp-icon{font-size:90pt;filter:drop-shadow(0 0 30px currentColor);animation:siBounce .5s ease-in-out infinite alternate}
+@keyframes siBounce{from{transform:scale(1) rotate(-4deg)}to{transform:scale(1.1) rotate(4deg)}}
+.aud-surp-text{font-family:'Cairo',sans-serif;font-size:44pt;font-weight:900;letter-spacing:6px;text-shadow:0 0 40px currentColor}
+.aud-transition{position:fixed;inset:0;z-index:200;background:rgba(4,4,16,.92);backdrop-filter:blur(20px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.aud-transition.active{display:flex}
+.aud-trans-icon{font-size:80pt;filter:drop-shadow(0 0 30px currentColor);animation:transFloat .6s ease-in-out infinite alternate}
+@keyframes transFloat{from{transform:scale(1) translateY(0)}to{transform:scale(1.08) translateY(-10px)}}
+.aud-trans-title{font-family:'Cairo',sans-serif;font-size:38pt;font-weight:900;letter-spacing:5px;text-shadow:0 0 40px currentColor}
+.aud-trans-sub{font-size:11pt;color:var(--muted);letter-spacing:4px;text-transform:uppercase}
+.stage-silver .aud-header{border-bottom-color:rgba(148,163,184,.3)}
+.stage-silver .aud-board-title{color:var(--silver)}
+.stage-silver .aud-q-slot.available{background:rgba(148,163,184,.12);border-color:rgba(148,163,184,.3);color:#e2e8f0}
+.stage-gold .aud-header{border-bottom-color:rgba(240,165,0,.3);background:rgba(7,5,1,.95)}
+.stage-gold .aud-board-title{color:var(--gold)}
+.stage-gold .aud-q-slot.available{background:rgba(240,165,0,.12);border-color:rgba(240,165,0,.3);color:var(--gold-lt)}
+
+/* ═══ DIAMOND EXCLUSIVE VIEW — hide global scoreboard, spotlight finalists ═══ */
+.stage-diamond .aud-scores{display:none!important}
+.stage-diamond .aud-main{padding:20px 30px}
+.stage-diamond .aud-diamond-panel.active{grid-template-columns:repeat(3,1fr);gap:22px}
+.stage-diamond .aud-diamond-cell{padding:24px;font-size:14pt;min-height:120px}
+.stage-diamond .aud-header{border-bottom-color:rgba(6,182,212,.4);background:linear-gradient(90deg,rgba(4,4,16,.95),rgba(0,20,35,.95),rgba(4,4,16,.95))}
+/* Diamond finalists banner at top (visible only in diamond stage) */
+.aud-finalists-banner{display:none}
+.stage-diamond .aud-finalists-banner{display:flex;align-items:center;justify-content:center;gap:24px;padding:12px 20px;background:linear-gradient(135deg,rgba(6,182,212,.14),rgba(4,4,16,.9));border-bottom:1px solid rgba(6,182,212,.25)}
+.finalist-chip{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 20px;border-radius:16px;background:linear-gradient(160deg,rgba(4,4,16,.7),rgba(15,10,40,.6));border:2px solid;min-width:140px}
+.finalist-chip.f1{border-color:var(--danger);box-shadow:0 6px 20px rgba(239,68,68,.15)}
+.finalist-chip.f2{border-color:var(--cyan);box-shadow:0 6px 20px rgba(6,182,212,.15)}
+.finalist-role{font-size:8pt;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.finalist-name{font-family:'Cairo',sans-serif;font-size:14pt;font-weight:900;color:var(--text)}
+.finalist-vs{font-family:'Cairo',sans-serif;font-size:24pt;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(240,165,0,.5);letter-spacing:2px}
+
+/* Buzzer Winner Overlay */
+.aud-buzz-win{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:150;padding:16px 36px;background:linear-gradient(135deg,rgba(240,165,0,.95),rgba(252,211,77,.9));color:#1a0e00;border-radius:50px;font-family:'Cairo',sans-serif;font-size:18pt;font-weight:900;letter-spacing:2px;box-shadow:0 10px 40px rgba(240,165,0,.55);display:none;animation:audBuzzPop .45s cubic-bezier(.34,1.56,.64,1)}
+.aud-buzz-win.on{display:block}
+.aud-buzz-win::before{content:'⚡ ';font-size:22pt}
+@keyframes audBuzzPop{from{transform:translate(-50%,-40px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+
+/* ── LIVE AUDIENCE VOTE — QR sidebar + bottom results bar ── */
+.aud-vote-qr{position:fixed;top:80px;left:22px;z-index:80;background:linear-gradient(160deg,rgba(4,4,16,.92),rgba(15,10,40,.85));border:2px solid rgba(240,165,0,.5);border-radius:16px;padding:12px;display:none;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 40px rgba(240,165,0,.18);animation:qrPop .5s cubic-bezier(.34,1.56,.64,1)}
+.aud-vote-qr.on{display:block}
+.aud-vote-qr-inner{display:flex;flex-direction:column;align-items:center;gap:6px}
+.aud-vote-qr-title{font-family:'Cairo',sans-serif;font-size:9pt;font-weight:900;color:var(--gold);letter-spacing:2px}
+.aud-vote-qr-img{width:120px;height:120px;background:#fff;padding:6px;border-radius:8px}
+.aud-vote-qr-hint{font-size:8pt;color:var(--muted);text-align:center;max-width:130px;line-height:1.4}
+.aud-vote-total{margin-top:4px;font-family:'Cairo',sans-serif;font-size:12pt;font-weight:900;color:var(--gold-lt);letter-spacing:1px}
+@keyframes qrPop{from{transform:scale(.5) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+
+.aud-vote-bar{position:fixed;bottom:0;left:0;right:0;z-index:80;background:linear-gradient(0deg,rgba(4,4,16,.98),rgba(4,4,16,.85));backdrop-filter:blur(20px);border-top:1.5px solid rgba(240,165,0,.35);padding:12px 22px 14px;display:none;box-shadow:0 -12px 40px rgba(0,0,0,.6);animation:barSlide .45s ease-out}
+.aud-vote-bar.on{display:block}
+@keyframes barSlide{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.aud-vote-bar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:'Cairo',sans-serif;font-size:10pt;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.aud-vote-bar-head strong{color:var(--gold);font-size:13pt}
+.aud-vote-bar-row{display:flex;gap:10px;height:44px;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.aud-vote-seg{position:relative;flex:0 0 0%;transition:flex-basis .8s cubic-bezier(.34,1.2,.64,1);display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;font-weight:900;color:#fff;overflow:hidden;min-width:0}
+.aud-vote-seg.A{background:linear-gradient(90deg,#f0a500,#fcd34d)}
+.aud-vote-seg.B{background:linear-gradient(90deg,#6d28d9,#8b5cf6)}
+.aud-vote-seg.C{background:linear-gradient(90deg,#0891b2,#06b6d4)}
+.aud-vote-seg.D{background:linear-gradient(90deg,#059669,#10b981)}
+.aud-vote-seg-inner{white-space:nowrap;padding:0 8px;font-size:11pt;text-shadow:0 1px 4px rgba(0,0,0,.5);color:#fff}
+.aud-vote-seg[data-pct="0"]{flex-basis:2%;background:rgba(255,255,255,.04)}
+.aud-vote-labels{display:flex;justify-content:space-between;margin-top:6px;font-family:'Cairo',sans-serif;font-size:9.5pt;color:var(--muted);letter-spacing:1px}
+.aud-vote-labels span{display:flex;align-items:center;gap:4px}
+.aud-vote-labels .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.aud-vote-labels .dot-A{background:var(--gold)}
+.aud-vote-labels .dot-B{background:var(--purple-lt)}
+.aud-vote-labels .dot-C{background:var(--cyan)}
+.aud-vote-labels .dot-D{background:var(--success)}
+@media(max-width:900px){.aud-vote-qr{top:auto;bottom:120px;left:12px}.aud-vote-qr-img{width:90px;height:90px}}
+
+@media(max-width:900px){
+  .aud-body{flex-direction:column;height:auto;min-height:calc(100vh - 56px)}
+  /* ═══ SLIM MOBILE PLAYER STRIP ═══ */
+  .aud-scores{
+    width:100%;height:auto;display:flex;gap:6px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    padding:6px 10px;border-left:none;border-bottom:1px solid var(--border);
+    flex-shrink:0;position:sticky;top:0;z-index:20;background:rgba(4,4,16,.96);
+    backdrop-filter:blur(16px);
+  }
+  .aud-scores::-webkit-scrollbar{display:none}
+  .scores-title{display:none}
+  .score-card{
+    min-width:auto;flex:0 0 auto;padding:5px 10px;border-radius:20px;
+    display:inline-flex;align-items:center;gap:6px;min-height:32px;max-height:36px;
+    text-align:right;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  }
+  .score-card::before{display:none}
+  .rank-medal{font-size:11pt!important;margin:0!important;line-height:1}
+  .sc-name{font-size:9pt!important;font-weight:700!important;color:var(--text);margin:0!important;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:80px;line-height:1}
+  .sc-score{font-size:11pt!important;font-weight:900!important;color:var(--gold)!important;line-height:1!important;padding:2px 8px!important;background:rgba(240,165,0,.13)!important;border-radius:12px!important;min-width:32px!important;text-align:center;text-shadow:none!important}
+  .sc-banked{margin:0!important;padding:2px 6px!important;font-size:7.5pt!important;line-height:1}
+  .score-card.rank-1{background:linear-gradient(135deg,rgba(240,165,0,.18),rgba(255,255,255,.04));border-color:var(--gold)}
+  .score-card.buzz-active{transform:scale(1.05)}
+  .aud-board{flex-direction:column;gap:8px}
+  .aud-cat-col{min-height:120px}
+  .q-text-big{font-size:15pt;line-height:1.55}
+  .aud-main{padding:12px;min-height:0}
+  .q-big-box{padding:20px 16px}
+  .aud-header{padding:10px 14px}
+  .aud-logo{font-size:13pt}
+  .aud-stage-badge{font-size:9pt;padding:6px 14px}
+  /* Diamond stage on mobile: finalists as slim horizontal chips */
+  .stage-diamond .aud-finalists-banner{padding:8px 12px;gap:10px}
+  .stage-diamond .finalist-chip{padding:6px 12px;min-width:0;flex:1;border-width:1.5px}
+  .stage-diamond .finalist-name{font-size:11pt}
+  .stage-diamond .finalist-role{font-size:7.5pt}
+  .stage-diamond .finalist-vs{font-size:14pt}
+  .stage-diamond .aud-main{padding:10px}
+  .stage-diamond .aud-diamond-panel.active{gap:6px}
+  .stage-diamond .aud-diamond-cell{padding:8px;font-size:9.5pt;min-height:72px}
+  /* Vote QR and bar on mobile */
+  .aud-vote-qr{position:static!important;margin:8px 10px;display:none}
+  .aud-vote-qr.on{display:block}
+  .aud-vote-bar{padding:8px 10px 10px}
+  .aud-vote-bar-head{font-size:9pt}
+  .aud-vote-bar-row{height:36px}
+  .aud-vote-seg-inner{font-size:9.5pt}
+}
+@media(max-width:480px){
+  .aud-header{padding:8px 12px}
+  .aud-logo{font-size:11pt}
+  .aud-stage-badge{font-size:8pt;padding:5px 10px}
+  .aud-waiting{display:none}
+  .sc-name{max-width:60px;font-size:8.5pt!important}
+  .sc-score{font-size:10pt!important;min-width:26px!important;padding:2px 6px!important}
+  .score-card{padding:4px 8px;gap:4px;min-height:28px}
+  .rank-medal{font-size:9pt!important}
+  .q-text-big{font-size:14pt;line-height:1.5}
+  .q-value-chip{font-size:10pt;padding:4px 12px}
+  .aud-timer-num{font-size:11pt}
+  .aud-wait-title{font-size:16pt}
+  .aud-surp-text{font-size:28pt}
+  .aud-surp-icon{font-size:60pt}
+  .aud-trans-title{font-size:22pt}
+  .aud-buzz-win{font-size:11pt;padding:10px 18px}
+  .q-answer-reveal .txt{font-size:13pt}
+  .q-answer-reveal{padding:14px 18px;margin-top:16px}
+}
+</style>
 </head>
 <body id="aud-body-el" class="stage-silver">
 
-<!-- Surprise Overlay -->
+<div class="aud-buzz-win" id="aud-buzz-win"><span id="aud-buzz-name">—</span> يجيب!</div>
+
+<!-- LIVE VOTE — QR + BAR -->
+<div class="aud-vote-qr" id="aud-vote-qr">
+  <div class="aud-vote-qr-inner">
+    <div class="aud-vote-qr-title">🗳️ صوّت الآن</div>
+    <img class="aud-vote-qr-img" id="aud-vote-qr-img" alt="QR">
+    <div class="aud-vote-qr-hint">امسح الكود وشارك في التصويت من جوّالك</div>
+    <div class="aud-vote-total" id="aud-vote-total">0 صوت</div>
+  </div>
+</div>
+
+<div class="aud-vote-bar" id="aud-vote-bar">
+  <div class="aud-vote-bar-head"><span>نتائج تصويت الجمهور المباشر</span><strong id="aud-vote-total-2">0 صوت</strong></div>
+  <div class="aud-vote-bar-row" id="aud-vote-bar-row">
+    <div class="aud-vote-seg A" data-key="A" data-pct="0"><span class="aud-vote-seg-inner">أ 0%</span></div>
+    <div class="aud-vote-seg B" data-key="B" data-pct="0"><span class="aud-vote-seg-inner">ب 0%</span></div>
+    <div class="aud-vote-seg C" data-key="C" data-pct="0"><span class="aud-vote-seg-inner">ج 0%</span></div>
+    <div class="aud-vote-seg D" data-key="D" data-pct="0"><span class="aud-vote-seg-inner">د 0%</span></div>
+  </div>
+  <div class="aud-vote-labels">
+    <span><span class="dot dot-A"></span>الخيار (أ)</span>
+    <span><span class="dot dot-B"></span>الخيار (ب)</span>
+    <span><span class="dot dot-C"></span>الخيار (ج)</span>
+    <span><span class="dot dot-D"></span>الخيار (د)</span>
+  </div>
+</div>
+
 <div class="aud-surprise" id="aud-surprise">
   <div class="aud-surp-icon" id="aud-surp-icon">🏛️</div>
   <div class="aud-surp-text" id="aud-surp-text">البنك!</div>
 </div>
 
-<!-- Stage Transition -->
 <div class="aud-transition" id="aud-transition">
   <div class="aud-trans-icon" id="aud-trans-icon"></div>
   <div class="aud-trans-title" id="aud-trans-title"></div>
   <div class="aud-trans-sub" id="aud-trans-sub"></div>
 </div>
 
-<!-- Header -->
 <div class="aud-header">
   <div class="aud-logo">🏛️ بنك المعلومات</div>
   <div class="aud-stage-badge badge-silver" id="aud-stage-badge">⚪ الشاشة الفضية</div>
-  <div class="aud-waiting">
-    <div class="aud-live-dot"></div>
-    <span>بث مباشر</span>
-  </div>
+  <div class="aud-waiting"><div class="aud-live-dot"></div><span>بث مباشر</span></div>
 </div>
 
-<!-- Body -->
-<div class="aud-body">
+<!-- DIAMOND EXCLUSIVE — Finalists Banner -->
+<div class="aud-finalists-banner" id="aud-finalists">
+  <div class="finalist-chip f1"><div class="finalist-role">الفارس الأول</div><div class="finalist-name" id="f1-name">—</div></div>
+  <div class="finalist-vs">💎</div>
+  <div class="finalist-chip f2"><div class="finalist-role">الفارس الثاني</div><div class="finalist-name" id="f2-name">—</div></div>
+</div>
 
-  <!-- Scores Sidebar -->
-  <div class="aud-scores" style="display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;">
+<div class="aud-body">
+  <div class="aud-scores">
     <div class="scores-title">لوحة المتسابقين</div>
     <div id="aud-scores-list"></div>
   </div>
-
-  <!-- Main Content -->
   <div class="aud-main">
-
-    <!-- Waiting Screen -->
     <div class="aud-waiting-screen" id="aud-waiting-screen">
       <div class="aud-wait-icon">🏛️</div>
       <div class="aud-wait-title">بنك المعلومات</div>
       <div class="aud-wait-sub">في انتظار بدء المسابقة</div>
     </div>
-
-    <!-- Board Panel (Silver/Gold) -->
     <div class="aud-board-panel hidden" id="aud-board-panel">
       <div class="aud-board-title" id="aud-board-title">⚪ الشاشة الفضية — التصفيات</div>
       <div class="aud-board" id="aud-board"></div>
     </div>
-
-    <!-- Diamond Panel -->
     <div class="aud-diamond-panel" id="aud-diamond-panel"></div>
-
-    <!-- Question Panel -->
     <div class="aud-question-panel" id="aud-q-panel">
       <div class="q-cat-badge" id="aud-q-cat"></div>
       <div class="q-big-box">
         <div class="q-value-chip" id="aud-q-value">100 نقطة</div>
         <div class="q-text-big" id="aud-q-text"></div>
+        <div class="q-answer-reveal" id="aud-q-answer">
+          <div class="lbl">الإجابة الصحيحة</div>
+          <div class="txt" id="aud-q-answer-txt"></div>
+        </div>
       </div>
       <div class="aud-timer-wrap">
         <div class="aud-timer-num" id="aud-timer-num">30</div>
-        <div class="aud-timer-track">
-          <div class="aud-timer-fill" id="aud-timer-fill"></div>
-        </div>
+        <div class="aud-timer-track"><div class="aud-timer-fill" id="aud-timer-fill"></div></div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD0sfgaMmNl0bbe4M4CSkczbjjRqjQYojE",
-  authDomain: "bank-almaloomat-game.firebaseapp.com",
-  databaseURL: "https://bank-almaloomat-game-default-rtdb.firebaseio.com",
-  projectId: "bank-almaloomat-game",
-  storageBucket: "bank-almaloomat-game.firebasestorage.app",
-  messagingSenderId: "96937409574",
-  appId: "1:96937409574:web:d04cbfe31fa4369e9e3ae7",
-  measurementId: "G-2VCSPP98Q2"
+  apiKey:"AIzaSyD0sfgaMmNl0bbe4M4CSkczbjjRqjQYojE",
+  authDomain:"bank-almaloomat-game.firebaseapp.com",
+  databaseURL:"https://bank-almaloomat-game-default-rtdb.firebaseio.com",
+  projectId:"bank-almaloomat-game",
+  storageBucket:"bank-almaloomat-game.firebasestorage.app",
+  messagingSenderId:"96937409574",
+  appId:"1:96937409574:web:d04cbfe31fa4369e9e3ae7"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -508,202 +394,245 @@ const catIcons = {
   'الاختراعات والاكتشافات':'💡','العلوم والكيمياء':'🧪','عجائب العالم':'🏛️',
   'كرة القدم':'⚽','الرياضات الأولمبية':'🥇','الفنون والموسيقى':'🎨',
   'أبطال رياضيون':'🏆','السينما والتلفزيون':'🎬','الأدب العالمي':'📚',
-  'قادة ورؤساء':'👑','ثقافة عامة':'🌍','تاريخ إسلامي':'☪️',
-  'جغرافيا':'🗺️','علوم':'🔬','رياضة':'⚽','أدب وشعر':'📚',
-  'فكر بسرعة!':'⚡'
+  'الدين والعلوم الإسلامية':'🕌','اللغات والآداب':'📖',
+  'اللقطات السينمائية والخدع البصرية':'🎞️','الألغاز والذكاء الرياضي':'🧩',
+  'التكنولوجيا والاختراعات الحديثة':'🤖','الطقس والمناخ والكون':'🌦️',
+  'الثقافة والفنون التشكيلية والسينمائية':'🎭',
+  'ثقافة عامة':'🌍','تاريخ إسلامي':'☪️','جغرافيا':'🗺️',
+  'علوم':'🔬','رياضة':'⚽','أدب وشعر':'📚','اختراعات':'💡'
 };
 
-let timerInterval = null;
-let lastStage = null;
-let lastQuestion = null;
+let timerInterval=null, lastStage=null, lastQuestion=null, lastBuzzer=null, voteQrGeneratedFor=null;
 
-function typewrite(el, text, speed=35) {
-  el.innerHTML = '';
-  const cur = document.createElement('span');
-  cur.className = 'tw-cur'; el.appendChild(cur);
-  let i = 0;
-  const iv = setInterval(() => {
-    if(i < text.length) { el.insertBefore(document.createTextNode(text[i]), cur); i++; }
-    else { clearInterval(iv); cur.remove(); }
+function updateVoting(voting){
+  const qrEl = document.getElementById('aud-vote-qr');
+  const barEl = document.getElementById('aud-vote-bar');
+  if(!voting || !voting.active){
+    qrEl.classList.remove('on');
+    barEl.classList.remove('on');
+    return;
+  }
+  // Show QR (generate once per session)
+  const url = window.location.origin + '/vote.html';
+  if(voteQrGeneratedFor !== url){
+    document.getElementById('aud-vote-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    voteQrGeneratedFor = url;
+  }
+  qrEl.classList.add('on');
+  barEl.classList.add('on');
+  // Update counts
+  const counts = voting.counts || {};
+  const total = voting.total || 0;
+  document.getElementById('aud-vote-total').textContent = `${total} صوت`;
+  document.getElementById('aud-vote-total-2').textContent = `${total} صوت`;
+  const keys = ['A','B','C','D'];
+  const arabicKey = {A:'أ',B:'ب',C:'ج',D:'د'};
+  keys.forEach(k => {
+    const seg = document.querySelector(`.aud-vote-seg[data-key="${k}"]`);
+    if(!seg) return;
+    const c = counts[k] || 0;
+    const pct = total > 0 ? Math.round((c/total)*100) : 0;
+    seg.style.flexBasis = (total>0 ? Math.max(pct,4) : 25) + '%';
+    seg.setAttribute('data-pct', pct);
+    seg.querySelector('.aud-vote-seg-inner').textContent = `${arabicKey[k]} ${pct}% (${c})`;
+  });
+}
+
+function typewrite(el,text,speed=35){
+  el.innerHTML='';
+  const cur=document.createElement('span'); cur.className='tw-cur'; el.appendChild(cur);
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i<text.length){ el.insertBefore(document.createTextNode(text[i]),cur); i++; }
+    else{ clearInterval(iv); cur.remove(); }
   }, speed);
 }
 
-function updateScores(players, stage, diamondPlayers) {
-  const list = document.getElementById('aud-scores-list');
-  list.innerHTML = '';
-  if (!players) return;
-  const sorted = [...players].sort((a,b) => b.score - a.score);
-  const medals = ['🥇','🥈','🥉','④','⑤'];
-  sorted.forEach((p, i) => {
-    const card = document.createElement('div');
-    card.className = `score-card rank-${i+1}`;
-    if (stage === 'diamond' && diamondPlayers) {
-      if (p.id === diamondPlayers[0]?.id) card.classList.add('dp1');
-      if (p.id === diamondPlayers[1]?.id) card.classList.add('dp2');
-    }
-    card.innerHTML = `
+function updateScores(players, stage, diamondPlayers, buzzerWinnerId){
+  const list=document.getElementById('aud-scores-list');
+  list.innerHTML='';
+  if(!players) return;
+  const sorted=[...players].sort((a,b)=>b.score-a.score);
+  const medals=['🥇','🥈','🥉','④','⑤'];
+  sorted.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className=`score-card rank-${i+1}`;
+    if(buzzerWinnerId!==null && buzzerWinnerId!==undefined && p.id===buzzerWinnerId) card.classList.add('buzz-active');
+    card.innerHTML=`
       <span class="rank-medal">${medals[i]||'•'}</span>
       <div class="sc-name">${p.name}</div>
       <div class="sc-score" id="aud-sc-${p.id}">${p.score}</div>
-      ${p.isBanked ? `<div class="sc-banked" style="display:block">🔒 ${p.bankedValue}</div>` : ''}
+      ${p.isBanked?`<div class="sc-banked" style="display:block">🔒 ${p.bankedValue}</div>`:''}
     `;
     list.appendChild(card);
   });
 }
 
-function updateStageBadge(stage) {
-  const badge = document.getElementById('aud-stage-badge');
-  const body = document.getElementById('aud-body-el');
-  const boardTitle = document.getElementById('aud-board-title');
-  body.className = `stage-${stage}`;
-
-  if (stage === 'silver') {
-    badge.className = 'aud-stage-badge badge-silver';
-    badge.textContent = '⚪ الشاشة الفضية';
-    if(boardTitle) boardTitle.textContent = '⚪ الشاشة الفضية — التصفيات';
-  } else if (stage === 'gold') {
-    badge.className = 'aud-stage-badge badge-gold';
-    badge.textContent = '🥇 الشاشة الذهبية';
-    if(boardTitle) boardTitle.textContent = '🥇 الشاشة الذهبية — مضاعفة النقاط';
-  } else if (stage === 'diamond') {
-    badge.className = 'aud-stage-badge badge-diamond';
-    badge.textContent = '💎 الشاشة الماسية';
-  }
+function updateStageBadge(stage){
+  const badge=document.getElementById('aud-stage-badge');
+  const body=document.getElementById('aud-body-el');
+  const boardTitle=document.getElementById('aud-board-title');
+  body.className=`stage-${stage}`;
+  if(stage==='silver'){ badge.className='aud-stage-badge badge-silver'; badge.textContent='⚪ الشاشة الفضية'; if(boardTitle) boardTitle.textContent='⚪ الشاشة الفضية — التصفيات'; }
+  else if(stage==='gold'){ badge.className='aud-stage-badge badge-gold'; badge.textContent='🥇 الشاشة الذهبية'; if(boardTitle) boardTitle.textContent='🥇 الشاشة الذهبية — مضاعفة النقاط'; }
+  else if(stage==='diamond'){ badge.className='aud-stage-badge badge-diamond'; badge.textContent='💎 الشاشة الماسية'; }
 }
 
-function buildBoard(boardData, stage) {
-  const container = document.getElementById('aud-board');
-  container.innerHTML = '';
-  if (!boardData) return;
-  boardData.forEach(col => {
-    const div = document.createElement('div');
-    div.className = 'aud-cat-col';
-    const icon = catIcons[col.cat] || '❓';
-    div.innerHTML = `<div class="aud-cat-icon">${icon}</div><div class="aud-cat-name">${col.cat}</div>`;
-    col.questions.forEach(q => {
-      const slot = document.createElement('div');
-      slot.className = 'aud-q-slot ' + (q.spent ? 'spent' : 'available');
-      slot.textContent = q.spent ? '✓' : `${q.v} ن`;
+function updateFinalists(diamondPlayers){
+  if(!diamondPlayers || diamondPlayers.length < 2) return;
+  document.getElementById('f1-name').textContent = diamondPlayers[0]?.name || '—';
+  document.getElementById('f2-name').textContent = diamondPlayers[1]?.name || '—';
+}
+
+function buildBoard(boardData){
+  const container=document.getElementById('aud-board');
+  container.innerHTML='';
+  if(!boardData) return;
+  boardData.forEach(col=>{
+    const div=document.createElement('div'); div.className='aud-cat-col';
+    const icon=catIcons[col.cat]||'❓';
+    div.innerHTML=`<div class="aud-cat-icon">${icon}</div><div class="aud-cat-name">${col.cat}</div>`;
+    col.questions.forEach(q=>{
+      const slot=document.createElement('div');
+      slot.className='aud-q-slot '+(q.spent?'spent':'available');
+      slot.textContent=q.spent?'✓':`${q.v} ن`;
       div.appendChild(slot);
     });
     container.appendChild(div);
   });
 }
 
-function buildDiamond(diamondState, diamondPlayers) {
-  const container = document.getElementById('aud-diamond-panel');
-  container.innerHTML = '';
-  if (!diamondState) return;
-  diamondState.forEach(cell => {
-    const div = document.createElement('div');
-    div.className = 'aud-diamond-cell' + (cell.spent && !cell.owner ? ' spent' : '');
-    if (cell.spent && cell.owner !== null && diamondPlayers) {
-      const isP1 = cell.owner === diamondPlayers[0]?.id;
-      div.innerHTML = `<span class="aud-jewel ${isP1 ? 'aud-jewel-r' : 'aud-jewel-b'}">♦</span>`;
-    } else if (!cell.spent) {
-      div.textContent = cell.category;
-    }
+function buildDiamond(diamondState, diamondPlayers){
+  const container=document.getElementById('aud-diamond-panel');
+  container.innerHTML='';
+  if(!diamondState) return;
+  diamondState.forEach(cell=>{
+    const div=document.createElement('div');
+    div.className='aud-diamond-cell'+(cell.spent && !cell.owner?' spent':'');
+    if(cell.spent && cell.owner!==null && diamondPlayers){
+      const isP1=cell.owner===diamondPlayers[0]?.id;
+      div.innerHTML=`<span class="aud-jewel ${isP1?'aud-jewel-r':'aud-jewel-b'}">♦</span>`;
+    } else if(!cell.spent){ div.textContent=cell.category; }
     container.appendChild(div);
   });
 }
 
-function startTimer(secs, mode) {
+function startTimer(secs, mode){
   clearInterval(timerInterval);
-  const fill = document.getElementById('aud-timer-fill');
-  const num = document.getElementById('aud-timer-num');
-  fill.className = 'aud-timer-fill' + (mode === 'speed' ? ' danger' : '');
-  fill.style.width = '100%';
-  num.textContent = secs;
-  let rem = secs;
-  timerInterval = setInterval(() => {
+  const fill=document.getElementById('aud-timer-fill');
+  const num=document.getElementById('aud-timer-num');
+  fill.className='aud-timer-fill';
+  fill.style.width='100%'; num.textContent=secs;
+  let rem=secs;
+  timerInterval=setInterval(()=>{
     rem--;
-    fill.style.width = `${(rem / secs) * 100}%`;
-    num.textContent = rem;
-    if (rem <= 5) fill.classList.add('danger');
-    if (rem <= 0) clearInterval(timerInterval);
+    fill.style.width=`${(rem/secs)*100}%`;
+    num.textContent=rem;
+    // For 120s speed round: danger starts in last 15s. For normal: last 5s.
+    const dangerThreshold = mode==='speed' ? 15 : 5;
+    if(rem<=dangerThreshold) fill.classList.add('danger');
+    if(rem<=0) clearInterval(timerInterval);
   }, 1000);
 }
 
-// ── LISTEN TO FIREBASE ──
-onValue(ref(db, 'gameState'), (snapshot) => {
-  const state = snapshot.val();
-  if (!state) return;
+function showBuzzerWinner(name){
+  const el=document.getElementById('aud-buzz-win');
+  document.getElementById('aud-buzz-name').textContent=name;
+  el.classList.add('on');
+}
+function hideBuzzerWinner(){ document.getElementById('aud-buzz-win').classList.remove('on'); }
 
-  const { stage, players, question, board, diamondState, diamondPlayers, transition, surprise } = state;
+onValue(ref(db,'gameState'),(snapshot)=>{
+  const state=snapshot.val();
+  if(!state) return;
+  const { stage, players, question, board, diamondState, diamondPlayers, transition, surprise, buzzer, voting } = state;
 
-  // Stage change transition
-  if (stage !== lastStage && lastStage !== null) {
-    const stageInfo = {
-      gold:    { icon: '🥇', title: 'الشاشة الذهبية',  sub: 'مضاعفة النقاط',   color: 'var(--gold)' },
-      diamond: { icon: '💎', title: 'الشاشة الماسية', sub: 'الحسم النهائي',    color: 'var(--cyan)' }
+  if(stage!==lastStage && lastStage!==null){
+    const stageInfo={
+      gold:{icon:'🥇',title:'الشاشة الذهبية',sub:'مضاعفة النقاط',color:'var(--gold)'},
+      diamond:{icon:'💎',title:'الشاشة الماسية',sub:'الحسم النهائي',color:'var(--cyan)'}
     };
-    if (stageInfo[stage]) {
-      const { icon, title, sub, color } = stageInfo[stage];
-      const ov = document.getElementById('aud-transition');
-      document.getElementById('aud-trans-icon').textContent = icon;
-      document.getElementById('aud-trans-icon').style.color = color;
-      document.getElementById('aud-trans-title').textContent = title;
-      document.getElementById('aud-trans-title').style.color = color;
-      document.getElementById('aud-trans-sub').textContent = sub;
+    if(stageInfo[stage]){
+      const {icon,title,sub,color}=stageInfo[stage];
+      const ov=document.getElementById('aud-transition');
+      document.getElementById('aud-trans-icon').textContent=icon;
+      document.getElementById('aud-trans-icon').style.color=color;
+      document.getElementById('aud-trans-title').textContent=title;
+      document.getElementById('aud-trans-title').style.color=color;
+      document.getElementById('aud-trans-sub').textContent=sub;
       ov.classList.add('active');
-      setTimeout(() => ov.classList.remove('active'), 3500);
+      setTimeout(()=>ov.classList.remove('active'),3500);
     }
   }
-  lastStage = stage;
+  lastStage=stage;
 
-  // Surprise screen
-  const surpriseEl = document.getElementById('aud-surprise');
-  if (surprise && surprise.active) {
-    document.getElementById('aud-surp-icon').textContent = surprise.icon || '🏛️';
-    document.getElementById('aud-surp-text').textContent = surprise.text || '';
-    document.getElementById('aud-surp-text').style.color = surprise.color || '#fff';
+  const surpriseEl=document.getElementById('aud-surprise');
+  if(surprise && surprise.active){
+    document.getElementById('aud-surp-icon').textContent=surprise.icon||'🏛️';
+    document.getElementById('aud-surp-text').textContent=surprise.text||'';
+    document.getElementById('aud-surp-text').style.color=surprise.color||'#fff';
     surpriseEl.classList.add('active');
+  } else surpriseEl.classList.remove('active');
+
+  // Buzzer winner flash
+  const buzzerWinnerId = buzzer && buzzer.winnerId!==undefined ? buzzer.winnerId : null;
+  if(buzzer && buzzer.winnerId!==null && buzzer.winnerId!==undefined && buzzer.winnerName){
+    if(lastBuzzer !== buzzer.winnerId+'-'+buzzer.ts){
+      showBuzzerWinner(buzzer.winnerName);
+      lastBuzzer = buzzer.winnerId+'-'+buzzer.ts;
+    }
   } else {
-    surpriseEl.classList.remove('active');
+    hideBuzzerWinner();
+    lastBuzzer = null;
   }
 
-  // Update scores
-  updateScores(players, stage, diamondPlayers);
+  updateScores(players, stage, diamondPlayers, buzzerWinnerId);
   updateStageBadge(stage);
+  updateFinalists(diamondPlayers);
+  updateVoting(voting);
 
-  const waitScreen   = document.getElementById('aud-waiting-screen');
-  const boardPanel   = document.getElementById('aud-board-panel');
-  const diamondPanel = document.getElementById('aud-diamond-panel');
-  const qPanel       = document.getElementById('aud-q-panel');
+  const waitScreen=document.getElementById('aud-waiting-screen');
+  const boardPanel=document.getElementById('aud-board-panel');
+  const diamondPanel=document.getElementById('aud-diamond-panel');
+  const qPanel=document.getElementById('aud-q-panel');
 
-  // Show question
-  if (question && question.active) {
+  if(question && question.active){
     waitScreen.classList.add('hidden');
     boardPanel.classList.add('hidden');
     diamondPanel.classList.remove('active');
     qPanel.classList.add('active');
-
-    document.getElementById('aud-q-cat').textContent = question.cat || '';
-    document.getElementById('aud-q-value').textContent = question.value ? `${question.value} نقطة` : '';
-
-    if (question.text !== lastQuestion) {
-      typewrite(document.getElementById('aud-q-text'), question.text || '');
-      lastQuestion = question.text;
+    document.getElementById('aud-q-cat').textContent=question.cat||'';
+    document.getElementById('aud-q-value').textContent=question.value?`${question.value} نقطة`:'';
+    if(question.text!==lastQuestion){
+      typewrite(document.getElementById('aud-q-text'), question.text||'');
+      lastQuestion=question.text;
     }
-
-    if (question.timerSecs) startTimer(question.timerSecs, question.timerMode);
-
+    // Answer reveal handling
+    const ansEl = document.getElementById('aud-q-answer');
+    const ansTxt = document.getElementById('aud-q-answer-txt');
+    if(question.answerRevealed && question.answer){
+      ansTxt.textContent = question.answer;
+      ansEl.classList.add('on');
+    } else {
+      ansEl.classList.remove('on');
+    }
+    if(question.timerSecs) startTimer(question.timerSecs, question.timerMode);
   } else {
-    // Show board
     qPanel.classList.remove('active');
-    lastQuestion = null;
+    lastQuestion=null;
+    const ansEl2 = document.getElementById('aud-q-answer');
+    if(ansEl2) ansEl2.classList.remove('on');
     clearInterval(timerInterval);
-
-    if (stage === 'diamond') {
+    if(stage==='diamond'){
       waitScreen.classList.add('hidden');
       boardPanel.classList.add('hidden');
       diamondPanel.classList.add('active');
       buildDiamond(diamondState, diamondPlayers);
-    } else if (board) {
+    } else if(board){
       waitScreen.classList.add('hidden');
       boardPanel.classList.remove('hidden');
       diamondPanel.classList.remove('active');
-      buildBoard(board, stage);
+      buildBoard(board);
     } else {
       waitScreen.classList.remove('hidden');
       boardPanel.classList.add('hidden');
@@ -714,3 +643,5 @@ onValue(ref(db, 'gameState'), (snapshot) => {
 </script>
 </body>
 </html>
+
+
