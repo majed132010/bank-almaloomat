@@ -1074,6 +1074,21 @@ window.addEventListener('DOMContentLoaded', () => {
 function buildTopicGrid() {
   const grid = document.getElementById('topic-grid');
   if (!grid) return;
+  // If extra banks were loaded (from new_banks.js), convert and append them
+  try {
+    if (window.ALL_BANKS && typeof window.ALL_BANKS === 'object') {
+      const nameMap = { health:'الطب والصحة', sports:'الرياضة', space:'الفضاء والفلك', food:'الطبخ والمأكولات', animals:'الحيوانات والطبيعة', worldHistory:'التاريخ العالمي' };
+      Object.keys(window.ALL_BANKS).forEach(k => {
+        const displayName = nameMap[k] || k;
+        if (!questionBanks.find(b => b.name === displayName)) {
+          const raw = window.ALL_BANKS[k] || [];
+          const conv = raw.map(it => ({ v: it.value || 100, q: it.text || it.q || '', a: it.answer || it.a || '' }));
+          const bankObj = { name: displayName, silver: [ { cat: displayName, questions: conv.slice(0,9) } ], gold: [ { cat: displayName, questions: conv.slice(0,6) } ], speedBank: conv.slice(0,12).map(x=>({q:x.q,a:x.a})) };
+          questionBanks.push(bankObj);
+        }
+      });
+    }
+  } catch(e){ console.warn('append extra banks failed', e); }
   const icons = ['🌍','☪️','🔬','⚽','🕌','📖','🎞️','🧩','🤖','🌦️','🎭'];
   grid.innerHTML = '';
   questionBanks.forEach((b, i) => {
