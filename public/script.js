@@ -736,6 +736,24 @@ const questionBanks = [
       {q:'ما اسم أول قاموس في اللغة العربية؟',a:'كتاب العين للخليل بن أحمد الفراهيدي'},
       {q:'من كتب "مدام بوفاري"؟',a:'غوستاف فلوبير'}
     ]},
+    // --- New banks loader: registers EXTRA_BANKS for runtime use ---
+    (function(){
+      try{
+        window.EXTRA_BANKS = window.EXTRA_BANKS || [];
+        if (typeof healthBank !== 'undefined') window.EXTRA_BANKS.push(healthBank);
+        if (typeof sportsBank !== 'undefined') window.EXTRA_BANKS.push(sportsBank);
+        if (typeof spaceBank !== 'undefined') window.EXTRA_BANKS.push(spaceBank);
+        if (typeof foodBank !== 'undefined') window.EXTRA_BANKS.push(foodBank);
+        if (typeof animalsBank !== 'undefined') window.EXTRA_BANKS.push(animalsBank);
+        if (typeof worldHistoryBank !== 'undefined') window.EXTRA_BANKS.push(worldHistoryBank);
+        // Optional: if the app exposes a topic-refresh hook, call it
+        if (typeof refreshTopics === 'function') {
+          try{ refreshTopics(); }catch(e){}
+        }
+        console.log('new_banks.js loaded — EXTRA_BANKS length:', window.EXTRA_BANKS.length);
+      }catch(e){ console.warn('Failed to register new banks', e); }
+    })();
+
 
   // ============ 7. اللقطات السينمائية والخدع البصرية ============
   { name:'اللقطات السينمائية والخدع البصرية',
