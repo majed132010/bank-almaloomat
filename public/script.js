@@ -1924,6 +1924,27 @@ function cleanupRecording() {
 }
 
 // Expose to global scope for onclick handlers
+// ══════════════════════════════════════════
+// Extra banks integration: merge `new_banks.js` into runtime ALL_BANKS
+function loadExtraBanks() {
+  try {
+    window.ALL_BANKS = window.ALL_BANKS || {};
+    // prefer explicit globals if available
+    if (typeof healthBank !== 'undefined') window.ALL_BANKS.health = healthBank;
+    if (typeof sportsBank !== 'undefined') window.ALL_BANKS.sports = sportsBank;
+    if (typeof spaceBank !== 'undefined') window.ALL_BANKS.space = spaceBank;
+    if (typeof foodBank !== 'undefined') window.ALL_BANKS.food = foodBank;
+    if (typeof animalsBank !== 'undefined') window.ALL_BANKS.animals = animalsBank;
+    if (typeof worldHistoryBank !== 'undefined') window.ALL_BANKS.worldHistory = worldHistoryBank;
+    // also accept window.EXTRA_BANKS as an object map
+    if (window.EXTRA_BANKS && typeof window.EXTRA_BANKS === 'object' && !Array.isArray(window.EXTRA_BANKS)) {
+      Object.keys(window.EXTRA_BANKS).forEach(k => { window.ALL_BANKS[k] = window.EXTRA_BANKS[k]; });
+    }
+    console.log('[Banks] Loaded extra banks →', Object.keys(window.ALL_BANKS || {}).length);
+  } catch(e) { console.warn('loadExtraBanks error', e); }
+}
+setTimeout(loadExtraBanks, 150);
+
 window.goTo = goTo;
 window.goToSetup = goToSetup;
 window.addPlayer = addPlayer;
