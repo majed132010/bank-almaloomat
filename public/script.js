@@ -752,7 +752,7 @@ const questionBanks = [
         }
         console.log('new_banks.js loaded — EXTRA_BANKS length:', window.EXTRA_BANKS.length);
       }catch(e){ console.warn('Failed to register new banks', e); }
-    })();
+    })(),
 
 
   // ============ 7. اللقطات السينمائية والخدع البصرية ============
