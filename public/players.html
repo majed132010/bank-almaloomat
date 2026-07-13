@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -90,6 +90,7 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 /* Waiting states */
 .play-waiting{text-align:center;padding:30px 20px;font-size:11pt;color:var(--muted);letter-spacing:1px}
 .play-waiting-icon{font-size:44pt;margin-bottom:14px;animation:waitBob 2s ease-in-out infinite alternate}
+.turn-wait-bar{margin-bottom:14px;padding:10px 14px;border-radius:14px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.25);color:#a5f3fc;font-weight:800;font-size:10pt}
 .text-answer-wrap{margin-top:16px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.16);border-radius:18px}
 .text-answer-label{display:block;margin-bottom:10px;font-size:10pt;color:#cbd5e1;font-weight:700}
 .text-answer-row{display:flex;gap:10px;align-items:center}
@@ -98,7 +99,13 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 .text-answer-btn{background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;color:#fff;padding:12px 18px;border-radius:14px;font-size:13pt;font-weight:700;cursor:pointer;transition:transform .18s}
 .text-answer-btn:hover{transform:translateY(-1px)}
 .text-answer-hint{margin-top:10px;font-size:9.5pt;color:#94a3b8;line-height:1.4}
-
+.p-board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.pb-col{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px;text-align:center}
+.pb-cat{font-size:8.5pt;font-weight:800;color:var(--stage-color-lt);margin-bottom:6px;line-height:1.3}
+.pb-vals{display:flex;flex-direction:column;gap:4px}
+.pb-val{padding:7px 0;border-radius:8px;background:rgba(255,255,255,.06);font-size:10pt;font-weight:800;color:#e2e8f0;border:1px solid rgba(255,255,255,.08);width:100%;font-family:Tajawal,sans-serif}
+.pb-val.pickable{border-color:#f0a500;background:rgba(240,165,0,.12);cursor:pointer;animation:buzzIdle 2s ease-in-out infinite}
+.pb-val.spent{opacity:.25;text-decoration:line-through}
 @media(max-width:380px){
   .buzz-btn{font-size:20pt}
   .play-name{font-size:12pt}
@@ -116,6 +123,8 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
   <div class="join-logo">🏛️ بنك المعلومات</div>
   <div class="join-sub">شاشة المتسابق — Buzzer</div>
   <div class="join-card">
+    <div class="join-label">رمز الغرفة</div>
+      <input id="room-code-input" class="join-select" type="text" maxlength="4" placeholder="اكتب الرمز" autocomplete="off" autocapitalize="characters" style="text-align:center;letter-spacing:8px;font-weight:900;font-size:16pt;text-transform:uppercase">
     <div class="join-label">اختر اسمك من قائمة الفرسان</div>
     <select class="join-select" id="join-select" data-testid="join-select">
       <option value="">— في انتظار بدء المسابقة —</option>
@@ -141,11 +150,13 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
     </div>
   </div>
 
+  <div id="turn-wait-bar" class="turn-wait-bar" style="display:none"></div>
+
   <div class="play-status">
     <div class="status-pill status-live"><div class="dot"></div><span>متصل</span></div>
     <div class="status-pill status-mic" id="mic-pill" data-testid="mic-toggle" onclick="togglePlayerMic()"><div class="dot"></div><span id="mic-label">تفعيل الميكروفون</span></div>
   </div>
-
+<div id="p-board" class="p-board" style="display:none"></div>
   <div class="q-box">
     <div class="q-cat" id="p-q-cat">في انتظار سؤال</div>
     <div class="q-text q-empty" id="p-q-text">سيظهر السؤال هنا حين يبدأ المُقدِّم…</div>
@@ -184,6 +195,30 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 window.db = db;
 
+let ROOM = null;
+let RP = '';
+let roomListenersStarted = false;
+
+function normalizeRoomCode(raw) {
+  const code = String(raw || '').trim().toUpperCase().replace(/[^A-Z2-9]/g, '');
+  return code.length === 4 ? code : null;
+}
+
+function setRoomCode(code) {
+  const normalized = normalizeRoomCode(code);
+  if (!normalized) return false;
+  ROOM = normalized;
+  RP = `rooms/${ROOM}/`;
+  return true;
+}
+
+function startRoomListeners() {
+  if (roomListenersStarted || !ROOM) return;
+  roomListenersStarted = true;
+  watchTurnState();
+  watchGameState();
+}
+
 // ==============================
 //   STATE
 // ==============================
@@ -191,14 +226,51 @@ let myPlayer = null;             // { id, name }
 let currentQuestionId = null;    // used to detect new questions & reset buzzer local lock
 let localLocked = false;
 let latestState = null;
+let currentTurn = null;
+let selectedTurnOption = null;
+
+// ==============================
+//   TURN FLOW
+// ==============================
+function watchTurnState() {
+  if (!ROOM) return;
+  onValue(ref(db, RP + 'gameState/turn'), (snap) => {
+    const turn = snap.val();
+    currentTurn = turn || null;
+    renderTurnUi();
+  });
+}
+
+function renderTurnUi() {
+  const waitBar = document.getElementById('turn-wait-bar');
+  if (!waitBar) return;
+  if (!myPlayer || !currentTurn) {
+    waitBar.style.display = 'none';
+    return;
+  }
+  if (currentTurn.selection) {
+    waitBar.style.display = 'none';
+    return;
+  }
+  if (Number(currentTurn.playerId) === myPlayer.id) {
+    waitBar.style.display = 'block';
+    waitBar.textContent = '🎯 دورك! اضغط الدرجة التي تريدها من اللوحة';
+  } else {
+    waitBar.style.display = 'block';
+    waitBar.textContent = `⏳ ${currentTurn.playerName || 'متسابق'} يختار الفئة الآن…`;
+  }
+  if (latestState) renderPlayerBoard(latestState);
+}
 
 // ==============================
 //   POPULATE PLAYER LIST
 // ==============================
-onValue(ref(db,'gameState'), (snap)=>{
-  const state = snap.val();
-  latestState = state;
-  const sel = document.getElementById('join-select');
+function watchGameState() {
+  if (!ROOM) return;
+  onValue(ref(db, RP + 'gameState'), (snap)=>{
+    const state = snap.val();
+    latestState = state;
+    const sel = document.getElementById('join-select');
   if(!state || !state.players || state.players.length === 0){
     sel.innerHTML = '<option value="">— في انتظار بدء المسابقة —</option>';
     return;
@@ -213,6 +285,7 @@ onValue(ref(db,'gameState'), (snap)=>{
   // If joined, apply current state
   if(myPlayer) applyStateToPlayer(state);
 });
+}
 
 // ==============================
 //   JOIN
@@ -227,7 +300,7 @@ window.joinAsPlayer = async function(){
   myPlayer = { id: Number(p.id), name: p.name };
 
   // Register presence in /presence/players/{id}
-  const presenceRef = ref(db, `presence/players/${myPlayer.id}`);
+  const presenceRef = ref(db, RP + `presence/players/${myPlayer.id}`);
   await set(presenceRef, { name: myPlayer.name, joinedAt: Date.now(), online: true });
   onDisconnect(presenceRef).remove();
 
@@ -249,8 +322,38 @@ window.joinAsPlayer = async function(){
   }
 
   applyStateToPlayer(latestState);
+  renderTurnUi();
 };
+function renderPlayerBoard(state){
+  const el = document.getElementById('p-board');
+  if(!el) return;
+  const board = state && state.board;
+  const stg = state && state.stage;
+  if(!board || (stg !== 'silver' && stg !== 'gold')){
+    el.style.display='none'; el.innerHTML=''; return;
+  }
+  const myTurn = currentTurn && !currentTurn.selection && myPlayer && Number(currentTurn.playerId) === myPlayer.id;
+  el.style.display='grid';
+  el.innerHTML = board.map(col => `
+    <div class="pb-col">
+      <div class="pb-cat">${col.cat}</div>
+      <div class="pb-vals">${(col.questions||[]).map(q => {
+        const dis = q.spent || !myTurn;
+        return `<button class="pb-val ${q.spent?'spent':''} ${myTurn && !q.spent?'pickable':''}" ${dis?'disabled':''} onclick="pickFromBoard('${String(col.cat).replace(/'/g,"\\'")}', ${q.v})">${q.v}</button>`;
+      }).join('')}</div>
+    </div>`).join('');
+}
 
+window.pickFromBoard = async function(category, value){
+  if(!myPlayer || !currentTurn || currentTurn.selection) return;
+  if(Number(currentTurn.playerId) !== myPlayer.id) return;
+  try {
+    await set(ref(db, RP + 'gameState/turn/selection'), {
+      playerId: myPlayer.id, playerName: myPlayer.name,
+      category, value: Number(value), ts: Date.now()
+    });
+  } catch(e){ console.warn('pickFromBoard failed', e); }
+};
 // ==============================
 //   APPLY STATE TO PLAYER VIEW
 // ==============================
@@ -265,6 +368,7 @@ function applyStateToPlayer(state){
   document.body.className = 'stage-' + stage;
   const badgeMap = { silver:'⚪ الفضية', gold:'🥇 الذهبية', diamond:'💎 الماسية' };
   document.getElementById('play-stage-badge').textContent = badgeMap[stage] || stage;
+  renderPlayerBoard(state);
 
   // Question
   const q = state.question;
@@ -277,6 +381,11 @@ function applyStateToPlayer(state){
     qCat.textContent = q.cat || 'سؤال';
     qText.textContent = q.text || '';
     qText.classList.remove('q-empty');
+    // If host revealed the answer/result for multipart or judged outcome, show it
+    if (q.answerRevealed) {
+      const res = q.resultText || (q.answer ? `الإجابة: ${q.answer}` : '');
+      if (res) qText.textContent = (q.text || '') + '\n\n' + res;
+    }
     // New question? reset local buzzer state.
     const qid = q.id || (q.cat + '|' + (q.text||'').slice(0,40));
     if(qid !== currentQuestionId){
@@ -344,7 +453,7 @@ window.pressBuzzer = async function(){
     return;
   }
   localLocked = true;
-  const buzzerRef = ref(db, 'gameState/buzzer');
+  const buzzerRef = ref(db, RP + 'gameState/buzzer');
   try {
     const result = await runTransaction(buzzerRef, (current)=>{
       // If already claimed, abort
@@ -380,7 +489,7 @@ window.submitTextAnswer = async function(){
     return;
   }
   try {
-    await set(ref(db, `gameState/textAnswers/${myPlayer.id}`), {
+    await set(ref(db, RP + `gameState/textAnswers/${myPlayer.id}`), {
       playerId: myPlayer.id,
       playerName: myPlayer.name,
       text,
@@ -410,7 +519,7 @@ const rtcConfig = {
 
 async function initPlayerWebRTC(){
   if(!myPlayer) return;
-  signalingBase = `signaling/players/${myPlayer.id}`;
+  signalingBase = RP + `signaling/players/${myPlayer.id}`;
 
   pc = new RTCPeerConnection(rtcConfig);
 
@@ -456,7 +565,8 @@ async function initPlayerWebRTC(){
     if(ans && pc.signalingState !== 'stable' && !pc.currentRemoteDescription){
       try {
         await pc.setRemoteDescription(new RTCSessionDescription({ type: ans.type, sdp: ans.sdp }));
-      } catch(e){ console.warn('setRemoteDescription failed', e); }
+      } catch(e){ console.warn(
+        'setRemoteDescription failed', e); }
     }
   });
 
@@ -471,6 +581,44 @@ async function initPlayerWebRTC(){
   // Cleanup on disconnect
   onDisconnect(ref(db, signalingBase)).remove();
 }
+
+function initPlayersApp() {
+  const roomInput = document.getElementById('room-code-input');
+  const joinNotice = document.querySelector('.join-notice');
+  const joinBtn = document.querySelector('.join-btn');
+  const initialRoom = normalizeRoomCode(new URLSearchParams(window.location.search).get('room') || '');
+
+  if (initialRoom) {
+    setRoomCode(initialRoom);
+    if (roomInput) {
+      roomInput.value = ROOM;
+      roomInput.disabled = true;
+    }
+    if (joinNotice) joinNotice.textContent = `رمز الغرفة: ${ROOM}`;
+    startRoomListeners();
+    return;
+  }
+
+  if (roomInput) {
+    roomInput.value = '';
+    roomInput.disabled = false;
+    roomInput.addEventListener('input', (evt) => {
+      const input = evt.target;
+      const value = String(input.value || '').toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 4);
+      input.value = value;
+      if (value.length === 4 && !ROOM) {
+        if (setRoomCode(value)) {
+          if (joinNotice) joinNotice.textContent = `رمز الغرفة: ${ROOM}`;
+          startRoomListeners();
+        }
+      }
+    });
+  }
+
+  if (joinNotice) joinNotice.textContent = 'أدخل رمز الغرفة أو افتح الرابط الصحيح من المضيف.';
+}
+
+window.addEventListener('DOMContentLoaded', initPlayersApp);
 
 window.togglePlayerMic = function(){
   const pill = document.getElementById('mic-pill');
@@ -487,38 +635,7 @@ window.addEventListener('beforeunload', () => {
   try { if(localStream) localStream.getTracks().forEach(t => t.stop()); } catch(e){}
 });
 </script>
-<script>
-(function(){
-  const pid = localStorage.getItem('playerId') || 'p_'+Math.random().toString(36).substr(2,9);
-  const pname = localStorage.getItem('playerName') || 'متسابق';
-  if(!localStorage.getItem('playerId')) localStorage.setItem('playerId', pid);
-  if(!localStorage.getItem('playerName')) localStorage.setItem('playerName', pname);
-  window.sendBuzz = async function(){
-    if(typeof db==='undefined'){ alert('⚠️ لا يوجد اتصال'); return; }
-    try {
-      await set(ref(db,'gameState/buzzer'), {
-        winnerId: pid,
-        winnerName: pname,
-        ts: Date.now(),
-        serverTs: serverTimestamp()
-      });
-      const b = document.getElementById('buzz-btn');
-      if(b){ b.style.background = '#10b981'; b.innerHTML = '<span style="font-size:24pt">✓</span><br>تم الإرسال'; setTimeout(()=>{ b.style.background = ''; b.innerHTML = '<span style="font-size:32pt">🔔</span><br>اضغط للإجابة'; }, 2000); }
-    } catch(e){
-      console.warn('sendBuzz failed', e);
-      alert('فشل إرسال البازر. حاول مرة أخرى.');
-    }
-  };
-  setInterval(async ()=>{
-    if(typeof db==='undefined') return;
-    try {
-      const snap = await get(ref(db,'gameState/buzzer'));
-      const v = snap.val();
-      if(v && v.ts && Date.now() - v.ts > 5000) await remove(ref(db,'gameState/buzzer'));
-    } catch(e){ }
-  },3000);
-  console.log('[Buzz] Ready:',pname,pid);
-})();
-</script>
 </body>
 </html>
+
+س

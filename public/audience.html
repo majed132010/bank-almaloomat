@@ -495,7 +495,7 @@ function buildBoard(boardData){
     col.questions.forEach(q=>{
       const slot=document.createElement('div');
       slot.className='aud-q-slot '+(q.spent?'spent':'available');
-      slot.textContent=q.spent?'✓':`${q.v} ن`;
+      slot.textContent=q.spent?'✓':`${q.v}`;
       div.appendChild(slot);
     });
     container.appendChild(div);
@@ -643,6 +643,7 @@ onValue(ref(db,'gameState'),(snapshot)=>{
 </script>
 </body>
 </html>
+
 
 
 
