@@ -99,6 +99,15 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 .text-answer-btn:hover{transform:translateY(-1px)}
 .text-answer-hint{margin-top:10px;font-size:9.5pt;color:#94a3b8;line-height:1.4}
 
+/* Media & puzzle helpers */
+.modal-media-img { max-width:100%; max-height:300px; border-radius:12px; margin:10px auto; display:block; object-fit:cover; }
+.modal-media-iframe { width:100%; height:200px; border:none; border-radius:12px; margin:10px 0; }
+.puzzle-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0; }
+.puzzle-btn { padding:14px; border:2px solid rgba(255,255,255,.15); border-radius:12px; background:rgba(255,255,255,.06); color:#f0f0ff; font-family:Tajawal,sans-serif; font-size:12pt; font-weight:700; cursor:pointer; transition:all .2s; }
+.puzzle-btn:hover { border-color:#f0a500; background:rgba(240,165,0,.15); }
+.puzzle-btn.selected { border-color:#10b981; background:rgba(16,185,129,.2); color:#a7f3d0; }
+.puzzle-btn.wrong { border-color:#ef4444; background:rgba(239,68,68,.2); color:#fca5a5; }
+
 @media(max-width:380px){
   .buzz-btn{font-size:20pt}
   .play-name{font-size:12pt}
@@ -151,6 +160,7 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
   <div class="q-box">
     <div class="q-cat" id="p-q-cat">في انتظار سؤال</div>
     <div class="q-text q-empty" id="p-q-text">سيظهر السؤال هنا حين يبدأ المُقدِّم…</div>
+    <div id="p-media" style="margin-top:12px"></div>
   </div>
 
   <div class="buzz-wrap">
@@ -265,6 +275,7 @@ let latestState = null;
 // ==============================
 //   JOIN
 // ==============================
+// ROOM code is handled above (startListening / startRoomSync / initializeRoomCode)
 window.joinAsPlayer = async function(){
   const sel = document.getElementById('join-select');
   const id = sel.value;
@@ -336,6 +347,37 @@ function applyStateToPlayer(state){
     if(answerInput) answerInput.disabled = false;
     if(answerBtn) answerBtn.disabled = false;
     if(answerHint) answerHint.textContent = '📨 أرسل إجابتك النصية قبل انتهاء السؤال.';
+
+    // Render media / puzzle UI when provided
+    const media = document.getElementById('p-media'); if(media) media.innerHTML = '';
+      if(q.type === 'image' && media){
+        media.innerHTML = `<img src="${q.imageUrl || ''}" style="max-width:100%;border-radius:12px;margin:10px auto;display:block;object-fit:cover;">`;
+      }
+      if(q.type === 'music' && media){
+        const iframe = q.audioUrl ? `<iframe class="modal-media-iframe" style="height:150px" src="${q.audioUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>` : '';
+        const partTxt = (q.parts && typeof q.partIndex === 'number') ? `<div style="margin-top:8px;font-weight:700">${q.parts[q.partIndex]||''}</div>` : '';
+        media.innerHTML = iframe + partTxt;
+      }
+    if(q.type === 'puzzle' && media){
+      const puzzle = q.puzzle || {};
+      if(puzzle.subtype === 'odd_one_out'){
+        const btns = (puzzle.choices||[]).map((c,i)=>`<button class="puzzle-btn" data-idx="${i}">${c}</button>`).join('');
+        media.innerHTML = `<div class="puzzle-btns">${btns}</div>`;
+        // Attach handlers
+        media.querySelectorAll('.puzzle-btn').forEach(b=>{
+          b.addEventListener('click', async (e)=>{
+            if(localLocked) return; localLocked = true;
+            const idx = b.getAttribute('data-idx');
+            // send answer to Firebase under puzzleAnswers/{playerId}
+              try{ await set(ref(db, `${RP()}gameState/puzzleAnswer/${myPlayer.id}`), { choice: Number(idx), playerId: myPlayer.id, playerName: myPlayer.name, ts: Date.now() });
+              b.classList.add('selected');
+            }catch(err){ console.warn('puzzle answer send failed', err); }
+          });
+        });
+      } else {
+        media.innerHTML = `<div style="font-size:13pt">${puzzle.hint || ''}</div>`;
+      }
+    }
   } else {
     qCat.textContent = 'في انتظار سؤال';
     qText.textContent = 'سيظهر السؤال هنا حين يبدأ المُقدِّم…';

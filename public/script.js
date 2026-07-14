@@ -78,6 +78,13 @@ async function syncQuestion(qItem, cat, value, timerSecs, timerMode) {
     timerSecs,
     timerMode
   };
+  // Include media/puzzle metadata when present so players can render UI
+  if (qItem.type) state.question.type = qItem.type;
+  if (qItem.imageUrl) state.question.imageUrl = qItem.imageUrl;
+  if (qItem.audioUrl) state.question.audioUrl = qItem.audioUrl;
+  if (qItem.parts) state.question.parts = qItem.parts;
+  if (qItem.partIndex !== undefined) state.question.partIndex = qItem.partIndex;
+  if (qItem.puzzle) state.question.puzzle = qItem.puzzle;
   // Reset buzzer when a new question opens (unless bank/speed rounds skip buzzer)
   state.buzzer = { winnerId: null, winnerName: null, ts: 0 };
   currentTextAnswers = {};
@@ -421,6 +428,21 @@ function showTransition(icon, title, sub, color) {
 const questionBanks = [
   // ============ 1. ثقافة عامة ============
   { name:'ثقافة عامة',
+    imageQuestions:[
+      {cat:'شخصيات', value:75, type:'image', title:'من هذا الشخص؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Albert_Einstein_Head.jpg/440px-Albert_Einstein_Head.jpg', q:'من هذا العالم؟', a:'ألبرت أينشتاين', hint:'عالم فيزياء شهير'},
+      {cat:'أماكن', value:75, type:'image', title:'ما هذه المعلمة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Eiffel_Tower_%28tour_Eiffel%29%2C_Paris.jpg/440px-Eiffel_Tower_%28tour_Eiffel%29%2C_Paris.jpg', q:'ما اسم هذه المعلمة؟', a:'برج إيفل', hint:''},
+      {cat:'حيوانات', value:75, type:'image', title:'ما هذا الحيوان؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Giraffe_standing.jpg/440px-Giraffe_standing.jpg', q:'ما هذا الحيوان؟', a:'زرافة', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'ما هذه الأغنية؟', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما اسم هذه الأغنية؟',a:'مقطوعة تجريبية'},{q:'من الأداء؟',a:'فنان'} ,{q:'في أي سنة؟',a:'معلومة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'ما هذه الأغنية؟', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما اسم هذه الأغنية؟',a:'مقطوعة ثانية'},{q:'من الأداء؟',a:'فنان آخر'},{q:'في أي سنة؟',a:'معلومة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'ما هذه الأغنية؟', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'ما اسم هذه الأغنية؟',a:'مقطوعة ثالثة'},{q:'من الأداء؟',a:'مطرب'},{q:'في أي سنة؟',a:'معلومة'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'اكتشف المختلف', items:['تفاحة','موز','برتقال','حجر'], answer:'حجر', explanation:'الباقون فواكه'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'أكمل المعادلة', items:[], answer:'? = 4', explanation:'2 × 2 = 4'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب الأحداث', items:['بداية','منتصف','نهاية','خاتمة'], answer:'بداية,منتصف,خاتمة,نهاية', explanation:'الترتيب الزمني'}
+    ],
     silver:[
       {cat:'قادة ورؤساء', questions:[
         {v:100,q:'من هو القائد المسلم الذي فتح بلاد الأندلس؟',a:'طارق بن زياد'},
@@ -484,6 +506,21 @@ const questionBanks = [
 
   // ============ 2. تاريخ إسلامي ============
   { name:'تاريخ إسلامي',
+    imageQuestions:[
+      {cat:'شخصيات', value:75, type:'image', title:'من هذا الصحابي؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Al-Bukhari.jpg/440px-Al-Bukhari.jpg', q:'من هذا الشخص؟', a:'أبو بكر الصديق (تمثيل تاريخي)', hint:''},
+      {cat:'أماكن', value:75, type:'image', title:'ما هذا المكان؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Al-Masjid_al-Haram%2C_Makkah.jpg/440px-Al-Masjid_al-Haram%2C_Makkah.jpg', q:'ما اسم هذا المكان؟', a:'المسجد الحرام (مكة)', hint:''},
+      {cat:'رموز', value:75, type:'image', title:'ما هذا الرمز؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Islamic_Crescent.svg/440px-Islamic_Crescent.svg.png', q:'ما هذا الرمز؟', a:'الهلال الإسلامي', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'أغنية تراثية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما اسم المقطع؟',a:'مقطع تراثي'},{q:'من الأداء؟',a:'فنان'},{q:'من أين؟',a:'منطقة معينة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'نشيد تاريخي', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما اسم النشيد؟',a:'نشيد'},{q:'من الأداء؟',a:'جوقة'},{q:'في أي مناسبة؟',a:'حدث تاريخي'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'ما اسم المقطوعة؟',a:'مقطوعة'},{q:'من الأداء؟',a:'مؤلف'},{q:'في أي عصر؟',a:'عصر'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'اختَر المختلف', items:['مسجد','كنيسة','معبد','قبر'], answer:'قبر', explanation:'الباقون أماكن عبادة'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'أكمل الجملة', items:[], answer:'مدينة النبي = مكة', explanation:'ميلاد النبي'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب الشخصيات', items:['أبو بكر','عمر','عثمان','علي'], answer:'أبو بكر,عمر,عثمان,علي', explanation:''}
+    ],
     silver:[
       {cat:'الخلفاء الراشدون', questions:[
         {v:100,q:'من هو أول الخلفاء الراشدين؟',a:'أبو بكر الصديق رضي الله عنه'},
@@ -545,6 +582,21 @@ const questionBanks = [
 
   // ============ 3. علوم وجغرافيا ============
   { name:'علوم وجغرافيا',
+    imageQuestions:[
+      {cat:'أماكن', value:75, type:'image', title:'ما هذه البحيرة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Crater_Lake_Oregon.jpg/440px-Crater_Lake_Oregon.jpg', q:'ما اسم هذه البحيرة؟', a:'بحيرة كريتر', hint:''},
+      {cat:'حيوانات', value:75, type:'image', title:'ما هذا الحيوان؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blue_whale_3.jpg/440px-Blue_whale_3.jpg', q:'ما هذا الحيوان؟', a:'الحوت الأزرق', hint:''},
+      {cat:'نجوم', value:75, type:'image', title:'ما هذا التلسكوب؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/James_Webb_Space_Telescope.jpg/440px-James_Webb_Space_Telescope.jpg', q:'ما اسم هذا التلسكوب؟', a:'تلسكوب جيمس ويب', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى طبيعية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما اسم المقطع؟',a:'مقطع طبيعي'},{q:'أين التقط؟',a:'مكان'},{q:'أي ظاهرة؟',a:'معلومة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى فضاء', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما اسم المقطع؟',a:'فضاء'},{q:'من الأداء؟',a:'مؤلف'},{q:'في أي سنة؟',a:'معلومة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى تعليمية', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'ما هدفها؟',a:'تبسيط'},{q:'لمن؟',a:'طلاب'},{q:'أي موضوع؟',a:'علوم'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'اكتشف المختلف', items:['نهر','بحر','محيط','جبل'], answer:'جبل', explanation:'الباقون مسطحات مائية'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'ما ناتج 2×?=8', items:[], answer:'?=4', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب الكواكب حسب القرب', items:['المريخ','الأرض','عطارد','الزهرة'], answer:'عطارد,الزهرة,الأرض,المريخ', explanation:''}
+    ],
     silver:[
       {cat:'الجغرافيا العربية', questions:[
         {v:100,q:'ما أكبر دولة عربية مساحةً؟',a:'الجزائر'},
@@ -606,6 +658,21 @@ const questionBanks = [
 
   // ============ 4. رياضة وفنون ============
   { name:'رياضة وفنون',
+    imageQuestions:[
+      {cat:'رياضة', value:75, type:'image', title:'من هذا اللاعب؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Lionel_Messi_20180626.jpg/440px-Lionel_Messi_20180626.jpg', q:'من هذا اللاعب؟', a:'ليونيل ميسي', hint:''},
+      {cat:'فنون', value:75, type:'image', title:'ما هذه اللوحة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Starry_Night_Over_the_Rhone.jpg/440px-Starry_Night_Over_the_Rhone.jpg', q:'ما اسم هذه اللوحة؟', a:'ليلة مرصعة بالنجوم (ستورِّي)', hint:''},
+      {cat:'سينما', value:75, type:'image', title:'من هذا المخرج؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Steven_Spielberg_by_Gage_Skidmore.jpg/440px-Steven_Spielberg_by_Gage_Skidmore.jpg', q:'من هذا المخرج؟', a:'ستيفن سبيلبرغ', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'أغنية مشهورة', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما اسمها؟',a:'أغنية'},{q:'من غنّاها؟',a:'مطرب'},{q:'سنة الإصدار؟',a:'معلومة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى فيلم', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'اسم الفيلم؟',a:'فيلم'},{q:'الملحن؟',a:'ملحن'},{q:'ما هي المشهد؟',a:'وصف'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة كلاسيكية', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'المؤلف؟',a:'مؤلف'},{q:'الحقبة؟',a:'حقبة'},{q:'الآلات؟',a:'آلات'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'من المختلف؟', items:['كرة','لاعبة','ملعب','مسرح'], answer:'مسرح', explanation:'باقي مرتبطة بالرياضة'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'أكمل', items:[], answer:'2+2=4', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب الأدوات', items:['كيبورد','قيثارة','طبلة','ساكسفون'], answer:'قيثارة,كيبورد,ساكسفون,طبلة', explanation:''}
+    ],
     silver:[
       {cat:'كرة القدم', questions:[
         {v:100,q:'كم مرة فازت البرازيل بكأس العالم؟',a:'5 مرات'},
@@ -665,6 +732,21 @@ const questionBanks = [
 
   // ============ 5. الدين والعلوم الإسلامية ============
   { name:'الدين والعلوم الإسلامية',
+    imageQuestions:[
+      {cat:'شخصيات', value:75, type:'image', title:'من هذا العالم؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Ibn_Sina_portrait.jpg/440px-Ibn_Sina_portrait.jpg', q:'من هذا؟', a:'ابن سينا (تمثيل)', hint:''},
+      {cat:'مواقع', value:75, type:'image', title:'ما هذا المسجد؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Al-Azhar_Mosque_Cairo.jpg/440px-Al-Azhar_Mosque_Cairo.jpg', q:'ما اسم هذا المسجد؟', a:'الجامع الأزهر', hint:''},
+      {cat:'رموز', value:75, type:'image', title:'ما هذا؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Calligraphy_Muhammad.jpg/440px-Calligraphy_Muhammad.jpg', q:'ما هذا؟', a:'خط عربي لكلمة محمد', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'نشيد ديني', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما اسمه؟',a:'نشيد'},{q:'من الأداء؟',a:'جوقة'},{q:'أين يؤدى؟',a:'مناسبة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقام عربي', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما اسمه؟',a:'مقام'},{q:'أداه؟',a:'عازف'},{q:'أي آلة؟',a:'عود'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى تراثية', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'اسمها؟',a:'مقطوعة'},{q:'من أين؟',a:'منطقة'},{q:'المضمون؟',a:'موضوع'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'من المختلف؟', items:['مسجد','كنيسة','معبد','مقبرة'], answer:'مقبرة', explanation:'الباقون أماكن عبادة'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'اكمل', items:[], answer:'المدينة = مكة', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتب الخلفاء', items:['أبو بكر','عمر','عثمان'], answer:'أبو بكر,عمر,عثمان', explanation:''}
+    ],
     silver:[
       {cat:'الدين والعلوم الإسلامية', questions:[
         {v:100,q:'ما هي أركان الإيمان؟',a:'ستة: الإيمان بالله وملائكته وكتبه ورسله واليوم الآخر والقدر خيره وشره'},
@@ -718,6 +800,21 @@ const questionBanks = [
 
   // ============ 6. اللغات والآداب ============
   { name:'اللغات والآداب',
+    imageQuestions:[
+      {cat:'أدب', value:75, type:'image', title:'من هذا الكاتب؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/James_Joyce_by_Paul_Henri.jpg/440px-James_Joyce_by_Paul_Henri.jpg', q:'من هذا الكاتب؟', a:'جيمس جويس', hint:''},
+      {cat:'لغات', value:75, type:'image', title:'ما هذه المخطوطة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Old_arabic_manuscript.jpg/440px-Old_arabic_manuscript.jpg', q:'ما هذه؟', a:'مخطوطة قديمة', hint:''},
+      {cat:'شعر', value:75, type:'image', title:'من هذا الشاعر؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Naguib_Mahfouz.jpg/440px-Naguib_Mahfouz.jpg', q:'من هذا الكاتب؟', a:'نجيب محفوظ', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى شعرية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'موضوع القصيدة؟',a:'حب'},{q:'الكاتب؟',a:'شاعر'},{q:'الحقبة؟',a:'عصر'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة أدبية', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما اسمها؟',a:'مقطوعة'},{q:'من الأداء؟',a:'منشد'},{q:'المصدر؟',a:'قصيدة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى متصلة بالأدب', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'ما هي؟',a:'مقطوعة'},{q:'الملحن؟',a:'ملحن'},{q:'النوع؟',a:'نوع'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'اختَر المختلف', items:['قافية','وزن','بيت','قلم'], answer:'قلم', explanation:'الباقي عناصر شعرية'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'املأ الفراغ', items:[], answer:'باريس عاصمة فرنسا', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتب قسمات القصة', items:['المقدمة','العقدة','الحل'], answer:'المقدمة,العقدة,الحل', explanation:''}
+    ],
     silver:[
       {cat:'اللغات والآداب', questions:[
         {v:100,q:'ما هي اللغة الأكثر انتشاراً في العالم من حيث الناطقين الأصليين؟',a:'الصينية (الماندرين)'},
@@ -789,6 +886,21 @@ const questionBanks = [
 
   // ============ 7. اللقطات السينمائية والخدع البصرية ============
   { name:'اللقطات السينمائية والخدع البصرية',
+    imageQuestions:[
+      {cat:'سينما', value:75, type:'image', title:'ما هذا المشهد؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Citadel_of_Constantine.jpg/440px-Citadel_of_Constantine.jpg', q:'ما هذا المشهد السينمائي؟', a:'مشهد خارجي', hint:''},
+      {cat:'مخرجون', value:75, type:'image', title:'من هذا المخرج؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Steven_Spielberg_by_Gage_Skidmore.jpg/440px-Steven_Spielberg_by_Gage_Skidmore.jpg', q:'من هذا المخرج؟', a:'ستيفن سبيلبرغ', hint:''},
+      {cat:'مؤثرات', value:75, type:'image', title:'ما هذه التقنية؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Green_screen.jpg/440px-Green_screen.jpg', q:'ما اسم هذه التقنية؟', a:'الشاشة الخضراء', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى تصويرية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'اسم المقطع؟',a:'موسيقى تصويرية'},{q:'الملحن؟',a:'ملحن'},{q:'الفيلم؟',a:'فيلم'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى خلفية', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'نوعها؟',a:'خلفية'},{q:'الهدف؟',a:'تعزيز المشهد'},{q:'الأدوات؟',a:'اوركسترا'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة مؤثرة', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'ما اسمها؟',a:'مقطوعة'},{q:'من الملحن؟',a:'ملحن'},{q:'السنة؟',a:'معلومة'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'اكتشف المختلف', items:['كاميرا','ميكروفون','مؤثر','مسمار'], answer:'مسمار', explanation:'الباقي معدات تصوير'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'أكمل', items:[], answer:'1+1=2', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب خطوات التصوير', items:['كتابة السيناريو','التصوير','المونتاج'], answer:'كتابة السيناريو,التصوير,المونتاج', explanation:''}
+    ],
     silver:[
       {cat:'اللقطات السينمائية والخدع البصرية', questions:[
         {v:100,q:'ما اسم أول فيلم صامت طويل في التاريخ؟',a:'"ولادة أمة" 1915 لـ D.W. Griffith'},
@@ -842,6 +954,21 @@ const questionBanks = [
 
   // ============ 8. الألغاز والذكاء الرياضي ============
   { name:'الألغاز والذكاء الرياضي',
+    imageQuestions:[
+      {cat:'ألغاز', value:75, type:'image', title:'ما هذا الشكل؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Mathematical_symbols.svg/440px-Mathematical_symbols.svg.png', q:'ما اسم هذا الشكل؟', a:'رموز رياضية', hint:''},
+      {cat:'ألغاز', value:75, type:'image', title:'ما هذه الألغاز؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Riddle_illustration.jpg/440px-Riddle_illustration.jpg', q:'ما نوع هذه الألغاز؟', a:'ألغاز منطقية', hint:''},
+      {cat:'ألغاز', value:75, type:'image', title:'من هذا الرياضي؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Alan_Turing_Aged_16.jpg/440px-Alan_Turing_Aged_16.jpg', q:'من هذا؟', a:'آلان تورينج (عالم حاسوب)', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'نغمة حسابية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما الهدف؟',a:'تعليم'},{q:'من الأداء؟',a:'مؤلف'},{q:'للمن؟',a:'طلاب'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى ذهنية', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما اسلوبها؟',a:'تأمل'},{q:'الأداة؟',a:'بيانو'},{q:'الفائدة؟',a:'تركيز'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة للألغاز', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'الاسم؟',a:'مقطوعة'},{q:'الملحن؟',a:'ملحن'},{q:'النوع؟',a:'علمي'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'من المختلف؟', items:['2','4','6','7'], answer:'7', explanation:'الباقي أعداد زوجية'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'حلّ المعادلة', items:[], answer:'x=4', explanation:'2×x=8'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب الأرقام', items:['3','1','2'], answer:'1,2,3', explanation:''}
+    ],
     silver:[
       {cat:'الألغاز والذكاء الرياضي', questions:[
         {v:100,q:'ما هو الرقم التالي في السلسلة: 2، 4، 8، 16، ...؟',a:'32 (كل رقم ضعف الذي قبله)'},
@@ -895,6 +1022,21 @@ const questionBanks = [
 
   // ============ 9. التكنولوجيا والاختراعات الحديثة ============
   { name:'التكنولوجيا والاختراعات الحديثة',
+    imageQuestions:[
+      {cat:'تكنولوجيا', value:75, type:'image', title:'ما هذا الجهاز؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Apple_Computer_logo.png/440px-Apple_Computer_logo.png', q:'ما اسم هذه الشركة؟', a:'آبل', hint:''},
+      {cat:'اختراعات', value:75, type:'image', title:'من هذا المخترع؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Thomas_Edison2.jpg/440px-Thomas_Edison2.jpg', q:'من هذا المخترع؟', a:'توماس إديسون', hint:''},
+      {cat:'إنترنت', value:75, type:'image', title:'ما هذا الشعار؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Google_2015_logo.svg/440px-Google_2015_logo.svg.png', q:'ما هذا الشعار؟', a:'جوجل', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى تقنية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما الطابع؟',a:'إلكتروني'},{q:'الآلة؟',a:'سينث'},{q:'الهدف؟',a:'خلفية'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى روبوتية', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما الأسلوب؟',a:'الكتروني'},{q:'الملحن؟',a:'منتج'},{q:'النوع؟',a:'تكنو'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة مختبرية', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'المؤلف؟',a:'مؤلف'},{q:'الغاية؟',a:'توضيح'},{q:'النوع؟',a:'تعليمي'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'من المختلف؟', items:['كود','خادم','شبكة','مطبخ'], answer:'مطبخ', explanation:'الباقي مصطلحات تقنية'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'أكمل', items:[], answer:'1+1=2', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب خطوات التطوير', items:['تصميم','برمجة','اختبار'], answer:'تصميم,برمجة,اختبار', explanation:''}
+    ],
     silver:[
       {cat:'التكنولوجيا والاختراعات الحديثة', questions:[
         {v:100,q:'من هو مؤسس شركة مايكروسوفت؟',a:'بيل غيتس وبول ألن'},
@@ -948,6 +1090,21 @@ const questionBanks = [
 
   // ============ 10. الطقس والمناخ والكون ============
   { name:'الطقس والمناخ والكون',
+    imageQuestions:[
+      {cat:'ظواهر', value:75, type:'image', title:'ما هذه الظاهرة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Weather_fronts.svg/440px-Weather_fronts.svg.png', q:'ما اسم هذه الظاهرة؟', a:'جبهة جوية', hint:''},
+      {cat:'فضاء', value:75, type:'image', title:'ما هذا؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Andromeda_galaxy_(with_h-alpha).jpg/440px-Andromeda_galaxy_(with_h-alpha).jpg', q:'ما اسم هذه المجرة؟', a:'أندروميدا', hint:''},
+      {cat:'مناخ', value:75, type:'image', title:'ما هذه الظاهرة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Tornado_at_Sharps_Canyon.jpg/440px-Tornado_at_Sharps_Canyon.jpg', q:'ما اسم الظاهرة؟', a:'الإعصار/الغضب الهوائي', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى للطبيعة', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'ما نوع الصوت؟',a:'ماء'},{q:'أين؟',a:'نهر'},{q:'لماذا؟',a:'توضيح'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى فضاء', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'ما الطابع؟',a:'غامض'},{q:'الأداة؟',a:'سينث'},{q:'الهدف؟',a:'تأثير'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة مناخية', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'الغرض؟',a:'تعليم'},{q:'المصدر؟',a:'مؤسسة'},{q:'النوع؟',a:'تثقيفي'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'من المختلف؟', items:['سحب','مطر','ثلج','صحراء'], answer:'صحراء', explanation:'الباقي مرتبط بالماء'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'اكمل', items:[], answer:'F=ma', explanation:'قانون نيوتن الثاني (تمثيل)'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب الطوارئ', items:['توقع','تحذير','استجابة'], answer:'توقع,تحذير,استجابة', explanation:''}
+    ],
     silver:[
       {cat:'الطقس والمناخ والكون', questions:[
         {v:100,q:'ما اسم الظاهرة التي تحدث عندما ترتفع درجة حرارة الأرض بسبب الغازات؟',a:'ظاهرة الاحتباس الحراري'},
@@ -1001,6 +1158,21 @@ const questionBanks = [
 
   // ============ 11. الثقافة والفنون التشكيلية والسينمائية ============
   { name:'الثقافة والفنون التشكيلية والسينمائية',
+    imageQuestions:[
+      {cat:'فن', value:75, type:'image', title:'من رسم هذه اللوحة؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Mona_Lisa.jpg/440px-Mona_Lisa.jpg', q:'من رسم هذه اللوحة؟', a:'ليوناردو دافنشي', hint:''},
+      {cat:'مسرح', value:75, type:'image', title:'مسرح شهير', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Sydney_Opera_House_Sails.jpg/440px-Sydney_Opera_House_Sails.jpg', q:'ما اسم هذا المبنى؟', a:'دار أوبرا سيدني', hint:''},
+      {cat:'سينما', value:75, type:'image', title:'من هذا المخرج؟', imageUrl:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Alfred_Hitchcock_1955.jpg/440px-Alfred_Hitchcock_1955.jpg', q:'من هذا المخرج؟', a:'ألفريد هيتشكوك', hint:''}
+    ],
+    musicQuestions:[
+      {cat:'موسيقى', value:75, type:'music', title:'موسيقى كلاسيكية', audioUrl:'https://www.youtube.com/embed/ScMzIvxBSi4', parts:[{q:'المؤلف؟',a:'فيالدي'},{q:'اسم القطعة؟',a:'الأربعة فصول'},{q:'الآلة؟',a:'كمان'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'أغنية فيلم', audioUrl:'https://www.youtube.com/embed/YE7VzlLtp-4', parts:[{q:'اسم الفيلم؟',a:'فيلم'},{q:'المغني؟',a:'مطرب'},{q:'العام؟',a:'سنة'}]},
+      {cat:'موسيقى', value:75, type:'music', title:'مقطوعة فنية', audioUrl:'https://www.youtube.com/embed/2Vv-BfVoq4g', parts:[{q:'النوع؟',a:'مقطوعة'},{q:'الملحن؟',a:'ملحن'},{q:'الحقبة؟',a:'عصر'}]}
+    ],
+    puzzleQuestions:[
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'odd_one_out', title:'اختَر المختلف', items:['لوحة','نحت','فيلم','طبق'], answer:'طبق', explanation:'الباقي فنون تشكيلية/سينمائية'},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'equation', title:'اختر الكلمة الناقصة', items:[], answer:'الفن يعبّر', explanation:''},
+      {cat:'ألغاز', value:75, type:'puzzle', subtype:'order', title:'رتّب مراحل إنتاج فيلم', items:['كتابة','تصوير','مونتاج'], answer:'كتابة,تصوير,مونتاج', explanation:''}
+    ],
     silver:[
       {cat:'الثقافة والفنون التشكيلية والسينمائية', questions:[
         {v:100,q:'من رسم لوحة "الموناليزا"؟',a:'ليوناردو دافنشي'},
@@ -1302,6 +1474,48 @@ const allSilver=[],allGold=[],allSpeed=[];
   // Shuffle speedBank too
   if (d.speedBank) d.speedBank = shuffle([...d.speedBank]);
 
+  // Collect image/music/puzzle pools from all banks (if provided)
+  const imagePool = [], musicPool = [], puzzlePool = [];
+  questionBanks.forEach(b => {
+    if (!b) return;
+    (b.imageQuestions||[]).forEach(i => { if(i) imagePool.push(JSON.parse(JSON.stringify(i))); });
+    (b.musicQuestions||[]).forEach(m => { if(m) musicPool.push(JSON.parse(JSON.stringify(m))); });
+    (b.puzzleQuestions||[]).forEach(p => { if(p) puzzlePool.push(JSON.parse(JSON.stringify(p))); });
+  });
+
+  // Occasionally inject a media/puzzle question into the top-value slot (30% chance)
+  ['silver','gold'].forEach(s => {
+    if (!d[s]) return;
+    const topValue = s === 'silver' ? 75 : 150;
+    d[s].forEach(col => {
+      if (Math.random() < 0.3) {
+        const idx = col.questions.findIndex(q => q.v === topValue);
+        if (idx !== -1) {
+          const types = [];
+          if (imagePool.length) types.push('image');
+          if (musicPool.length) types.push('music');
+          if (puzzlePool.length) types.push('puzzle');
+          if (types.length) {
+            const t = types[Math.floor(Math.random()*types.length)];
+            if (t === 'image') {
+              const item = imagePool.splice(Math.floor(Math.random()*imagePool.length),1)[0];
+              item.type = 'image'; item.v = topValue; item.spent = false;
+              col.questions[idx] = item;
+            } else if (t === 'music') {
+              const item = musicPool.splice(Math.floor(Math.random()*musicPool.length),1)[0];
+              item.type = 'music'; item.v = topValue; item.spent = false; item.partIndex = 0;
+              col.questions[idx] = item;
+            } else if (t === 'puzzle') {
+              const item = puzzlePool.splice(Math.floor(Math.random()*puzzlePool.length),1)[0];
+              item.type = 'puzzle'; item.v = topValue; item.spent = false;
+              col.questions[idx] = item;
+            }
+          }
+        }
+      }
+    });
+  });
+
   // 9-cell diamond grid with balanced category variety across all 11 categories
   d.diamond = [
     {cat:'قادة ورؤساء',      q:'من قاد مصر في حرب أكتوبر 1973؟',                   a:'الرئيس أنور السادات'},
@@ -1411,6 +1625,10 @@ function buildBoard(s) {
 // ══════════════════════════════════════════
 async function openModal(ci, qi) {
   const qItem = stage==='diamond' ? diamondState[ci] : gameDB[stage][ci].questions[qi];
+  // Media / puzzle special types
+  if (qItem && qItem.type === 'image') { launchImageModal(qItem, ci, qi); return; }
+  if (qItem && qItem.type === 'music') { launchMusicModal(qItem, ci, qi); return; }
+  if (qItem && qItem.type === 'puzzle') { launchPuzzleModal(qItem, ci, qi); return; }
   if (qItem && qItem.isMultiPart) { launchMultiPartModal(qItem, ci, qi); return; }
   initAudio();
   cellRef={stage,ci,qi};
@@ -1464,6 +1682,61 @@ async function openModal(ci, qi) {
     const val = stage==='diamond' ? 0 : gameDB[stage][cellRef.ci].questions[cellRef.qi].v;
     syncQuestion(qItem, cat, val, 30, 'normal');
   }
+}
+
+// ------- Media / Puzzle modal launchers -------
+async function launchImageModal(qItem, ci, qi) {
+  initAudio();
+  cellRef={stage,ci,qi}; responder=null; bankMode=false; bankBet=0;
+  await resetBuzzer();
+  document.getElementById('modal-overlay').style.display='flex';
+  document.getElementById('modal-cat').textContent = `${gameDB[stage][ci].cat} — ${qItem.v} نقطة`;
+  document.getElementById('bank-bet-zone').style.display='none';
+  document.getElementById('modal-a').className='modal-a';
+  document.getElementById('modal-a').innerHTML = `<img src="${qItem.imageUrl}" class="modal-media-img">`;
+  document.getElementById('modal-q').textContent = qItem.q || '';
+  document.getElementById('modal-a').classList.add('show');
+  const cat = gameDB[stage][ci].cat; const val = gameDB[stage][ci].questions[qi].v;
+  syncQuestion(qItem, cat, val, 30, 'normal');
+  startTimer(30,'normal');
+}
+
+async function launchMusicModal(qItem, ci, qi) {
+  initAudio(); cellRef={stage,ci,qi}; responder=null; bankMode=false; bankBet=0; await resetBuzzer();
+  document.getElementById('modal-overlay').style.display='flex';
+  document.getElementById('modal-cat').textContent = `${gameDB[stage][ci].cat} — ${qItem.v} نقطة`;
+  document.getElementById('bank-bet-zone').style.display='none';
+  const iframe = `<iframe class="modal-media-iframe" src="${qItem.audioUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  document.getElementById('modal-a').innerHTML = iframe;
+  document.getElementById('modal-q').textContent = qItem.q || '';
+  document.getElementById('modal-a').classList.add('show');
+  const cat = gameDB[stage][ci].cat; const val = gameDB[stage][ci].questions[qi].v;
+  qItem.partIndex = qItem.partIndex || 0;
+  syncQuestion(qItem, cat, val, 30, 'normal');
+  startTimer(30,'normal');
+}
+
+async function launchPuzzleModal(qItem, ci, qi) {
+  initAudio(); cellRef={stage,ci,qi}; responder=null; bankMode=false; bankBet=0; await resetBuzzer();
+  document.getElementById('modal-overlay').style.display='flex';
+  document.getElementById('modal-cat').textContent = `${gameDB[stage][ci].cat} — ${qItem.v} نقطة`;
+  document.getElementById('bank-bet-zone').style.display='none';
+  // Build simple puzzle UI for host (players get only question and choice buttons via sync)
+  const container = document.createElement('div');
+  container.className = 'puzzle-host';
+  if (qItem.puzzle && qItem.puzzle.subtype === 'odd_one_out') {
+    const choices = qItem.puzzle.choices || [];
+    const html = choices.map((c,i)=>`<button class="puzzle-btn">${c}</button>`).join('');
+    document.getElementById('modal-q').textContent = qItem.q || '';
+    document.getElementById('modal-a').innerHTML = html; document.getElementById('modal-a').classList.add('show');
+  } else {
+    document.getElementById('modal-q').textContent = qItem.q || '';
+    document.getElementById('modal-a').textContent = qItem.puzzle && qItem.puzzle.hint ? qItem.puzzle.hint : '';
+    document.getElementById('modal-a').classList.add('show');
+  }
+  const cat = gameDB[stage][ci].cat; const val = gameDB[stage][ci].questions[qi].v;
+  syncQuestion(qItem, cat, val, 30, 'normal');
+  startTimer(30,'normal');
 }
 
 async function launchModal(isSpeed,isBank,qItem) {
@@ -2161,6 +2434,99 @@ async function launchMultiPartModal(qItem, ci, qi) {
     mpZone.innerHTML='';
     setTimeout(()=>origJudge.call(window,ok),500);
   };
+}
+// ══════════════════════════════════════════
+//  IMAGE / MUSIC / PUZZLE MODALS
+// ══════════════════════════════════════════
+async function launchImageModal(qItem, ci, qi) {
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.getElementById('modal-surprise').style.display = 'none';
+  document.getElementById('modal-bank').style.display = 'none';
+  document.getElementById('modal-speed').style.display = 'none';
+  const judgeEl = document.getElementById('modal-judge');
+  judgeEl.style.display = 'flex';
+  judgeEl.querySelectorAll('.judge-btn').forEach(b => { if(b.classList.contains('judge-correct')||b.classList.contains('judge-wrong')) b.disabled=false; });
+  // Host view: show image and full answer for host
+  document.getElementById('modal-cat').textContent = (qItem.cat || 'سؤال') + ' — 🖼️ سؤال بصوري — ' + (qItem.v || 0) + ' نقطة';
+  const mq = document.getElementById('modal-q'); mq.textContent = qItem.q || '';
+  const ma = document.getElementById('modal-a'); ma.textContent = qItem.a || ''; ma.classList.add('show');
+  // Insert image above question text
+  let imgEl = document.querySelector('#modal-q-box .modal-media-img');
+  if (!imgEl) {
+    imgEl = document.createElement('img'); imgEl.className = 'modal-media-img'; imgEl.style.display='block';
+    document.getElementById('modal-q').parentNode.insertBefore(imgEl, document.getElementById('modal-q'));
+  }
+  imgEl.src = qItem.imageUrl || '';
+  // Send to players (without answer)
+  const sendItem = Object.assign({}, qItem);
+  delete sendItem.a;
+  sendItem.type = 'image';
+  await resetBuzzer();
+  cellRef = {stage,ci,qi}; responder=null; bankMode=false; bankBet=0;
+  startTimer(30,'normal');
+  await syncQuestion(sendItem, qItem.cat || '', qItem.v || 0, 30, 'normal');
+}
+
+async function launchMusicModal(qItem, ci, qi) {
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.getElementById('modal-surprise').style.display = 'none';
+  document.getElementById('modal-bank').style.display = 'none';
+  document.getElementById('modal-speed').style.display = 'none';
+  const judgeEl = document.getElementById('modal-judge');
+  judgeEl.style.display = 'flex';
+  judgeEl.querySelectorAll('.judge-btn').forEach(b => { if(b.classList.contains('judge-correct')||b.classList.contains('judge-wrong')) b.disabled=false; });
+  let partIndex = qItem.partIndex || 0;
+  document.getElementById('modal-cat').textContent = (qItem.cat || 'موسيقى') + ' — 🎵 سؤال موسيقي — ' + (qItem.v || 0) + ' نقطة';
+  const mq = document.getElementById('modal-q'); const ma = document.getElementById('modal-a'); ma.classList.remove('show');
+  function renderHost() {
+    mq.textContent = (qItem.parts && qItem.parts[partIndex] && qItem.parts[partIndex].q) ? qItem.parts[partIndex].q : (qItem.title||'');
+    ma.textContent = (qItem.parts && qItem.parts[partIndex] && qItem.parts[partIndex].a) ? qItem.parts[partIndex].a : '';
+  }
+  // Add host-only iframe preview
+  let ifr = document.querySelector('#modal-q-box .modal-media-iframe');
+  if (!ifr) { ifr = document.createElement('iframe'); ifr.className = 'modal-media-iframe'; document.getElementById('modal-q').parentNode.insertBefore(ifr, document.getElementById('modal-q')); }
+  ifr.src = qItem.audioUrl || '';
+  renderHost();
+
+  // Controls: Play to audience, Next part
+  let ctrl = document.getElementById('music-controls');
+  if (!ctrl) { ctrl = document.createElement('div'); ctrl.id='music-controls'; ctrl.style.cssText='display:flex;gap:8px;margin-top:8px'; document.getElementById('modal-a').after(ctrl); }
+  ctrl.innerHTML = '';
+  const playBtn = document.createElement('button'); playBtn.textContent='▶️ تشغيل للجمهور'; playBtn.style.cssText='padding:8px 12px;border-radius:10px;background:#6d28d9;color:#fff;border:none;cursor:pointer';
+  const nextBtn = document.createElement('button'); nextBtn.textContent='الجزء التالي'; nextBtn.style.cssText='padding:8px 12px;border-radius:10px;background:#f59e0b;color:#111;border:none;cursor:pointer';
+  ctrl.appendChild(playBtn); ctrl.appendChild(nextBtn);
+
+  playBtn.onclick = async () => {
+    // send current part to players (without answer)
+    const send = { type:'music', audioUrl: qItem.audioUrl, parts: qItem.parts ? qItem.parts.map(p=>p.q) : [], partIndex: partIndex, v: qItem.v, cat: qItem.cat };
+    await resetBuzzer(); startTimer(25,'normal');
+    await syncQuestion(send, qItem.cat||'', qItem.v||0, 25, 'normal');
+  };
+  nextBtn.onclick = () => {
+    partIndex = Math.min((qItem.parts||[]).length-1, partIndex+1);
+    renderHost();
+  };
+}
+
+async function launchPuzzleModal(qItem, ci, qi) {
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.getElementById('modal-surprise').style.display = 'none';
+  document.getElementById('modal-bank').style.display = 'none';
+  document.getElementById('modal-speed').style.display = 'none';
+  const judgeEl = document.getElementById('modal-judge');
+  judgeEl.style.display = 'flex';
+  judgeEl.querySelectorAll('.judge-btn').forEach(b => { if(b.classList.contains('judge-correct')||b.classList.contains('judge-wrong')) b.disabled=false; });
+  document.getElementById('modal-cat').textContent = (qItem.cat || 'ألغاز') + ' — 🧩 ' + (qItem.title || '') + ' — ' + (qItem.v || 0) + ' نقطة';
+  const mq = document.getElementById('modal-q'); const ma = document.getElementById('modal-a'); ma.classList.remove('show');
+  // Host view shows full puzzle and explanation
+  mq.textContent = qItem.title || qItem.q || '';
+  ma.textContent = qItem.answer ? ('الإجابة: ' + qItem.answer + (qItem.explanation ? ' — ' + qItem.explanation : '')) : '';
+
+  // Prepare puzzle payload for players
+  const puzzlePayload = { subtype: qItem.subtype, items: qItem.items || qItem.choices || [], answer: qItem.answer, explanation: qItem.explanation };
+  const send = { type:'puzzle', puzzle: puzzlePayload, v: qItem.v, cat: qItem.cat };
+  await resetBuzzer(); startTimer(35,'normal');
+  await syncQuestion(send, qItem.cat||'', qItem.v||0, 35, 'normal');
 }
 window.goTo = goTo;
 window.goToSetup = goToSetup;
