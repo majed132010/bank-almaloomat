@@ -6,7 +6,7 @@
 <title>بنك المعلومات — المُقدِّم</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260709002138">
+<link rel="stylesheet" href="style.css?v=20260708204949">
 <style>
 /* Host-only additions */
 /* WEBRTC panel: fixed bottom-left; hidden on landing/setup */
@@ -25,13 +25,6 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
 .buzz-flash.on{display:block}
 .buzz-flash::before{content:'⚡';margin-left:10px;font-size:16pt}
 @keyframes buzzPop{from{transform:translate(-50%,-30px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
-.host-turn-panel{margin:18px 0 12px;padding:12px 14px;border:1px solid rgba(6,182,212,.22);background:linear-gradient(135deg,rgba(4,4,16,.95),rgba(8,12,28,.75));border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.28)}
-.host-turn-header{font-family:'Cairo',sans-serif;font-size:10.5pt;font-weight:900;color:#67e8f9;margin-bottom:10px}
-.host-turn-list{display:grid;gap:8px}
-.host-turn-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px}
-.host-turn-name{font-size:10pt;font-weight:700;color:#e2e8f0}
-.host-turn-btn{background:linear-gradient(135deg,rgba(240,165,0,.9),rgba(180,120,0,.9));border:none;color:#fff;padding:6px 10px;border-radius:999px;font-family:'Tajawal',sans-serif;font-weight:800;cursor:pointer}
-.host-turn-note{margin-top:8px;padding:8px 10px;border-radius:12px;background:rgba(16,185,129,.12);color:#bbf7d0;border:1px solid rgba(16,185,129,.26);font-size:9.5pt}
 </style>
 </head>
 <body>
@@ -145,11 +138,6 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
   </div>
   <div class="game-body">
     <div class="game-sidebar">
-      <div class="host-turn-panel" id="host-turn-panel">
-        <div class="host-turn-header">🎯 إعطاء الدور</div>
-        <div id="host-turn-list" class="host-turn-list"></div>
-        <div id="host-turn-notice" class="host-turn-note" style="display:none"></div>
-      </div>
       <div class="sidebar-label">الفرسان</div>
       <div id="sidebar-players"></div>
     </div>
@@ -184,7 +172,7 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
       <div id="modal-buzz-winner" style="display:none;margin:12px 0;padding:12px 20px;background:linear-gradient(135deg,rgba(240,165,0,.22),rgba(252,211,77,.15));border:1.5px solid rgba(240,165,0,.55);border-radius:14px;text-align:center;font-family:'Cairo',sans-serif;">
         <div style="font-size:9pt;letter-spacing:2px;color:#fcd34d;margin-bottom:4px">⚡ زر أسرع متسابق</div>
         <div style="font-size:16pt;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(240,165,0,.6)"><span id="modal-buzz-name">—</span></div>
-        <button data-testid="btn-reset-buzzer" onclick="resetBuzzer()" style="margin-top:8px;background:rgba(4,4,16,.6);border:1px solid rgba(148,163,184,.3);color:#e2e8f0;padding:5px 14px;border-radius:20px;font-size:9pt;cursor:pointer;font-family:'Tajawal',sans-serif;">🔄 إعادة تعيين البازر</button>
+        <button data-testid="btn-reset-buzzer" onclick="resetBuzzer()" style="margin-top:8px;background:rgba(4,4,16,.6);border:1px solid rgba(148,163,184,.3);color:#e2e8f0;padding:5px 14px;border-radius:20px;font-size:9pt;cursor:pointer;font-family:'Tajawal',sans-serif;">🔄 إعادة تفعيل Buzzer</button>
       </div>
       <div id="modal-text-answers" class="modal-text-answers" style="display:none;margin:12px 0;padding:14px 18px;background:rgba(7,10,24,.95);border:1px solid rgba(148,163,184,.22);border-radius:18px;max-height:220px;overflow:auto;">
         <div class="text-answers-title" style="font-size:10pt;color:#cbd5e1;margin-bottom:10px;letter-spacing:1px;">📨 إجابات نصية واردة</div>
@@ -203,7 +191,7 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
         </div>
         <div id="bank-bet-zone" class="bank-bet-zone" style="display:none">
           <label>مبلغ الرهان</label>
-          <div class="bank-bet-row"><input id="bank-bet-input" type="number" value="400"></div>
+          <div class="bank-bet-row"><input id="bank-bet-input" type="number" value="400"><span>ن</span></div>
           <div id="bank-bet-limits" class="bank-bet-limits"></div>
           <button class="bank-confirm-btn" onclick="confirmBankBet()">تثبيت الرهان 🚀</button>
         </div>
@@ -288,11 +276,9 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
 .modal-text-answers .answer-text{color:#e2e8f0;}</style>
 
 <script src="new_banks.js?v202607081200"></script>
-<script type="module" src="script.js?v202607081200"></script>
+<script src="script.js?v=99999"></script>
 </body>
 </html>
-
-
 
 
 
