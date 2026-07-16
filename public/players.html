@@ -326,6 +326,39 @@ function applyStateToPlayer(state){
   const badgeMap = { silver:'⚪ الفضية', gold:'🥇 الذهبية', diamond:'💎 الماسية' };
   document.getElementById('play-stage-badge').textContent = badgeMap[stage] || stage;
 
+  // معالجة شاشة المفاجأة عند المتسابقين
+  if(state.surprise && state.surprise.active) {
+    const existingSurprise = document.getElementById('player-surprise-overlay');
+    if(!existingSurprise) {
+      const overlay = document.createElement('div');
+      overlay.id = 'player-surprise-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.92);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+      overlay.innerHTML = `
+        <div style="font-size:80pt;animation:pulse 0.5s infinite alternate">${state.surprise.icon || '🏛️'}</div>
+        <div style="font-size:28pt;font-weight:900;color:${state.surprise.color || '#f0a500'};font-family:Cairo,sans-serif;margin-top:20px">${state.surprise.text || 'البنك!'}</div>
+      `;
+      document.body.appendChild(overlay);
+      // موسيقى بسيطة
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [261, 329, 392, 523, 659, 783, 1046];
+        notes.forEach((f, i) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.08, ctx.currentTime + i * 0.15);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.4);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(ctx.currentTime + i * 0.15);
+          o.stop(ctx.currentTime + i * 0.15 + 0.4);
+        });
+      } catch(e){}
+      setTimeout(() => { overlay.remove(); }, 5000);
+    }
+  } else {
+    const existingSurprise = document.getElementById('player-surprise-overlay');
+    if(existingSurprise) existingSurprise.remove();
+  }
+
   // Question
   const q = state.question;
   const qCat = document.getElementById('p-q-cat');
@@ -352,10 +385,9 @@ function applyStateToPlayer(state){
     const media = document.getElementById('p-media'); if(media) media.innerHTML = '';
       if(q.type === 'video' && q.videoUrl) {
         if(media) media.innerHTML = `
-          <video src="${q.videoUrl}" autoplay playsinline
-            style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000"
-            onended="this.remove()">
-          </video>`;
+          <iframe src="${q.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+            style="width:100%;max-width:340px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
+            allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
       }
       if(q.type === 'image' && media){
         media.innerHTML = `<img src="${q.imageUrl || ''}" style="max-width:100%;border-radius:12px;margin:10px auto;display:block;object-fit:cover;">`;
