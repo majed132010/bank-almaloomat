@@ -394,10 +394,25 @@ function applyStateToPlayer(state){
     // Render media / puzzle UI when provided
     const media = document.getElementById('p-media'); if(media) media.innerHTML = '';
       if(q.type === 'video' && q.videoUrl) {
-        if(media) media.innerHTML = `
-          <iframe src="${q.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
-            style="width:100%;max-width:340px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
-            allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
+        // إذا كان فيديو افتتاحي (بدون parts) يعرض كامل الشاشة
+        if(!q.parts || q.parts.length === 0) {
+          const existingVid = document.getElementById('bank-intro-video-player');
+          if(existingVid) existingVid.remove();
+          const vid = document.createElement('video');
+          vid.id = 'bank-intro-video-player';
+          vid.src = q.videoUrl;
+          vid.autoplay = true;
+          vid.playsInline = true;
+          vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000';
+          vid.onended = function() { this.remove(); };
+          document.body.appendChild(vid);
+        } else {
+          // فيديو مسلسل عادي في iframe
+          if(media) media.innerHTML = `
+            <iframe src="${q.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+              style="width:100%;max-width:340px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
+              allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
+        }
       }
       if(q.type === 'image' && media){
         media.innerHTML = `<img src="${q.imageUrl || ''}" style="max-width:100%;border-radius:12px;margin:10px auto;display:block;object-fit:cover;">`;
@@ -437,6 +452,10 @@ function applyStateToPlayer(state){
     if(answerInput) answerInput.disabled = true;
     if(answerBtn) answerBtn.disabled = true;
     if(answerHint) answerHint.textContent = '📨 ستعمل الإجابة النصية عندما يبدأ سؤال جديد.';
+    const existingVideo = document.getElementById('bank-intro-video-player');
+    if(existingVideo) existingVideo.remove();
+    const existingKushkul = document.getElementById('kushkul-intro-video-player');
+    if(existingKushkul) existingKushkul.remove();
   }
 
   // Buzzer state — check winner
