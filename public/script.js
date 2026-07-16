@@ -933,10 +933,10 @@ const videoQuestions = [
     parts:[{q:'ما اسم هذا المسلسل؟',a:'لعبة نيوتن'},{q:'من هي بطلة المسلسل؟',a:'منى زكي'},{q:'من أخرج المسلسل؟',a:'تامر محسن'}]},
   { type:'video', videoUrl:'https://www.youtube.com/embed/Y1OXiOs92hs',
     parts:[{q:'ما اسم هذا المسلسل؟',a:'الاختيار'},{q:'من هو بطل المسلسل؟',a:'أمير كرارة'},{q:'ماذا يحكي المسلسل؟',a:'قصة الشهيد أحمد منسي والتصدي للإرهاب في سيناء'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/f6yoxTfi83I',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'لدواعي أمنية'},{q:'من هو بطل المسلسل؟',a:'كمال الشناوي وماجد المصري'},{q:'في أي عام عُرض؟',a:'2002'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/8kB07NXRcSo',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'شهادة معاملة أطفال'},{q:'من هو بطل المسلسل؟',a:'محمد هنيدي'},{q:'في أي عام عُرض؟',a:'2025'}]}
+  { type:'video', videoUrl:'https://www.youtube.com/embed/FVNsCg-wyyo',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'نسل الأغراب'},{q:'من هو بطل المسلسل؟',a:'أمير كرارة'},{q:'في أي عام عُرض؟',a:'2021'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/HNWe69Xk6cE',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'حكيم باشا'},{q:'من هو بطل المسلسل؟',a:'كريم عبد العزيز'},{q:'في أي عام عُرض؟',a:'2024'}]}
 ];
 let usedVideoIndexes = [];
 function getRandomVideo() {
