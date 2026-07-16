@@ -1306,7 +1306,7 @@ async function launchModal(isSpeed, isBank, qItem) {
     resp.style.display = 'block'; bank.style.display = 'none';
     judge.style.display = 'none'; speed.style.display = 'none';
     buildResponderBtns();
-    launchKushkulSequence();
+    await launchKushkulSequence();
   } else {
     resp.style.display = 'block'; bank.style.display = 'none';
     judge.style.display = 'flex'; speed.style.display = 'none';
@@ -1427,7 +1427,7 @@ function showBankVideoQuestions(video) {
 
 const KUSHKUL_VIDEO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/v1784158627/WhatsApp_Video_2026-07-16_at_02.30.27_zy0zne.mp4';
 
-function launchKushkulSequence() {
+async function launchKushkulSequence() {
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
   mq.innerHTML = '';
@@ -1436,11 +1436,17 @@ function launchKushkulSequence() {
       style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
     </video>`;
   ma.classList.add('show');
-  // إرسال فيديو كشكول للمتسابقين
-  syncQuestion(
-    { q:'🎭 كشكول!', type:'video', videoUrl: KUSHKUL_VIDEO_URL, parts:[], sendVideo: true },
-    '🎭 كشكول', 0, 31, 'normal'
-  );
+  // إرسال فيديو كشكول للمتسابقين كامل الشاشة
+  const kushkulState = buildGameStateForSync();
+  kushkulState.question = {
+    active: true,
+    type: 'video',
+    videoUrl: KUSHKUL_VIDEO_URL,
+    q: '🎭 كشكول!',
+    parts: [],
+    timerSecs: 31
+  };
+  await syncToFirebase(kushkulState);
   document.getElementById('kushkul-intro-video').onended = function() {
     this.remove();
     launchKushkulMusalsal();
