@@ -1362,14 +1362,20 @@ async function launchBankIntroVideo() {
   await syncToFirebase(bankIntroState);
 
   return new Promise(resolve => {
-    const bankIntroTimeout = setTimeout(() => {
+    const bankIntroTimeout = setTimeout(async () => {
       const vid = document.getElementById('bank-intro-video');
       if (vid) vid.remove();
+      const clearState = buildGameStateForSync();
+      clearState.question = { active: false };
+      await syncToFirebase(clearState);
       resolve();
     }, 20000);
-    document.getElementById('bank-intro-video').onended = function() {
+    document.getElementById('bank-intro-video').onended = async function() {
       clearTimeout(bankIntroTimeout);
       this.remove();
+      const clearState = buildGameStateForSync();
+      clearState.question = { active: false };
+      await syncToFirebase(clearState);
       resolve();
     };
   }).then(() => {
