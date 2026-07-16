@@ -1400,7 +1400,7 @@ async function launchBankIntroVideo() {
 
   ma.innerHTML = `
     <video id="bank-intro-video" src="${BANK_INTRO_URL}" autoplay playsinline
-      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;z-index:9999;background:#000">
     </video>`;
   ma.classList.add('show');
 
@@ -1565,7 +1565,7 @@ async function launchKushkulSequence() {
 
   ma.innerHTML = `
     <video id="kushkul-intro-video" src="${KUSHKUL_VIDEO_URL}" autoplay playsinline
-      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;z-index:9999;background:#000">
     </video>`;
   ma.classList.add('show');
 
