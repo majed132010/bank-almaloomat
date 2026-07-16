@@ -1261,7 +1261,6 @@ async function openModal(ci, qi) {
       document.getElementById('surprise-text').textContent = 'كشكول!';
       document.getElementById('surprise-text').style.color = '#06b6d4';
       sfx.bankSurprise();
-      syncSurprise('🎭', 'كشكول!', '#06b6d4');
     } else {
       document.getElementById('surprise-icon').textContent = '🏛️';
       document.getElementById('surprise-text').textContent = 'البنك!';
@@ -1380,7 +1379,7 @@ function confirmBankBet() {
   setTimeout(() => {
     const ifr = document.getElementById('bank-video-iframe');
     if (ifr && ifr.dataset && ifr.dataset.src) ifr.src = ifr.dataset.src;
-  }, 2000);
+  }, 500);
 
   syncQuestion(
     { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q), ready: true },
@@ -1478,11 +1477,11 @@ function launchKushkulMusalsal() {
     </div>
     <div id="kushkul-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>`;
   ma.classList.add('show');
-  // انتظر 2 ثانية ثم شغّل الفيديو لدى الجميع لمزامنة التشغيل
+  // انتظر قليلًا ثم شغّل الفيديو لدى الجميع لمزامنة التشغيل
   setTimeout(() => {
     const kif = document.getElementById('kushkul-video-iframe');
     if (kif && kif.dataset && kif.dataset.src) kif.src = kif.dataset.src;
-  }, 2000);
+  }, 500);
   syncQuestion(
     { q:'🎭 شاهد المقطع وأجب!', type:'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
     '🎭 كشكول', 0, 30, 'normal'
