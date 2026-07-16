@@ -1472,8 +1472,8 @@ function stopBankVideo() {
 function showBankVideoQuestions(video) {
   const ifr = document.getElementById('bank-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}','*'); } catch(e){}
-    ifr.style.display = 'none';
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
+    setTimeout(() => { if(ifr) ifr.src = 'about:blank'; setTimeout(() => { if(ifr) ifr.remove(); }, 200); }, 300);
   }
   const stopBtn = document.getElementById('bank-video-stop-btn');
   if (stopBtn) stopBtn.style.display = 'none';
@@ -1615,7 +1615,10 @@ function stopKushkulVideo() {
 
 function showKushkulQuestions(video) {
   const ifr = document.getElementById('kushkul-video-iframe');
-  if (ifr) ifr.style.display = 'none';
+  if (ifr) {
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
+    setTimeout(() => { if(ifr) ifr.src = 'about:blank'; setTimeout(() => { if(ifr) ifr.remove(); }, 200); }, 300);
+  }
   const partsDiv = document.getElementById('kushkul-video-parts');
   if (partsDiv) {
     partsDiv.style.display = 'block';
