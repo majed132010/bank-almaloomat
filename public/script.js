@@ -1270,18 +1270,18 @@ async function openModal(ci, qi) {
       setTimeout(() => sfx.startBank(), 1200);
       syncSurprise('🏛️', 'البنك!', 'var(--gold-lt)');
     }
-    setTimeout(() => { sc.style.display = 'none'; launchModal(isSpeed, isBank, qItem); }, 5000);
+    setTimeout(() => { sc.style.display = 'none'; launchModal(isSpeed, isBank, qItem, isKushkul); }, 5000);
   } else {
     document.getElementById('modal-surprise').style.display = 'none';
     sfx.question();
-    launchModal(false, false, qItem);
+    launchModal(false, false, qItem, isKushkul);
     const cat = stage === 'diamond' ? qItem.category : gameDB[stage][cellRef.ci].cat;
     const val = stage === 'diamond' ? 0 : gameDB[stage][cellRef.ci].questions[cellRef.qi].v;
     syncQuestion(qItem, cat, val, 30, 'normal');
   }
 }
 
-async function launchModal(isSpeed, isBank, qItem) {
+async function launchModal(isSpeed, isBank, qItem, isKushkul = false) {
   const resp = document.getElementById('modal-responder');
   const bank = document.getElementById('modal-bank');
   const judge = document.getElementById('modal-judge');
@@ -1306,6 +1306,8 @@ async function launchModal(isSpeed, isBank, qItem) {
     resp.style.display = 'block'; bank.style.display = 'none';
     judge.style.display = 'none'; speed.style.display = 'none';
     buildResponderBtns();
+    document.getElementById('modal-judge').style.display = 'flex';
+    document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
     await launchKushkulSequence();
   } else {
     resp.style.display = 'block'; bank.style.display = 'none';
