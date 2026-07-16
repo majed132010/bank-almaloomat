@@ -1059,17 +1059,55 @@ function startGame() {
     : selectedBankIndex;
   const selectedBank = questionBanks[bankIdx];
   gameDB = buildDB(selectedBank);
-  kushkulLoc = {
-    ci: Math.floor(Math.random() * 3),
-    qi: Math.floor(Math.random() * 3)
-  };
 
-  speedLoc = {stage:'silver', cat: Math.floor(Math.random() * gameDB.silver.length), q: Math.floor(Math.random() * 3)};
-  bankLoc = {
-    stage: 'gold',
-    cat: Math.floor(Math.random() * 3),
-    q: Math.floor(Math.random() * 3)
-  };
+  // قائمة مواقع كشكول والسرعة - مضمونة عدم التعارض
+  const kushkulRotation = [
+    {ci:0, qi:2},
+    {ci:2, qi:0},
+    {ci:1, qi:2},
+    {ci:0, qi:0},
+    {ci:2, qi:1},
+    {ci:1, qi:0},
+    {ci:0, qi:1},
+    {ci:2, qi:2},
+    {ci:1, qi:1},
+    {ci:2, qi:0},
+  ];
+
+  const speedRotation = [
+    {ci:2, qi:1},
+    {ci:0, qi:1},
+    {ci:2, qi:2},
+    {ci:1, qi:1},
+    {ci:0, qi:2},
+    {ci:2, qi:0},
+    {ci:1, qi:2},
+    {ci:0, qi:0},
+    {ci:2, qi:1},
+    {ci:1, qi:0},
+  ];
+
+  const bankRotation = [
+    {ci:1, qi:2},
+    {ci:2, qi:1},
+    {ci:0, qi:0},
+    {ci:2, qi:2},
+    {ci:1, qi:0},
+    {ci:0, qi:2},
+    {ci:2, qi:0},
+    {ci:1, qi:1},
+    {ci:0, qi:1},
+    {ci:1, qi:2},
+  ];
+
+  // احفظ رقم اللعبة في localStorage
+  const gameCount = parseInt(localStorage.getItem('bnk_gameCount') || '0');
+  localStorage.setItem('bnk_gameCount', gameCount + 1);
+  const idx = gameCount % 10;
+
+  kushkulLoc = kushkulRotation[idx];
+  speedLoc = { stage: 'silver', cat: speedRotation[idx].ci, q: speedRotation[idx].qi };
+  bankLoc = { stage: 'gold', cat: bankRotation[idx].ci, q: bankRotation[idx].qi };
 
   goTo('game');
   sfx.main();
