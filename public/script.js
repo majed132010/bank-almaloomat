@@ -1248,25 +1248,28 @@ async function openModal(ci, qi) {
   const isKushkul = stage === 'silver' && ci === kushkulLoc.ci && qi === kushkulLoc.qi && !isBank;
 
   if (isSpeed || isBank || isKushkul) {
-    const sc = document.getElementById('modal-surprise'); sc.style.display = 'flex';
-    spawnParticles('surprise-particles');
-    if (isSpeed) {
-      document.getElementById('surprise-icon').textContent = '⚡';
-      document.getElementById('surprise-text').textContent = 'دقيقة السرعة!';
-      document.getElementById('surprise-text').style.color = 'var(--danger)';
-      sfx.startSpeed(220);
-      syncSurprise('⚡', 'دقيقة السرعة!', 'var(--danger)');
-    } else if (isKushkul) {
-      sfx.bankSurprise();
+    if (isKushkul) {
+      document.getElementById('modal-surprise').style.display = 'none';
+      launchModal(isSpeed, isBank, qItem, isKushkul);
     } else {
-      document.getElementById('surprise-icon').textContent = '🏛️';
-      document.getElementById('surprise-text').textContent = 'البنك!';
-      document.getElementById('surprise-text').style.color = 'var(--gold-lt)';
-      sfx.bankSurprise();
-      setTimeout(() => sfx.startBank(), 1200);
-      syncSurprise('🏛️', 'البنك!', 'var(--gold-lt)');
+      const sc = document.getElementById('modal-surprise'); sc.style.display = 'flex';
+      spawnParticles('surprise-particles');
+      if (isSpeed) {
+        document.getElementById('surprise-icon').textContent = '⚡';
+        document.getElementById('surprise-text').textContent = 'دقيقة السرعة!';
+        document.getElementById('surprise-text').style.color = 'var(--danger)';
+        sfx.startSpeed(220);
+        syncSurprise('⚡', 'دقيقة السرعة!', 'var(--danger)');
+      } else {
+        document.getElementById('surprise-icon').textContent = '🏛️';
+        document.getElementById('surprise-text').textContent = 'البنك!';
+        document.getElementById('surprise-text').style.color = 'var(--gold-lt)';
+        sfx.bankSurprise();
+        setTimeout(() => sfx.startBank(), 1200);
+        syncSurprise('🏛️', 'البنك!', 'var(--gold-lt)');
+      }
+      setTimeout(() => { sc.style.display = 'none'; launchModal(isSpeed, isBank, qItem, isKushkul); }, 5000);
     }
-    setTimeout(() => { sc.style.display = 'none'; launchModal(isSpeed, isBank, qItem, isKushkul); }, 5000);
   } else {
     document.getElementById('modal-surprise').style.display = 'none';
     sfx.question();
@@ -1376,7 +1379,7 @@ function confirmBankBet() {
   setTimeout(() => {
     const ifr = document.getElementById('bank-video-iframe');
     if (ifr && ifr.dataset && ifr.dataset.src) ifr.src = ifr.dataset.src;
-  }, 750);
+  }, 1250);
 
   syncQuestion(
     { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q), ready: true },
@@ -1483,7 +1486,7 @@ function launchKushkulMusalsal() {
   setTimeout(() => {
     const kif = document.getElementById('kushkul-video-iframe');
     if (kif && kif.dataset && kif.dataset.src) kif.src = kif.dataset.src;
-  }, 750);
+  }, 1250);
   syncQuestion(
     { q:'🎭 شاهد المقطع وأجب!', type:'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
     '🎭 كشكول', 0, 30, 'normal'
