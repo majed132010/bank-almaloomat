@@ -1065,7 +1065,11 @@ function startGame() {
   };
 
   speedLoc = {stage:'silver', cat: Math.floor(Math.random() * gameDB.silver.length), q: Math.floor(Math.random() * 3)};
-  bankLoc = {stage:'gold', cat: 1, q: 2};
+  bankLoc = {
+    stage: 'gold',
+    cat: Math.floor(Math.random() * 3),
+    q: Math.floor(Math.random() * 3)
+  };
 
   goTo('game');
   sfx.main();
@@ -1248,26 +1252,18 @@ async function openModal(ci, qi) {
   const isKushkul = stage === 'silver' && ci === kushkulLoc.ci && qi === kushkulLoc.qi && !isBank;
 
   if (isSpeed || isBank || isKushkul) {
-    if (isKushkul) {
+    if (isKushkul || isBank) {
       document.getElementById('modal-surprise').style.display = 'none';
+      sfx.bankSurprise();
       launchModal(isSpeed, isBank, qItem, isKushkul);
     } else {
       const sc = document.getElementById('modal-surprise'); sc.style.display = 'flex';
       spawnParticles('surprise-particles');
-      if (isSpeed) {
-        document.getElementById('surprise-icon').textContent = '⚡';
-        document.getElementById('surprise-text').textContent = 'دقيقة السرعة!';
-        document.getElementById('surprise-text').style.color = 'var(--danger)';
-        sfx.startSpeed(220);
-        syncSurprise('⚡', 'دقيقة السرعة!', 'var(--danger)');
-      } else {
-        document.getElementById('surprise-icon').textContent = '🏛️';
-        document.getElementById('surprise-text').textContent = 'البنك!';
-        document.getElementById('surprise-text').style.color = 'var(--gold-lt)';
-        sfx.bankSurprise();
-        setTimeout(() => sfx.startBank(), 1200);
-        syncSurprise('🏛️', 'البنك!', 'var(--gold-lt)');
-      }
+      document.getElementById('surprise-icon').textContent = '⚡';
+      document.getElementById('surprise-text').textContent = 'دقيقة السرعة!';
+      document.getElementById('surprise-text').style.color = 'var(--danger)';
+      sfx.startSpeed(220);
+      syncSurprise('⚡', 'دقيقة السرعة!', 'var(--danger)');
       setTimeout(() => { sc.style.display = 'none'; launchModal(isSpeed, isBank, qItem, isKushkul); }, 5000);
     }
   } else {
@@ -1344,7 +1340,7 @@ function showBankBet() {
   document.getElementById('bank-bet-zone').style.display = 'block';
 }
 
-function confirmBankBet() {
+async function confirmBankBet() {
   const p = players.find(x => x.id === responder);
   const bv = parseInt(document.getElementById('bank-bet-input').value);
   const cv = gameDB[cellRef.stage][cellRef.ci].questions[cellRef.qi].v;
@@ -1355,11 +1351,44 @@ function confirmBankBet() {
   bankBet = bv; bankMode = true;
   document.getElementById('modal-bank').style.display = 'none';
 
+  const BANK_INTRO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/WhatsApp_Video_2026-07-16_at_02.34.18_tv8x1z.mp4';
+  const mq = document.getElementById('modal-q');
+  const ma = document.getElementById('modal-a');
+  mq.innerHTML = '';
+  ma.innerHTML = `
+    <video id="bank-intro-video" src="${BANK_INTRO_URL}" autoplay playsinline
+      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+    </video>`;
+  ma.classList.add('show');
+
+  const bankIntroState = buildGameStateForSync();
+  bankIntroState.question = {
+    active: true,
+    type: 'video',
+    videoUrl: BANK_INTRO_URL,
+    q: '🏛️ البنك!',
+    parts: [],
+    timerSecs: 20
+  };
+  await syncToFirebase(bankIntroState);
+
+  const bankIntroTimeout = setTimeout(() => {
+    const vid = document.getElementById('bank-intro-video');
+    if (vid) { vid.remove(); launchBankVideoMain(); }
+  }, 20000);
+  document.getElementById('bank-intro-video').onended = function() {
+    clearTimeout(bankIntroTimeout);
+    this.remove();
+    launchBankVideoMain();
+  };
+}
+
+function launchBankVideoMain() {
   const video = getRandomVideo();
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
 
-  mq.innerHTML = `<div style="font-size:13pt;color:var(--gold);margin-bottom:8px">🎬 رهانك: ${bv} نقطة — شاهد المقطع وأجب!</div>`;
+  mq.innerHTML = `<div style="font-size:13pt;color:var(--gold);margin-bottom:8px">🎬 رهانك: ${bankBet} نقطة — شاهد المقطع وأجب!</div>`;
 
   ma.innerHTML = `
     <iframe id="bank-video-iframe"
@@ -1375,7 +1404,7 @@ function confirmBankBet() {
     <div id="bank-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>
   `;
   ma.classList.add('show');
-  // انتظر 2 ثانية حتى يحمل المتسابق الصفحة ثم ابدأ الفيديو عند الطرفين
+
   setTimeout(() => {
     const ifr = document.getElementById('bank-video-iframe');
     if (ifr && ifr.dataset && ifr.dataset.src) ifr.src = ifr.dataset.src;
@@ -1383,7 +1412,7 @@ function confirmBankBet() {
 
   syncQuestion(
     { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q), ready: true },
-    '🎬 سؤال البنك', bv, 30, 'normal'
+    '🎬 سؤال البنك', bankBet, 30, 'normal'
   );
   resetBuzzer();
 
