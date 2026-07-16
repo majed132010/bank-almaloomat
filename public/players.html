@@ -350,6 +350,13 @@ function applyStateToPlayer(state){
 
     // Render media / puzzle UI when provided
     const media = document.getElementById('p-media'); if(media) media.innerHTML = '';
+      if(q.type === 'video' && q.videoUrl) {
+        const questionArea = document.querySelector('.play-screen');
+        if(questionArea) questionArea.innerHTML = `
+          <video src="${q.videoUrl}" autoplay playsinline controls
+            style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+          </video>`;
+      }
       if(q.type === 'image' && media){
         media.innerHTML = `<img src="${q.imageUrl || ''}" style="max-width:100%;border-radius:12px;margin:10px auto;display:block;object-fit:cover;">`;
       }

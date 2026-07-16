@@ -75,6 +75,9 @@ async function syncQuestion(qItem, cat, value, timerSecs, timerMode) {
     timerSecs,
     timerMode
   };
+  if (qItem.type) state.question.type = qItem.type;
+  if (qItem.videoUrl) state.question.videoUrl = qItem.videoUrl;
+  if (qItem.parts) state.question.parts = qItem.parts;
   state.buzzer = { winnerId: null, winnerName: null, ts: 0 };
   currentTextAnswers = {};
   await fbPut(FB_URL_TEXT_ANS, {});
@@ -1286,9 +1289,6 @@ async function launchModal(isSpeed, isBank, qItem) {
     judge.style.display = 'none'; speed.style.display = 'none';
     buildResponderBtns();
     await typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك الاستثمارية\nاسأل الفارس عن رغبته الاستراتيجية الآن:', 35);
-    const a = document.getElementById('modal-a');
-    a.textContent = 'سؤال الرهان: ما اسم عاصمة سلطنة عمان؟  [ مسقط ]';
-    a.classList.add('show');
     startTimer(45, 'bank');
   } else {
     resp.style.display = 'block'; bank.style.display = 'none';
