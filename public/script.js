@@ -1451,7 +1451,7 @@ function launchBankVideoMain() {
   );
   resetBuzzer();
 
-  window._bankVideoTimer = setTimeout(() => showBankVideoQuestions(video), 30000);
+  window._bankVideoTimer = setTimeout(() => showBankVideoQuestions(video), 10000);
   window._currentBankVideo = video;
 
   document.getElementById('modal-judge').style.display = 'flex';
@@ -1596,7 +1596,7 @@ function launchKushkulMusalsal() {
     '🎭 كشكول', 0, 30, 'normal'
   );
   resetBuzzer();
-  window._kushkulVideoTimer = setTimeout(() => showKushkulQuestions(video), 30000);
+  window._kushkulVideoTimer = setTimeout(() => showKushkulQuestions(video), 10000);
   window._currentKushkulVideo = video;
   document.getElementById('modal-judge').style.display = 'flex';
   document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
