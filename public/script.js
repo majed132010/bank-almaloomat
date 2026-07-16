@@ -1438,7 +1438,7 @@ function launchKushkulSequence() {
   ma.classList.add('show');
   // إرسال فيديو كشكول للمتسابقين
   syncQuestion(
-    { q:'🎭 كشكول!', type:'video', videoUrl: KUSHKUL_VIDEO_URL, parts:[] },
+    { q:'🎭 كشكول!', type:'video', videoUrl: KUSHKUL_VIDEO_URL, parts:[], sendVideo: true },
     '🎭 كشكول', 0, 31, 'normal'
   );
   document.getElementById('kushkul-intro-video').onended = function() {
@@ -1541,6 +1541,7 @@ function closeModal() {
   clearInterval(cdTimer);
   clearInterval(speedTimerInterval);
   sfx.stopAll();
+  if (speedTimerInterval) { clearInterval(speedTimerInterval); speedTimerInterval = null; }
   document.getElementById('modal-surprise').style.display = 'none';
   document.getElementById('modal-overlay').style.display = 'none';
   updateBuzzerUI(null);
