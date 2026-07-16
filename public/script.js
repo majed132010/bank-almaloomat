@@ -1292,11 +1292,9 @@ async function launchModal(isSpeed, isBank, qItem, isKushkul = false) {
     syncQuestion({q: spq.q || '⚡ جولة السرعة'}, '⚡ دقيقة السرعة', 100, 120, 'speed');
     startSpeedTempoEscalator();
   } else if (isBank) {
-    resp.style.display = 'block'; bank.style.display = 'block';
+    resp.style.display = 'none'; bank.style.display = 'none';
     judge.style.display = 'none'; speed.style.display = 'none';
-    buildResponderBtns();
-    await typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك الاستثمارية\nاسأل الفارس عن رغبته الاستراتيجية الآن:', 35);
-    startTimer(45, 'bank');
+    await launchBankIntroVideo();
   } else if (isKushkul) {
     resp.style.display = 'block'; bank.style.display = 'none';
     judge.style.display = 'none'; speed.style.display = 'none';
@@ -1340,18 +1338,9 @@ function showBankBet() {
   document.getElementById('bank-bet-zone').style.display = 'block';
 }
 
-async function confirmBankBet() {
-  const p = players.find(x => x.id === responder);
-  const bv = parseInt(document.getElementById('bank-bet-input').value);
-  const cv = gameDB[cellRef.stage][cellRef.ci].questions[cellRef.qi].v;
-  if (!(p.score < cv && bv === p.score)) {
-    if (isNaN(bv) || bv < cv) { alert(`الحد الأدنى ${cv} ن!`); return; }
-    if (bv > p.score) { alert('يتجاوز الرصيد!'); return; }
-  }
-  bankBet = bv; bankMode = true;
-  document.getElementById('modal-bank').style.display = 'none';
+const BANK_INTRO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/WhatsApp_Video_2026-07-16_at_02.34.18_tv8x1z.mp4';
 
-  const BANK_INTRO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/WhatsApp_Video_2026-07-16_at_02.34.18_tv8x1z.mp4';
+async function launchBankIntroVideo() {
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
   mq.innerHTML = '';
@@ -1372,15 +1361,38 @@ async function confirmBankBet() {
   };
   await syncToFirebase(bankIntroState);
 
-  const bankIntroTimeout = setTimeout(() => {
-    const vid = document.getElementById('bank-intro-video');
-    if (vid) { vid.remove(); launchBankVideoMain(); }
-  }, 20000);
-  document.getElementById('bank-intro-video').onended = function() {
-    clearTimeout(bankIntroTimeout);
-    this.remove();
-    launchBankVideoMain();
-  };
+  return new Promise(resolve => {
+    const bankIntroTimeout = setTimeout(() => {
+      const vid = document.getElementById('bank-intro-video');
+      if (vid) vid.remove();
+      resolve();
+    }, 20000);
+    document.getElementById('bank-intro-video').onended = function() {
+      clearTimeout(bankIntroTimeout);
+      this.remove();
+      resolve();
+    };
+  }).then(() => {
+    const resp = document.getElementById('modal-responder');
+    const bank = document.getElementById('modal-bank');
+    resp.style.display = 'block';
+    bank.style.display = 'block';
+    buildResponderBtns();
+    typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك\nاختر الفارس وحدد رهانه:', 35);
+  });
+}
+
+function confirmBankBet() {
+  const p = players.find(x => x.id === responder);
+  const bv = parseInt(document.getElementById('bank-bet-input').value);
+  const cv = gameDB[cellRef.stage][cellRef.ci].questions[cellRef.qi].v;
+  if (!(p.score < cv && bv === p.score)) {
+    if (isNaN(bv) || bv < cv) { alert(`الحد الأدنى ${cv} ن!`); return; }
+    if (bv > p.score) { alert('يتجاوز الرصيد!'); return; }
+  }
+  bankBet = bv; bankMode = true;
+  document.getElementById('modal-bank').style.display = 'none';
+  launchBankVideoMain();
 }
 
 function launchBankVideoMain() {
@@ -1428,7 +1440,7 @@ function stopBankVideo() {
   if (window._bankVideoTimer) { clearTimeout(window._bankVideoTimer); window._bankVideoTimer = null; }
   const ifr = document.getElementById('bank-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*'); } catch(e){}
     setTimeout(() => { if (ifr) ifr.src = 'about:blank'; }, 300);
   }
   if (window._currentBankVideo) showBankVideoQuestions(window._currentBankVideo);
@@ -1437,7 +1449,7 @@ function stopBankVideo() {
 function showBankVideoQuestions(video) {
   const ifr = document.getElementById('bank-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}','*'); } catch(e){}
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}','*'); } catch(e){}
     ifr.style.display = 'none';
   }
   const stopBtn = document.getElementById('bank-video-stop-btn');
