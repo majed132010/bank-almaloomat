@@ -975,6 +975,7 @@ const catIcons = {
 let players = [], stage = 'silver', responder = null, cellRef = null;
 let speedLoc = {stage:'silver',cat:0,q:0}, bankLoc = {stage:'gold',cat:1,q:2};
 let bankMode = false, bankBet = 0, speedIdx = 0, diamondState = [], diamondPlayers = [];
+let kushkulLoc = {ci: 0, qi: 0};
 let currentTextAnswers = {};
 let gameDB = null;
 let selectedBankIndex = 0;
@@ -1058,6 +1059,10 @@ function startGame() {
     : selectedBankIndex;
   const selectedBank = questionBanks[bankIdx];
   gameDB = buildDB(selectedBank);
+  kushkulLoc = {
+    ci: Math.floor(Math.random() * 3),
+    qi: Math.floor(Math.random() * 3)
+  };
 
   speedLoc = {stage:'silver', cat: Math.floor(Math.random() * gameDB.silver.length), q: Math.floor(Math.random() * 3)};
   bankLoc = {stage:'gold', cat: 1, q: 2};
@@ -1240,8 +1245,9 @@ async function openModal(ci, qi) {
 
   const isSpeed = (stage === speedLoc.stage && ci === speedLoc.cat && qi === speedLoc.q) || (stage === 'diamond' && qItem.isSpeedRound);
   const isBank = (stage === bankLoc.stage && ci === bankLoc.cat && qi === bankLoc.q);
+  const isKushkul = stage === 'silver' && ci === kushkulLoc.ci && qi === kushkulLoc.qi && !isBank;
 
-  if (isSpeed || isBank) {
+  if (isSpeed || isBank || isKushkul) {
     const sc = document.getElementById('modal-surprise'); sc.style.display = 'flex';
     spawnParticles('surprise-particles');
     if (isSpeed) {
@@ -1250,6 +1256,12 @@ async function openModal(ci, qi) {
       document.getElementById('surprise-text').style.color = 'var(--danger)';
       sfx.startSpeed(220);
       syncSurprise('⚡', 'دقيقة السرعة!', 'var(--danger)');
+    } else if (isKushkul) {
+      document.getElementById('surprise-icon').textContent = '🎭';
+      document.getElementById('surprise-text').textContent = 'كشكول!';
+      document.getElementById('surprise-text').style.color = '#06b6d4';
+      sfx.bankSurprise();
+      syncSurprise('🎭', 'كشكول!', '#06b6d4');
     } else {
       document.getElementById('surprise-icon').textContent = '🏛️';
       document.getElementById('surprise-text').textContent = 'البنك!';
@@ -1290,6 +1302,11 @@ async function launchModal(isSpeed, isBank, qItem) {
     buildResponderBtns();
     await typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك الاستثمارية\nاسأل الفارس عن رغبته الاستراتيجية الآن:', 35);
     startTimer(45, 'bank');
+  } else if (isKushkul) {
+    resp.style.display = 'block'; bank.style.display = 'none';
+    judge.style.display = 'none'; speed.style.display = 'none';
+    buildResponderBtns();
+    launchKushkulSequence();
   } else {
     resp.style.display = 'block'; bank.style.display = 'none';
     judge.style.display = 'flex'; speed.style.display = 'none';
@@ -1405,6 +1422,87 @@ function showBankVideoQuestions(video) {
   syncQuestion(
     { q: 'أجب على الأسئلة التالية:', type: 'video-parts', parts: video.parts.map(p=>p.q) },
     '🎬 أسئلة البنك', bankBet, 45, 'bank'
+  );
+}
+
+const KUSHKUL_VIDEO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/v1784158627/WhatsApp_Video_2026-07-16_at_02.30.27_zy0zne.mp4';
+
+function launchKushkulSequence() {
+  const mq = document.getElementById('modal-q');
+  const ma = document.getElementById('modal-a');
+  mq.innerHTML = '';
+  ma.innerHTML = `
+    <video id="kushkul-intro-video" src="${KUSHKUL_VIDEO_URL}" autoplay playsinline
+      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+    </video>`;
+  ma.classList.add('show');
+  // إرسال فيديو كشكول للمتسابقين
+  syncQuestion(
+    { q:'🎭 كشكول!', type:'video', videoUrl: KUSHKUL_VIDEO_URL, parts:[] },
+    '🎭 كشكول', 0, 31, 'normal'
+  );
+  document.getElementById('kushkul-intro-video').onended = function() {
+    this.remove();
+    launchKushkulMusalsal();
+  };
+}
+
+function launchKushkulMusalsal() {
+  const video = getRandomVideo();
+  const mq = document.getElementById('modal-q');
+  const ma = document.getElementById('modal-a');
+  mq.innerHTML = '<div style="font-size:13pt;color:#06b6d4;font-weight:900">🎭 كشكول — شاهد المقطع وأجب!</div>';
+  ma.innerHTML = `
+    <iframe id="kushkul-video-iframe"
+      src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+      style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
+      allow="autoplay;encrypted-media" allowfullscreen></iframe>
+    <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
+      <button onclick="stopKushkulVideo()"
+        style="padding:8px 16px;border-radius:10px;background:#ef4444;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700">
+        ⏹️ إيقاف الفيديو
+      </button>
+    </div>
+    <div id="kushkul-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>`;
+  ma.classList.add('show');
+  syncQuestion(
+    { q:'🎭 شاهد المقطع وأجب!', type:'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
+    '🎭 كشكول', 0, 30, 'normal'
+  );
+  resetBuzzer();
+  window._kushkulVideoTimer = setTimeout(() => showKushkulQuestions(video), 30000);
+  window._currentKushkulVideo = video;
+  document.getElementById('modal-judge').style.display = 'flex';
+  document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
+  startTimer(30, 'normal');
+}
+
+function stopKushkulVideo() {
+  if (window._kushkulVideoTimer) { clearTimeout(window._kushkulVideoTimer); window._kushkulVideoTimer = null; }
+  const ifr = document.getElementById('kushkul-video-iframe');
+  if (ifr) {
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}','*'); } catch(e){}
+    ifr.src = 'about:blank';
+  }
+  if (window._currentKushkulVideo) showKushkulQuestions(window._currentKushkulVideo);
+}
+
+function showKushkulQuestions(video) {
+  const ifr = document.getElementById('kushkul-video-iframe');
+  if (ifr) ifr.style.display = 'none';
+  const partsDiv = document.getElementById('kushkul-video-parts');
+  if (partsDiv) {
+    partsDiv.style.display = 'block';
+    partsDiv.innerHTML = video.parts.map((part, i) =>
+      `<div style="padding:10px 14px;margin-bottom:8px;border-radius:10px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);direction:rtl">
+        <div style="color:#06b6d4;font-weight:700">السؤال ${i+1}: ${part.q}</div>
+        <div style="color:#10b981;font-weight:900;margin-top:4px">✓ ${part.a}</div>
+      </div>`
+    ).join('');
+  }
+  syncQuestion(
+    { q:'أجب على الأسئلة التالية:', type:'video-parts', parts: video.parts.map(p=>p.q) },
+    '🎭 كشكول', 0, 45, 'normal'
   );
 }
 
@@ -1916,6 +2014,7 @@ window.confirmBankBet = confirmBankBet;
 window.judge = judge;
 window.closeModal = closeModal;
 window.showQRCode = showQRCode;
+window.stopKushkulVideo = stopKushkulVideo;
 window.hideQRCode = hideQRCode;
 window.resetBuzzer = resetBuzzer;
 window.revealAnswer = revealAnswer;
