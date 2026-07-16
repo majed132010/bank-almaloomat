@@ -115,6 +115,47 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
   .q-text{font-size:14pt}
 }
 </style>
+<script>
+// Wake Lock - منع إطفاء شاشة الجوال
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        setTimeout(requestWakeLock, 1000);
+      });
+    } else {
+      // fallback للأجهزة التي لا تدعم Wake Lock
+      startNoSleepFallback();
+    }
+  } catch(e) {
+    startNoSleepFallback();
+  }
+}
+
+function startNoSleepFallback() {
+  const vid = document.createElement('video');
+  vid.setAttribute('loop', '');
+  vid.setAttribute('playsinline', '');
+  vid.setAttribute('muted', '');
+  vid.style.display = 'none';
+  vid.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAA';
+  document.body.appendChild(vid);
+  vid.play().catch(()=>{});
+}
+
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') requestWakeLock();
+});
+
+window.addEventListener('load', () => {
+  document.addEventListener('click', function initWakeLock() {
+    requestWakeLock();
+    document.removeEventListener('click', initWakeLock);
+  }, {once: true});
+});
+</script>
 </head>
 <body class="stage-silver">
 
@@ -439,7 +480,7 @@ function applyStateToPlayer(state){
               vid.src = q.videoUrl;
               vid.autoplay = true;
               vid.playsInline = true;
-              vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000';
+              vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;z-index:9999;background:#000;display:block;max-width:100vw;max-height:100vh';
               vid.onended = function() { this.remove(); };
               document.body.appendChild(vid);
             }
