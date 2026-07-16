@@ -237,6 +237,22 @@ function startRoomSync(){
   });
 }
 
+function preloadGameVideos() {
+  const urls = [
+    'https://res.cloudinary.com/dz9gy0rsr/video/upload/v1784158627/WhatsApp_Video_2026-07-16_at_02.30.27_zy0zne.mp4',
+    'https://res.cloudinary.com/dz9gy0rsr/video/upload/WhatsApp_Video_2026-07-16_at_02.34.18_tv8x1z.mp4'
+  ];
+  urls.forEach(url => {
+    const vid = document.createElement('video');
+    vid.src = url;
+    vid.preload = 'auto';
+    vid.style.display = 'none';
+    vid.id = url.includes('02.30') ? 'preload-kushkul' : 'preload-bank';
+    document.body.appendChild(vid);
+  });
+}
+preloadGameVideos();
+
 function startListening(code){
   const room = normalizeRoom(code);
   if(room.length !== 4) return;
@@ -407,17 +423,26 @@ function applyStateToPlayer(state){
             vid.style.display = 'none';
             document.body.appendChild(vid);
           } else {
-            // تشغيل فعلي
-            const existingVid = document.getElementById('bank-intro-video-player');
-            if(existingVid) existingVid.remove();
-            const vid = document.createElement('video');
-            vid.id = 'bank-intro-video-player';
-            vid.src = q.videoUrl;
-            vid.autoplay = true;
-            vid.playsInline = true;
-            vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000';
-            vid.onended = function() { this.remove(); };
-            document.body.appendChild(vid);
+            // تشغيل فعلي — حاول استخدام الفيديو المحمّل مسبقًا إن وُجد
+            const preloadId = q.videoUrl.includes('02.30') ? 'preload-kushkul' : 'preload-bank';
+            const preloadedVid = document.getElementById(preloadId);
+            if(preloadedVid) {
+              preloadedVid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000;display:block';
+              preloadedVid.id = 'bank-intro-video-player';
+              try { preloadedVid.play(); } catch(e) {}
+              preloadedVid.onended = function() { this.remove(); };
+            } else {
+              const existingVid = document.getElementById('bank-intro-video-player');
+              if(existingVid) existingVid.remove();
+              const vid = document.createElement('video');
+              vid.id = 'bank-intro-video-player';
+              vid.src = q.videoUrl;
+              vid.autoplay = true;
+              vid.playsInline = true;
+              vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000';
+              vid.onended = function() { this.remove(); };
+              document.body.appendChild(vid);
+            }
           }
         } else {
           // فيديو مسلسل عادي في iframe
