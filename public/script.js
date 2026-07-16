@@ -1381,6 +1381,8 @@ const BANK_INTRO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/WhatsA
 async function launchBankIntroVideo() {
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
+  // إيقاف الميكروفون مؤقتاً
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = false);
   mq.innerHTML = '';
 
   // شغل فيديو البنك عند الجميع فوراً
@@ -1434,6 +1436,8 @@ async function launchBankIntroVideo() {
       resolve();
     };
   }).then(() => {
+    // إعادة الميكروفون
+    if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
     const resp = document.getElementById('modal-responder');
     const bank = document.getElementById('modal-bank');
     resp.style.display = 'block';
@@ -1459,6 +1463,8 @@ function confirmBankBet() {
 function launchBankVideoMain() {
   const video = getRandomVideo();
   const mq = document.getElementById('modal-q');
+  // إيقاف الميكروفون مؤقتاً
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = false);
   const ma = document.getElementById('modal-a');
 
   mq.innerHTML = `<div style="font-size:13pt;color:var(--gold);margin-bottom:8px">🎬 رهانك: ${bankBet} نقطة — شاهد المقطع وأجب!</div>`;
@@ -1508,6 +1514,8 @@ function stopBankVideo() {
 }
 
 function showBankVideoQuestions(video) {
+  // إعادة الميكروفون
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
   const ifr = document.getElementById('bank-video-iframe');
   if (ifr) {
     try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
@@ -1538,6 +1546,8 @@ const KUSHKUL_VIDEO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/v17
 async function launchKushkulSequence() {
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
+  // إيقاف الميكروفون مؤقتاً
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = false);
   mq.innerHTML = '<div style="font-size:14pt;color:#06b6d4;font-weight:900">🎭 كشكول!</div>';
 
   // شغل فيديو كشكول عند الجميع فوراً
@@ -1593,6 +1603,8 @@ async function launchKushkulSequence() {
 }
 
 function showKushkulMusalButton() {
+  // إعادة الميكروفون
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
   mq.innerHTML = '<div style="font-size:14pt;color:#06b6d4;font-weight:900">🎭 كشكول — المسلسل</div>';
@@ -1609,6 +1621,8 @@ function showKushkulMusalButton() {
 function launchKushkulMusalsal() {
   const video = getRandomVideo();
   const mq = document.getElementById('modal-q');
+  // إيقاف الميكروفون مؤقتاً
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = false);
   const ma = document.getElementById('modal-a');
   mq.innerHTML = '<div style="font-size:13pt;color:#06b6d4;font-weight:900">🎭 كشكول — شاهد المقطع وأجب!</div>';
   ma.innerHTML = `
@@ -1652,6 +1666,8 @@ function stopKushkulVideo() {
 }
 
 function showKushkulQuestions(video) {
+  // إعادة الميكروفون
+  if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
   const ifr = document.getElementById('kushkul-video-iframe');
   if (ifr) {
     try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
