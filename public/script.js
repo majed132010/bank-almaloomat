@@ -917,6 +917,33 @@ const questionBanks = [
 function getRandomBank() { return questionBanks[Math.floor(Math.random() * questionBanks.length)]; }
 const defaultDB = questionBanks[0];
 
+const videoQuestions = [
+  { type:'video', videoUrl:'https://www.youtube.com/embed/bCh7L3KDQ10',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'سفاح الجيزة'},{q:'من هو بطل المسلسل؟',a:'أحمد فهمي'},{q:'في أي عام عُرض؟',a:'2023'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/kkj673CcxfI',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'لن أعيش في جلباب أبي'},{q:'من هو بطل المسلسل؟',a:'نور الشريف'},{q:'في أي عام عُرض؟',a:'1996'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/xFB8RmEBdJ8',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'رأفت الهجان'},{q:'من هو بطل المسلسل؟',a:'محمود عبد العزيز'},{q:'ما موضوع المسلسل؟',a:'جاسوس مصري زُرع في إسرائيل'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/qmu3H42LnrY',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'الفتوة'},{q:'من هو بطل المسلسل؟',a:'ياسر جلال'},{q:'في أي عام عُرض؟',a:'2020'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/gO1X6xhsAuY',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'لعبة نيوتن'},{q:'من هي بطلة المسلسل؟',a:'منى زكي'},{q:'من أخرج المسلسل؟',a:'تامر محسن'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/Y1OXiOs92hs',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'الاختيار'},{q:'من هو بطل المسلسل؟',a:'أمير كرارة'},{q:'ماذا يحكي المسلسل؟',a:'قصة الشهيد أحمد منسي والتصدي للإرهاب في سيناء'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/f6yoxTfi83I',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'لدواعي أمنية'},{q:'من هو بطل المسلسل؟',a:'كمال الشناوي وماجد المصري'},{q:'في أي عام عُرض؟',a:'2002'}]},
+  { type:'video', videoUrl:'https://www.youtube.com/embed/8kB07NXRcSo',
+    parts:[{q:'ما اسم هذا المسلسل؟',a:'شهادة معاملة أطفال'},{q:'من هو بطل المسلسل؟',a:'محمد هنيدي'},{q:'في أي عام عُرض؟',a:'2025'}]}
+];
+let usedVideoIndexes = [];
+function getRandomVideo() {
+  if (usedVideoIndexes.length >= videoQuestions.length) usedVideoIndexes = [];
+  const remaining = videoQuestions.map((_,i)=>i).filter(i=>!usedVideoIndexes.includes(i));
+  const idx = remaining[Math.floor(Math.random()*remaining.length)];
+  usedVideoIndexes.push(idx);
+  return videoQuestions[idx];
+}
+
 // ══════════════════════════════════════════
 //  CATEGORY ICONS
 // ══════════════════════════════════════════
@@ -1308,10 +1335,77 @@ function confirmBankBet() {
     if (bv > p.score) { alert('يتجاوز الرصيد!'); return; }
   }
   bankBet = bv; bankMode = true;
-  typewrite(document.getElementById('modal-q'), `💰 سؤال رهان البنك\nما اسم عاصمة سلطنة عمان الحالية؟\n[ الرهان المثبت: ${bv} نقطة ]`, 35);
   document.getElementById('modal-bank').style.display = 'none';
+
+  const video = getRandomVideo();
+  const mq = document.getElementById('modal-q');
+  const ma = document.getElementById('modal-a');
+
+  mq.innerHTML = `<div style="font-size:13pt;color:var(--gold);margin-bottom:8px">🎬 رهانك: ${bv} نقطة — شاهد المقطع وأجب!</div>`;
+
+  ma.innerHTML = `
+    <iframe id="bank-video-iframe"
+      src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+      style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
+      allow="autoplay;encrypted-media" allowfullscreen></iframe>
+    <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
+      <button id="bank-video-stop-btn" onclick="stopBankVideo()"
+        style="padding:8px 16px;border-radius:10px;background:#ef4444;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700">
+        ⏹️ إيقاف الفيديو
+      </button>
+    </div>
+    <div id="bank-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>
+  `;
+  ma.classList.add('show');
+
+  syncQuestion(
+    { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
+    '🎬 سؤال البنك', bv, 30, 'normal'
+  );
+  resetBuzzer();
+
+  window._bankVideoTimer = setTimeout(() => showBankVideoQuestions(video), 30000);
+  window._currentBankVideo = video;
+
   document.getElementById('modal-judge').style.display = 'flex';
   document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
+  startTimer(30, 'bank');
+}
+
+function stopBankVideo() {
+  if (window._bankVideoTimer) { clearTimeout(window._bankVideoTimer); window._bankVideoTimer = null; }
+  const ifr = document.getElementById('bank-video-iframe');
+  if (ifr) {
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
+    setTimeout(() => { if (ifr) ifr.src = 'about:blank'; }, 300);
+  }
+  if (window._currentBankVideo) showBankVideoQuestions(window._currentBankVideo);
+}
+
+function showBankVideoQuestions(video) {
+  const ifr = document.getElementById('bank-video-iframe');
+  if (ifr) {
+    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}','*'); } catch(e){}
+    ifr.style.display = 'none';
+  }
+  const stopBtn = document.getElementById('bank-video-stop-btn');
+  if (stopBtn) stopBtn.style.display = 'none';
+
+  const partsDiv = document.getElementById('bank-video-parts');
+  if (partsDiv) {
+    partsDiv.style.display = 'block';
+    partsDiv.innerHTML = video.parts.map((part, i) =>
+      `<div style="padding:10px 14px;margin-bottom:8px;border-radius:10px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.3);direction:rtl">
+        <div style="color:#f0a500;font-weight:700;font-size:10pt">السؤال ${i+1}: ${part.q}</div>
+        <div style="color:#10b981;font-weight:900;margin-top:4px">✓ ${part.a}</div>
+      </div>`
+    ).join('');
+  }
+
+  syncQuestion(
+    { q: 'أجب على الأسئلة التالية:', type: 'video-parts', parts: video.parts.map(p=>p.q) },
+    '🎬 أسئلة البنك', bankBet, 45, 'bank'
+  );
 }
 
 function freezeBank() {
@@ -1509,7 +1603,7 @@ function buildSpeedBtns() {
   list.forEach((p, i) => {
     const b = document.createElement('button'); b.className = 'speed-btn';
     b.textContent = `✓ ${p.name} +100`;
-    b.onclick = () => { sfx.correct(); p.score += 100; refreshScores(); speedIdx++; loadSpeedQ(); };
+    b.onclick = () => { sfx.correct(); p.score += 100; refreshScores(); speedIdx++; resetBuzzer(); loadSpeedQ(); };
     c1.appendChild(b);
     if (stage === 'diamond') {
       const bw = document.createElement('button'); bw.className = 'speed-btn';
@@ -1520,7 +1614,7 @@ function buildSpeedBtns() {
     }
   });
   const sk = document.createElement('button'); sk.className = 'speed-btn speed-skip'; sk.textContent = '⟶ تخطي';
-  sk.onclick = () => { tone(350, 'sine', .07, .05); speedIdx++; loadSpeedQ(); };
+  sk.onclick = () => { tone(350, 'sine', .07, .05); speedIdx++; resetBuzzer(); loadSpeedQ(); };
   c1.appendChild(sk);
 }
 
