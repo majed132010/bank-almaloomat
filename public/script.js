@@ -1374,7 +1374,20 @@ async function launchBankIntroVideo() {
       resolve();
     }, 20000);
 
-    document.getElementById('bank-intro-video').onended = async function() {
+    const bankVid = document.getElementById('bank-intro-video');
+    bankVid.addEventListener('timeupdate', async function() {
+      if(this.currentTime >= 20 || (this.duration && this.currentTime >= this.duration - 0.3)) {
+        this.removeEventListener('timeupdate', arguments.callee);
+        clearTimeout(bankIntroTimeout);
+        this.remove();
+        const clearState = buildGameStateForSync();
+        clearState.question = { active: false };
+        await syncToFirebase(clearState);
+        resolve();
+      }
+    });
+
+    bankVid.onended = async function() {
       clearTimeout(bankIntroTimeout);
       this.remove();
       const clearState = buildGameStateForSync();
@@ -1518,7 +1531,20 @@ async function launchKushkulSequence() {
     showKushkulMusalButton();
   }, 20000);
 
-  document.getElementById('kushkul-intro-video').onended = async function() {
+  const kushkulVid = document.getElementById('kushkul-intro-video');
+  kushkulVid.addEventListener('timeupdate', async function() {
+    if(this.currentTime >= 20 || (this.duration && this.currentTime >= this.duration - 0.3)) {
+      this.removeEventListener('timeupdate', arguments.callee);
+      clearTimeout(kushkulTimeout);
+      this.remove();
+      const clearState = buildGameStateForSync();
+      clearState.question = { active: false };
+      await syncToFirebase(clearState);
+      showKushkulMusalButton();
+    }
+  });
+
+  kushkulVid.onended = async function() {
     clearTimeout(kushkulTimeout);
     this.remove();
     const clearState = buildGameStateForSync();
