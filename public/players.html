@@ -351,10 +351,10 @@ function applyStateToPlayer(state){
     // Render media / puzzle UI when provided
     const media = document.getElementById('p-media'); if(media) media.innerHTML = '';
       if(q.type === 'video' && q.videoUrl) {
-        const questionArea = document.querySelector('.play-screen');
-        if(questionArea) questionArea.innerHTML = `
-          <video src="${q.videoUrl}" autoplay playsinline controls
-            style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+        if(media) media.innerHTML = `
+          <video src="${q.videoUrl}" autoplay playsinline
+            style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000"
+            onended="this.remove()">
           </video>`;
       }
       if(q.type === 'image' && media){
