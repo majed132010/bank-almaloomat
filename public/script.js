@@ -1343,13 +1343,9 @@ const BANK_INTRO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/WhatsA
 async function launchBankIntroVideo() {
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
-  mq.innerHTML = '';
-  ma.innerHTML = `
-    <video id="bank-intro-video" src="${BANK_INTRO_URL}" autoplay playsinline
-      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
-    </video>`;
-  ma.classList.add('show');
+  mq.innerHTML = '<div style="font-size:14pt;color:var(--gold);font-weight:900">🏛️ البنك!</div>';
 
+  // أرسل الرابط للمتسابقين ليبدأ التحميل
   const bankIntroState = buildGameStateForSync();
   bankIntroState.question = {
     active: true,
@@ -1357,36 +1353,71 @@ async function launchBankIntroVideo() {
     videoUrl: BANK_INTRO_URL,
     q: '🏛️ البنك!',
     parts: [],
-    timerSecs: 20
+    timerSecs: 20,
+    preload: true
   };
   await syncToFirebase(bankIntroState);
 
+  // أظهر زر التشغيل عند المقدم
+  ma.innerHTML = `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:60pt">🏛️</div>
+      <div style="color:var(--gold);font-size:16pt;font-weight:900;margin:16px 0">البنك!</div>
+      <button id="bank-play-btn" onclick="startBankIntroVideo()"
+        style="padding:14px 28px;border-radius:14px;background:#f0a500;color:#111;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:900;font-size:14pt">
+        ▶️ تشغيل فيديو البنك
+      </button>
+    </div>`;
+  ma.classList.add('show');
+
   return new Promise(resolve => {
-    const bankIntroTimeout = setTimeout(async () => {
-      const vid = document.getElementById('bank-intro-video');
-      if (vid) vid.remove();
-      const clearState = buildGameStateForSync();
-      clearState.question = { active: false };
-      await syncToFirebase(clearState);
-      resolve();
-    }, 20000);
-    document.getElementById('bank-intro-video').onended = async function() {
-      clearTimeout(bankIntroTimeout);
-      this.remove();
-      const clearState = buildGameStateForSync();
-      clearState.question = { active: false };
-      await syncToFirebase(clearState);
-      resolve();
-    };
-  }).then(() => {
-    const resp = document.getElementById('modal-responder');
-    const bank = document.getElementById('modal-bank');
-    resp.style.display = 'block';
-    bank.style.display = 'block';
-    buildResponderBtns();
-    typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك\nاختر الفارس وحدد رهانه:', 35);
+    window._bankIntroResolve = resolve;
   });
 }
+
+window.startBankIntroVideo = async function() {
+  const btn = document.getElementById('bank-play-btn');
+  if(btn) btn.style.display = 'none';
+  const mq = document.getElementById('modal-q');
+  const ma = document.getElementById('modal-a');
+  mq.innerHTML = '';
+
+  // أرسل إشارة للمتسابقين لبدء التشغيل
+  const bankIntroState = buildGameStateForSync();
+  bankIntroState.question = {
+    active: true,
+    type: 'video',
+    videoUrl: BANK_INTRO_URL,
+    q: '🏛️ البنك!',
+    parts: [],
+    timerSecs: 20,
+    preload: false
+  };
+  await syncToFirebase(bankIntroState);
+
+  ma.innerHTML = `
+    <video id="bank-intro-video" src="${BANK_INTRO_URL}" autoplay playsinline
+      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+    </video>`;
+
+  const bankIntroTimeout = setTimeout(async () => {
+    const vid = document.getElementById('bank-intro-video');
+    if(vid) vid.remove();
+    const clearState = buildGameStateForSync();
+    clearState.question = { active: false };
+    await syncToFirebase(clearState);
+    if(window._bankIntroResolve) { window._bankIntroResolve(); window._bankIntroResolve = null; }
+  }, 20000);
+
+  document.getElementById('bank-intro-video').onended = async function() {
+    clearTimeout(bankIntroTimeout);
+    this.remove();
+    const clearState = buildGameStateForSync();
+    clearState.question = { active: false };
+    await syncToFirebase(clearState);
+    if(window._bankIntroResolve) { window._bankIntroResolve(); window._bankIntroResolve = null; }
+  };
+};
 
 function confirmBankBet() {
   const p = players.find(x => x.id === responder);
@@ -1483,13 +1514,9 @@ const KUSHKUL_VIDEO_URL = 'https://res.cloudinary.com/dz9gy0rsr/video/upload/v17
 async function launchKushkulSequence() {
   const mq = document.getElementById('modal-q');
   const ma = document.getElementById('modal-a');
-  mq.innerHTML = '';
-  ma.innerHTML = `
-    <video id="kushkul-intro-video" src="${KUSHKUL_VIDEO_URL}" autoplay playsinline
-      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
-    </video>`;
-  ma.classList.add('show');
-  // إرسال فيديو كشكول للمتسابقين كامل الشاشة
+  mq.innerHTML = '<div style="font-size:14pt;color:#06b6d4;font-weight:900">🎭 كشكول!</div>';
+
+  // أرسل الرابط للمتسابقين ليبدأ التحميل
   const kushkulState = buildGameStateForSync();
   kushkulState.question = {
     active: true,
@@ -1497,19 +1524,60 @@ async function launchKushkulSequence() {
     videoUrl: KUSHKUL_VIDEO_URL,
     q: '🎭 كشكول!',
     parts: [],
-    timerSecs: 20
+    timerSecs: 20,
+    preload: true
   };
   await syncToFirebase(kushkulState);
+
+  // أظهر زر التشغيل عند المقدم
+  ma.innerHTML = `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:60pt">🎭</div>
+      <div style="color:#06b6d4;font-size:16pt;font-weight:900;margin:16px 0">كشكول!</div>
+      <button id="kushkul-play-btn" onclick="startKushkulIntroVideo()"
+        style="padding:14px 28px;border-radius:14px;background:#06b6d4;color:#111;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:900;font-size:14pt">
+        ▶️ تشغيل فيديو كشكول
+      </button>
+    </div>`;
+  ma.classList.add('show');
+}
+
+window.startKushkulIntroVideo = async function() {
+  const btn = document.getElementById('kushkul-play-btn');
+  if(btn) btn.style.display = 'none';
+  const mq = document.getElementById('modal-q');
+  const ma = document.getElementById('modal-a');
+  mq.innerHTML = '';
+
+  // إشارة للمتسابقين لبدء التشغيل
+  const kushkulState = buildGameStateForSync();
+  kushkulState.question = {
+    active: true,
+    type: 'video',
+    videoUrl: KUSHKUL_VIDEO_URL,
+    q: '🎭 كشكول!',
+    parts: [],
+    timerSecs: 20,
+    preload: false
+  };
+  await syncToFirebase(kushkulState);
+
+  ma.innerHTML = `
+    <video id="kushkul-intro-video" src="${KUSHKUL_VIDEO_URL}" autoplay playsinline
+      style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000">
+    </video>`;
+
   const kushkulTimeout = setTimeout(() => {
     const vid = document.getElementById('kushkul-intro-video');
-    if (vid) { vid.remove(); launchKushkulMusalsal(); }
+    if(vid) { vid.remove(); launchKushkulMusalsal(); }
   }, 20000);
+
   document.getElementById('kushkul-intro-video').onended = function() {
     clearTimeout(kushkulTimeout);
     this.remove();
     launchKushkulMusalsal();
   };
-}
+};
 
 function launchKushkulMusalsal() {
   const video = getRandomVideo();

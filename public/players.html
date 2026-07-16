@@ -394,18 +394,31 @@ function applyStateToPlayer(state){
     // Render media / puzzle UI when provided
     const media = document.getElementById('p-media'); if(media) media.innerHTML = '';
       if(q.type === 'video' && q.videoUrl) {
-        // إذا كان فيديو افتتاحي (بدون parts) يعرض كامل الشاشة
+        // إذا كان فيديو افتتاحي (بدون parts)
         if(!q.parts || q.parts.length === 0) {
-          const existingVid = document.getElementById('bank-intro-video-player');
-          if(existingVid) existingVid.remove();
-          const vid = document.createElement('video');
-          vid.id = 'bank-intro-video-player';
-          vid.src = q.videoUrl;
-          vid.autoplay = true;
-          vid.playsInline = true;
-          vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000';
-          vid.onended = function() { this.remove(); };
-          document.body.appendChild(vid);
+          if(q.preload) {
+            // تحميل مسبق بدون تشغيل
+            const existingVid = document.getElementById('bank-intro-video-player');
+            if(existingVid) existingVid.remove();
+            const vid = document.createElement('video');
+            vid.id = 'bank-intro-video-player';
+            vid.src = q.videoUrl;
+            vid.preload = 'auto';
+            vid.style.display = 'none';
+            document.body.appendChild(vid);
+          } else {
+            // تشغيل فعلي
+            const existingVid = document.getElementById('bank-intro-video-player');
+            if(existingVid) existingVid.remove();
+            const vid = document.createElement('video');
+            vid.id = 'bank-intro-video-player';
+            vid.src = q.videoUrl;
+            vid.autoplay = true;
+            vid.playsInline = true;
+            vid.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9999;background:#000';
+            vid.onended = function() { this.remove(); };
+            document.body.appendChild(vid);
+          }
         } else {
           // فيديو مسلسل عادي في iframe
           if(media) media.innerHTML = `
