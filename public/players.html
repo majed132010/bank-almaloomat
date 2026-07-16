@@ -211,18 +211,28 @@ function startRoomSync(){
   stateUnsub = onValue(ref(db, `${RP()}gameState`), (snap)=>{
     const state = snap.val();
     latestState = state;
+    console.log('state.players:', state?.players);
+
     const sel = document.getElementById('join-select');
     if(!sel) return;
-    if(!state || !state.players || state.players.length === 0){
+
+    const playersList = Array.isArray(state?.players) ? state.players.filter(Boolean) : [];
+    if(playersList.length === 0){
       sel.innerHTML = '<option value="">— في انتظار بدء المسابقة —</option>';
       return;
     }
-    if(!myPlayer){
-      const cur = sel.value;
-      sel.innerHTML = '<option value="">— اختر اسمك —</option>' +
-        state.players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-      if(cur) sel.value = cur;
+
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— اختر اسمك —</option>' +
+      playersList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+    if (cur && playersList.some(p => String(p.id) === String(cur))) {
+      sel.value = cur;
+    } else if (myPlayer) {
+      const matching = playersList.find(p => String(p.id) === String(myPlayer.id));
+      if (matching) sel.value = String(myPlayer.id);
     }
+
     if(myPlayer) applyStateToPlayer(state);
   });
 }
