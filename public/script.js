@@ -1364,7 +1364,7 @@ function confirmBankBet() {
 
   ma.innerHTML = `
     <iframe id="bank-video-iframe"
-      src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+      src="about:blank" data-src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
       style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
       allow="autoplay;encrypted-media" allowfullscreen></iframe>
     <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
@@ -1376,6 +1376,11 @@ function confirmBankBet() {
     <div id="bank-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>
   `;
   ma.classList.add('show');
+  // انتظر 2 ثانية حتى يحمل المتسابق الصفحة ثم ابدأ الفيديو عند الطرفين
+  setTimeout(() => {
+    const ifr = document.getElementById('bank-video-iframe');
+    if (ifr && ifr.dataset && ifr.dataset.src) ifr.src = ifr.dataset.src;
+  }, 2000);
 
   syncQuestion(
     { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q), ready: true },
@@ -1462,7 +1467,7 @@ function launchKushkulMusalsal() {
   mq.innerHTML = '<div style="font-size:13pt;color:#06b6d4;font-weight:900">🎭 كشكول — شاهد المقطع وأجب!</div>';
   ma.innerHTML = `
     <iframe id="kushkul-video-iframe"
-      src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+      src="about:blank" data-src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
       style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
       allow="autoplay;encrypted-media" allowfullscreen></iframe>
     <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
@@ -1473,6 +1478,11 @@ function launchKushkulMusalsal() {
     </div>
     <div id="kushkul-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>`;
   ma.classList.add('show');
+  // انتظر 2 ثانية ثم شغّل الفيديو لدى الجميع لمزامنة التشغيل
+  setTimeout(() => {
+    const kif = document.getElementById('kushkul-video-iframe');
+    if (kif && kif.dataset && kif.dataset.src) kif.src = kif.dataset.src;
+  }, 2000);
   syncQuestion(
     { q:'🎭 شاهد المقطع وأجب!', type:'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
     '🎭 كشكول', 0, 30, 'normal'
@@ -1709,8 +1719,9 @@ function buildSpeedBtns() {
   const list = stage === 'diamond' ? diamondPlayers : players;
   list.forEach((p, i) => {
     const b = document.createElement('button'); b.className = 'speed-btn';
-    b.textContent = `✓ ${p.name} +100`;
-    b.onclick = () => { sfx.correct(); p.score += 100; refreshScores(); speedIdx++; resetBuzzer(); loadSpeedQ(); };
+    const speedPoints = stage === 'silver' ? 25 : stage === 'gold' ? 50 : 100;
+    b.textContent = `✓ ${p.name} +${speedPoints}`;
+    b.onclick = () => { sfx.correct(); p.score += speedPoints; refreshScores(); speedIdx++; resetBuzzer(); loadSpeedQ(); };
     c1.appendChild(b);
     if (stage === 'diamond') {
       const bw = document.createElement('button'); bw.className = 'speed-btn';
