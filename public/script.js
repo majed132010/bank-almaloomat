@@ -1639,10 +1639,8 @@ function launchKushkulMusalsal() {
     <div id="kushkul-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>`;
   ma.classList.add('show');
   // انتظر قليلًا ثم شغّل الفيديو لدى الجميع لمزامنة التشغيل
-  setTimeout(() => {
-    const kif = document.getElementById('kushkul-video-iframe');
-    if (kif && kif.dataset && kif.dataset.src) kif.src = kif.dataset.src;
-  }, 1250);
+  const ifrK = document.getElementById('kushkul-video-iframe');
+  if (ifrK) ifrK.src = ifrK.dataset.src;
   syncQuestion(
     { q:'🎭 شاهد المقطع وأجب!', type:'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
     '🎭 كشكول', 0, 30, 'normal'
