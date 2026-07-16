@@ -1345,9 +1345,18 @@ function confirmBankBet() {
 
   ma.innerHTML = `
     <iframe id="bank-video-iframe"
-      src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+      src="about:blank" data-src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
       style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
       allow="autoplay;encrypted-media" allowfullscreen></iframe>
+    <button onclick="
+      const ifr=document.getElementById('bank-video-iframe');
+      ifr.src=ifr.dataset.src;
+      this.style.display='none';
+      window._bankVideoTimer=setTimeout(()=>showBankVideoQuestions(window._currentBankVideo),30000);
+      startTimer(30,'bank');
+    " style="padding:12px 24px;border-radius:12px;background:#6d28d9;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:900;font-size:14pt;margin:20px auto;display:block">
+      ▶️ تشغيل الفيديو للجميع
+    </button>
     <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
       <button id="bank-video-stop-btn" onclick="stopBankVideo()"
         style="padding:8px 16px;border-radius:10px;background:#ef4444;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700">
@@ -1359,7 +1368,7 @@ function confirmBankBet() {
   ma.classList.add('show');
 
   syncQuestion(
-    { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
+    { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q), ready: true },
     '🎬 سؤال البنك', bv, 30, 'normal'
   );
   resetBuzzer();

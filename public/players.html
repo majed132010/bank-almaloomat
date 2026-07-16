@@ -639,14 +639,17 @@ window.addEventListener('beforeunload', () => {
       alert('فشل إرسال البازر. حاول مرة أخرى.');
     }
   };
-  setInterval(async ()=>{
-    if(typeof db==='undefined') return;
-    try {
-      const snap = await get(ref(db, `${window.RP()}gameState/buzzer`));
+  // Real-time listener for buzzer cleanup (instead of polling every 3 seconds)
+  if(typeof db !== 'undefined' && ROOM && ROOM.length === 4) {
+    onValue(ref(db, `${RP()}gameState/buzzer`), async (snap) => {
       const v = snap.val();
-      if(v && v.ts && Date.now() - v.ts > 5000) await remove(ref(db, `${window.RP()}gameState/buzzer`));
-    } catch(e){ }
-  },3000);
+      if(v && v.ts && Date.now() - v.ts > 5000) {
+        try {
+          await remove(ref(db, `${RP()}gameState/buzzer`));
+        } catch(e) { console.warn('Buzzer cleanup failed', e); }
+      }
+    });
+  }
   console.log('[Buzz] Ready:',pname,pid);
 })();
 </script>
