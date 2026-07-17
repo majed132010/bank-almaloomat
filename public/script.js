@@ -921,22 +921,48 @@ function getRandomBank() { return questionBanks[Math.floor(Math.random() * quest
 const defaultDB = questionBanks[0];
 
 const videoQuestions = [
-  { type:'video', videoUrl:'https://www.youtube.com/embed/bCh7L3KDQ10',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'سفاح الجيزة'},{q:'من هو بطل المسلسل؟',a:'أحمد فهمي'},{q:'في أي عام عُرض؟',a:'2023'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/kkj673CcxfI',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'لن أعيش في جلباب أبي'},{q:'من هو بطل المسلسل؟',a:'نور الشريف'},{q:'في أي عام عُرض؟',a:'1996'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/xFB8RmEBdJ8',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'رأفت الهجان'},{q:'من هو بطل المسلسل؟',a:'محمود عبد العزيز'},{q:'ما موضوع المسلسل؟',a:'جاسوس مصري زُرع في إسرائيل'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/qmu3H42LnrY',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'الفتوة'},{q:'من هو بطل المسلسل؟',a:'ياسر جلال'},{q:'في أي عام عُرض؟',a:'2020'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/gO1X6xhsAuY',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'لعبة نيوتن'},{q:'من هي بطلة المسلسل؟',a:'منى زكي'},{q:'من أخرج المسلسل؟',a:'تامر محسن'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/Y1OXiOs92hs',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'الاختيار'},{q:'من هو بطل المسلسل؟',a:'أمير كرارة'},{q:'ماذا يحكي المسلسل؟',a:'قصة الشهيد أحمد منسي والتصدي للإرهاب في سيناء'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/FVNsCg-wyyo',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'نسل الأغراب'},{q:'من هو بطل المسلسل؟',a:'أمير كرارة'},{q:'في أي عام عُرض؟',a:'2021'}]},
-  { type:'video', videoUrl:'https://www.youtube.com/embed/HNWe69Xk6cE',
-    parts:[{q:'ما اسم هذا المسلسل؟',a:'حكيم باشا'},{q:'من هو بطل المسلسل؟',a:'كريم عبد العزيز'},{q:'في أي عام عُرض؟',a:'2024'}]}
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/hjaj.mp4',
+    parts:[
+      {q:'ما اسم هذه الشخصية التاريخية؟', a:'الحجاج بن يوسف الثقفي'},
+      {q:'في أي دولة إسلامية كان والياً؟', a:'العراق في عهد الدولة الأموية'},
+      {q:'من هو الخليفة الذي عيّنه والياً على العراق؟', a:'عبد الملك بن مروان'}
+    ]},
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/imamahmad.mp4',
+    parts:[
+      {q:'من هو هذا العالم؟', a:'الإمام أحمد بن حنبل'},
+      {q:'ما اسم المذهب الفقهي المنسوب إليه؟', a:'المذهب الحنبلي'},
+      {q:'بم اشتُهر في موقفه من المحنة؟', a:'رفض القول بخلق القرآن رغم التعذيب'}
+    ]},
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/mutanabi.mp4',
+    parts:[
+      {q:'من هو هذا الشاعر؟', a:'أبو الطيب المتنبي'},
+      {q:'بم لُقِّب؟', a:'أمير الشعراء وأعظم شعراء العربية'},
+      {q:'في بلاط من من الأمراء عاش أشهر فترات حياته؟', a:'سيف الدولة الحمداني في حلب'}
+    ]},
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/omarkhtab.mp4',
+    parts:[
+      {q:'من هو هذا الصحابي الجليل؟', a:'عمر بن الخطاب رضي الله عنه'},
+      {q:'ما لقبه الشهير؟', a:'الفاروق'},
+      {q:'كم امتدت خلافته؟', a:'عشر سنوات'}
+    ]},
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/omarmaktar.mp4',
+    parts:[
+      {q:'من هو هذا البطل؟', a:'عمر المختار'},
+      {q:'في أي بلد قاد المقاومة ضد الاحتلال؟', a:'ليبيا ضد الاحتلال الإيطالي'},
+      {q:'ماذا كان يُلقَّب؟', a:'شيخ المجاهدين وأسد الصحراء'}
+    ]},
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/salahullden.mp4',
+    parts:[
+      {q:'من هو هذا القائد؟', a:'صلاح الدين الأيوبي'},
+      {q:'بم اشتُهر في التاريخ الإسلامي؟', a:'تحرير القدس من الصليبيين عام 1187م'},
+      {q:'ما اسم المعركة التي انتصر فيها على الصليبيين؟', a:'معركة حطين'}
+    ]},
+  { type:'video', videoUrl:'https://bnkvideos.b-cdn.net/saqr.mp4',
+    parts:[
+      {q:'من هو هذا القائد؟', a:'عبد الرحمن الداخل'},
+      {q:'بم لُقِّب؟', a:'صقر قريش'},
+      {q:'ما أبرز إنجازاته؟', a:'تأسيس الدولة الأموية في الأندلس'}
+    ]}
 ];
 let usedVideoIndexes = [];
 function getRandomVideo() {
