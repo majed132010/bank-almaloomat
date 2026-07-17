@@ -1496,10 +1496,9 @@ function launchBankVideoMain() {
   mq.innerHTML = `<div style="font-size:13pt;color:var(--gold);margin-bottom:8px">🎬 رهانك: ${bankBet} نقطة — شاهد المقطع وأجب!</div>`;
 
   ma.innerHTML = `
-    <iframe id="bank-video-iframe"
-      src="about:blank" data-src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
-      style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
-      allow="autoplay;encrypted-media" allowfullscreen></iframe>
+    <video id="bank-video-iframe" src="${video.videoUrl}" autoplay playsinline controls
+      style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;display:block;margin:0 auto">
+    </video>
     <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
       <button id="bank-video-stop-btn" onclick="stopBankVideo()"
         style="padding:8px 16px;border-radius:10px;background:#ef4444;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700">
@@ -1511,9 +1510,11 @@ function launchBankVideoMain() {
   ma.classList.add('show');
 
   setTimeout(() => {
-    const ifr = document.getElementById('bank-video-iframe');
-    if (ifr && ifr.dataset && ifr.dataset.src) ifr.src = ifr.dataset.src;
-  }, 1250);
+    const vid = document.getElementById('bank-video-iframe');
+    if(vid) vid.onended = function() {
+      showBankVideoQuestions(window._currentBankVideo);
+    };
+  }, 100);
 
   syncQuestion(
     { q: '🎬 شاهد المقطع وأجب!', type: 'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q), ready: true },
@@ -1521,7 +1522,6 @@ function launchBankVideoMain() {
   );
   resetBuzzer();
 
-  window._bankVideoTimer = setTimeout(() => showBankVideoQuestions(video), 10000);
   window._currentBankVideo = video;
 
   document.getElementById('modal-judge').style.display = 'flex';
@@ -1530,10 +1530,9 @@ function launchBankVideoMain() {
 }
 
 function stopBankVideo() {
-  if (window._bankVideoTimer) { clearTimeout(window._bankVideoTimer); window._bankVideoTimer = null; }
   const ifr = document.getElementById('bank-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*'); } catch(e){}
+    try { ifr.pause(); } catch(e){}
     setTimeout(() => { if (ifr) ifr.src = 'about:blank'; }, 300);
   }
   if (window._currentBankVideo) showBankVideoQuestions(window._currentBankVideo);
@@ -1544,7 +1543,7 @@ function showBankVideoQuestions(video) {
   if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
   const ifr = document.getElementById('bank-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
+    try { ifr.pause(); ifr.src = ''; } catch(e){}
     setTimeout(() => { if(ifr) ifr.src = 'about:blank'; setTimeout(() => { if(ifr) ifr.remove(); }, 200); }, 300);
   }
   const stopBtn = document.getElementById('bank-video-stop-btn');
@@ -1652,10 +1651,9 @@ function launchKushkulMusalsal() {
   const ma = document.getElementById('modal-a');
   mq.innerHTML = '<div style="font-size:13pt;color:#06b6d4;font-weight:900">🎭 كشكول — شاهد المقطع وأجب!</div>';
   ma.innerHTML = `
-    <iframe id="kushkul-video-iframe"
-      src="about:blank" data-src="${video.videoUrl}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
-      style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;border:none;display:block;margin:0 auto"
-      allow="autoplay;encrypted-media" allowfullscreen></iframe>
+    <video id="kushkul-video-iframe" src="${video.videoUrl}" autoplay playsinline controls
+      style="width:100%;max-width:360px;aspect-ratio:9/16;border-radius:12px;display:block;margin:0 auto">
+    </video>
     <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
       <button onclick="stopKushkulVideo()"
         style="padding:8px 16px;border-radius:10px;background:#ef4444;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-weight:700">
@@ -1664,15 +1662,16 @@ function launchKushkulMusalsal() {
     </div>
     <div id="kushkul-video-parts" style="display:none;margin-top:12px;direction:rtl"></div>`;
   ma.classList.add('show');
-  // انتظر قليلًا ثم شغّل الفيديو لدى الجميع لمزامنة التشغيل
-  const ifrK = document.getElementById('kushkul-video-iframe');
-  if (ifrK) ifrK.src = ifrK.dataset.src;
+  // انتظر قليلًا ثم اربط حدث الانتهاء بالفيديو
+  setTimeout(() => {
+    const vid = document.getElementById('kushkul-video-iframe');
+    if (vid) vid.onended = function() { showKushkulQuestions(window._currentKushkulVideo); };
+  }, 100);
   syncQuestion(
     { q:'🎭 شاهد المقطع وأجب!', type:'video', videoUrl: video.videoUrl, parts: video.parts.map(p=>p.q) },
     '🎭 كشكول', 0, 30, 'normal'
   );
   resetBuzzer();
-  window._kushkulVideoTimer = setTimeout(() => showKushkulQuestions(video), 10000);
   window._currentKushkulVideo = video;
   document.getElementById('modal-judge').style.display = 'flex';
   document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
@@ -1680,10 +1679,9 @@ function launchKushkulMusalsal() {
 }
 
 function stopKushkulVideo() {
-  if (window._kushkulVideoTimer) { clearTimeout(window._kushkulVideoTimer); window._kushkulVideoTimer = null; }
   const ifr = document.getElementById('kushkul-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}','*'); } catch(e){}
+    try { ifr.pause(); } catch(e){}
     ifr.src = 'about:blank';
   }
   if (window._currentKushkulVideo) showKushkulQuestions(window._currentKushkulVideo);
@@ -1694,7 +1692,7 @@ function showKushkulQuestions(video) {
   if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
   const ifr = document.getElementById('kushkul-video-iframe');
   if (ifr) {
-    try { ifr.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*'); } catch(e){}
+    try { ifr.pause(); ifr.src = ''; } catch(e){}
     setTimeout(() => { if(ifr) ifr.src = 'about:blank'; setTimeout(() => { if(ifr) ifr.remove(); }, 200); }, 300);
   }
   const partsDiv = document.getElementById('kushkul-video-parts');
