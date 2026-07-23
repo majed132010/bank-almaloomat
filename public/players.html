@@ -547,11 +547,17 @@ function applyStateToPlayer(state){
   if(b && (b.winnerId !== null && b.winnerId !== undefined)){
     const winnerEl = document.getElementById('winner-notice-name');
     winnerEl.textContent = b.winnerName || '—';
+    winnerEl.classList.remove('buzz-flash');
+    void winnerEl.offsetWidth;
     winnerEl.classList.add('buzz-flash');
     winnerEl.style.animationFillMode = 'forwards';
     winnerEl.style.opacity = '1';
-    setTimeout(() => { winnerEl.style.opacity = '0'; }, 900);
     notice.classList.add('on');
+    clearTimeout(window._winnerNoticeTimer);
+    window._winnerNoticeTimer = setTimeout(() => {
+      winnerEl.classList.remove('buzz-flash');
+      notice.classList.remove('on');
+    }, 1200);
     if(Number(b.winnerId) === myPlayer.id){
       buzzBtn.classList.remove('locked'); buzzBtn.classList.add('won');
       buzzBtn.textContent = '🏆 أجب!';
@@ -579,7 +585,9 @@ function applyStateToPlayer(state){
     }
   } else {
     clearTimeout(window._localBuzzerTimer);
+    clearTimeout(window._winnerNoticeTimer);
     window._localBuzzerTimer = null;
+    window._winnerNoticeTimer = null;
     localLocked = false;
     notice.classList.remove('on');
     resetBuzzUI();
@@ -600,6 +608,11 @@ function resetBuzzUI(){
 // ==============================
 window.pressBuzzer = async function(){
   if(!myPlayer){ return; }
+  if(latestState?.buzzer?.excludeId === myPlayer.id){
+    const hint = document.getElementById('buzz-hint');
+    hint.textContent = '⏳ تم استبعادك مؤقتاً من البازر';
+    return;
+  }
   if(localLocked) return;
   // Only allow if question is active
   if(!latestState || !latestState.question || !latestState.question.active){

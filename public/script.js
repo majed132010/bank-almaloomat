@@ -1000,7 +1000,7 @@ const catIcons = {
 // ══════════════════════════════════════════
 let players = [], stage = 'silver', responder = null, cellRef = null;
 let speedLoc = {stage:'silver',cat:0,q:0}, bankLoc = {stage:'gold',cat:1,q:2};
-let bankMode = false, bankBet = 0, speedIdx = 0, diamondState = [], diamondPlayers = [];
+let bankMode = false, bankBet = 0, speedIdx = 0, diamondState = [], diamondPlayers = [], diamondUsedByCat = {};
 let kushkulLoc = {ci: 0, qi: 0};
 let currentTextAnswers = {};
 let gameDB = null;
@@ -1480,9 +1480,7 @@ function confirmBankBet() {
   }
   bankBet = bv; bankMode = true;
   document.getElementById('modal-bank').style.display = 'none';
-  showBankVideoQuestions(window._currentBankVideo);
-  document.getElementById('modal-judge').style.display = 'flex';
-  document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
+  launchBankVideoMain();
 }
 
 function launchBankVideoMain() {
@@ -1747,6 +1745,8 @@ function judge(ok) {
       // إعادة تفعيل الخلية بسؤال مختلف من نفس الفئة
       const currentCell = diamondState[cellRef.ci];
       const cat = currentCell.category;
+      if (!diamondUsedByCat[cat]) diamondUsedByCat[cat] = [];
+      if (!diamondUsedByCat[cat].includes(currentCell.q)) diamondUsedByCat[cat].push(currentCell.q);
       // البحث في diamond grid الأصلي عن سؤال مختلف من نفس الفئة
       const originalDiamond = [
         {cat:'قادة ورؤساء',      q:'من قاد مصر في حرب أكتوبر 1973؟',                   a:'الرئيس أنور السادات'},
@@ -1768,10 +1768,15 @@ function judge(ok) {
         {cat:'الثقافة والفنون التشكيلية والسينمائية', q:'من رسم لوحة الموناليزا؟',     a:'ليوناردو دافنشي'},
         {cat:'الثقافة والفنون التشكيلية والسينمائية', q:'ما اسم الفيلم الذي فاز بأوسكار أفضل فيلم؟',     a:'أوبرا وينفري'}
       ];
-      const allCatQs = originalDiamond.filter(x => x.cat === cat && x.q !== currentCell.q);
+      let allCatQs = originalDiamond.filter(x => x.cat === cat && x.q !== currentCell.q && !diamondUsedByCat[cat].includes(x.q));
       console.log('cat:', cat, 'currentQ:', currentCell.q, 'found:', allCatQs.length);
+      if(allCatQs.length === 0) {
+        diamondUsedByCat[cat] = [];
+        allCatQs = originalDiamond.filter(x => x.cat === cat && x.q !== currentCell.q);
+      }
       if(allCatQs.length > 0) {
         const newQ = allCatQs[Math.floor(Math.random() * allCatQs.length)];
+        diamondUsedByCat[cat].push(newQ.q);
         diamondState[cellRef.ci] = { category: newQ.cat, q: newQ.q, a: newQ.a, spent: false, owner: null };
       } else {
         diamondState[cellRef.ci].spent = false;
@@ -1926,6 +1931,8 @@ function updateBuzzerUI(data) {
   const flashName = document.getElementById('buzz-flash-name');
   if (data && data.winnerName) {
     modalName.textContent = data.winnerName;
+    modalName.style.opacity = '1';
+    modalName.style.transition = 'opacity .3s ease';
     modalBuzz.style.display = 'block';
     flashName.textContent = data.winnerName;
     flash.classList.add('on');
@@ -1933,7 +1940,13 @@ function updateBuzzerUI(data) {
     if (data.winnerId !== null && data.winnerId !== undefined && document.getElementById('modal-overlay').style.display === 'flex') {
       selectResponder(Number(data.winnerId));
     }
+    clearTimeout(window._hostBuzzerResetTimer);
+    window._hostBuzzerResetTimer = setTimeout(async () => {
+      await resetBuzzer();
+    }, 10000);
   } else {
+    clearTimeout(window._hostBuzzerResetTimer);
+    window._hostBuzzerResetTimer = null;
     modalBuzz.style.display = 'none';
     flash.classList.remove('on');
   }
@@ -1979,6 +1992,11 @@ function buildSpeedBtns() {
 //  DIAMOND GRID
 // ══════════════════════════════════════════
 function initDiamond() {
+  diamondUsedByCat = {};
+  gameDB.diamond.slice(0, 9).forEach(x => {
+    if (!diamondUsedByCat[x.cat]) diamondUsedByCat[x.cat] = [];
+    diamondUsedByCat[x.cat].push(x.q);
+  });
   diamondState = gameDB.diamond.slice(0, 9).map(x => ({category: x.cat, q: x.q, a: x.a, spent: false, owner: null, isSpeedRound: !!x.isSpeedRound}));
   renderDiamond();
 }
