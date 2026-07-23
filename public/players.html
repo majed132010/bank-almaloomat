@@ -554,7 +554,26 @@ function applyStateToPlayer(state){
       buzzBtn.textContent = '🔒 مقفل';
       buzzHint.textContent = `${b.winnerName || 'متسابق آخر'} ضغط أولاً`;
     }
+    if(state.buzzer && state.buzzer.winnerId !== null) {
+      // بعد 10 ثواني أعد تفعيل البازر للجميع
+      if(!window._localBuzzerTimer) {
+        window._localBuzzerTimer = setTimeout(() => {
+          window._localBuzzerTimer = null;
+          if(latestState?.buzzer?.winnerId !== null) {
+            localLocked = false;
+            resetBuzzUI();
+          }
+        }, 10000);
+      }
+    } else {
+      clearTimeout(window._localBuzzerTimer);
+      window._localBuzzerTimer = null;
+      localLocked = false;
+    }
   } else {
+    clearTimeout(window._localBuzzerTimer);
+    window._localBuzzerTimer = null;
+    localLocked = false;
     notice.classList.remove('on');
     resetBuzzUI();
   }
@@ -566,6 +585,7 @@ function resetBuzzUI(){
   buzzBtn.classList.remove('locked','won');
   buzzBtn.textContent = 'اضغط أسرع!';
   buzzHint.textContent = 'اضغط الزر فور معرفة الإجابة';
+  localLocked = false;
 }
 
 // ==============================

@@ -1480,7 +1480,7 @@ function confirmBankBet() {
   }
   bankBet = bv; bankMode = true;
   document.getElementById('modal-bank').style.display = 'none';
-  launchBankVideoMain();
+  showBankVideoQuestions(window._currentBankVideo);
 }
 
 function launchBankVideoMain() {
@@ -1745,21 +1745,19 @@ function judge(ok) {
       // إعادة تفعيل الخلية بسؤال مختلف من نفس الفئة
       const currentCell = diamondState[cellRef.ci];
       const cat = currentCell.category;
-      // البحث في كل بنوك الأسئلة عن سؤال من نفس الفئة
-      const allCatQs = [];
-      questionBanks.forEach(bank => {
-        const silverQs = (bank.silver || []).filter(col => col.cat === cat);
-        silverQs.forEach(col => (col.questions || []).forEach(q => {
-          if(q.q !== currentCell.q) allCatQs.push({cat: cat, q: q.q, a: q.a});
-        }));
-        const goldQs = (bank.gold || []).filter(col => col.cat === cat);
-        goldQs.forEach(col => (col.questions || []).forEach(q => {
-          if(q.q !== currentCell.q) allCatQs.push({cat: cat, q: q.q, a: q.a});
-        }));
-        (bank.speedBank || []).forEach(q => {
-          if(q.q !== currentCell.q) allCatQs.push({cat: cat, q: q.q, a: q.a});
-        });
-      });
+      // البحث في diamond grid الأصلي عن سؤال مختلف من نفس الفئة
+      const originalDiamond = [
+        {cat:'قادة ورؤساء',      q:'من قاد مصر في حرب أكتوبر 1973؟',                   a:'الرئيس أنور السادات'},
+        {cat:'ثقافة عامة',       q:'ما أطول نهر في العالم؟',                            a:'نهر النيل'},
+        {cat:'الدين والعلوم الإسلامية', q:'كم عدد سور القرآن الكريم؟',                  a:'114 سورة'},
+        {cat:'اللغات والآداب',    q:'من هو الشاعر الملقب بالمتنبي؟',                    a:'أبو الطيب أحمد بن الحسين'},
+        {cat:'الطقس والمناخ والكون', q:'ما هي طبقة الغلاف الجوي التي تحمي الأرض من الأشعة فوق البنفسجية؟', a:'طبقة الأوزون'},
+        {cat:'فكر بسرعة!',       q:'🚨 جولة دقيقة السرعة!',                             a:'اضغط أسماء الفرسان لمنح نقاط السرعة.', isSpeedRound:true},
+        {cat:'التكنولوجيا والاختراعات الحديثة', q:'من هو مؤسس شركة أمازون؟',            a:'جيف بيزوس'},
+        {cat:'الألغاز والذكاء الرياضي', q:'ما هو ناتج جمع الأرقام من 1 إلى 10؟',        a:'55'},
+        {cat:'الثقافة والفنون التشكيلية والسينمائية', q:'من رسم لوحة الموناليزا؟',     a:'ليوناردو دافنشي'}
+      ];
+      const allCatQs = originalDiamond.filter(x => x.cat === cat && x.q !== currentCell.q);
       if(allCatQs.length > 0) {
         const newQ = allCatQs[Math.floor(Math.random() * allCatQs.length)];
         diamondState[cellRef.ci] = { category: newQ.cat, q: newQ.q, a: newQ.a, spent: false, owner: null };
