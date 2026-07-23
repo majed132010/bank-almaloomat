@@ -1296,6 +1296,8 @@ async function openModal(ci, qi) {
   responder = null; bankMode = false; bankBet = 0;
 
   await resetBuzzer();
+  window._firstBuzzerId = null;
+  window._buzzerLockTimer = null;
 
   const revBtn = document.getElementById('btn-reveal-answer');
   if (revBtn) { revBtn.textContent = '👁️ كشف الإجابة للجمهور'; revBtn.disabled = false; revBtn.classList.remove('revealed'); }
@@ -1731,18 +1733,37 @@ function judge(ok) {
     if (ok) { sfx.correct(); p.score += bankBet; alert(`✨ رهان صحيح! +${bankBet} لـ ${p.name}`); }
     else { sfx.wrong(); const fl = p.isBanked ? p.bankedValue : 0; p.score = Math.max(fl, p.score - bankBet); alert(`❌ رهان خاطئ! −${bankBet} ن من ${p.name}`); }
   } else if (stage === 'diamond') {
-    if (ok) { sfx.correct(); diamondState[cellRef.ci].owner = p.id; } else sfx.wrong();
-    diamondState[cellRef.ci].spent = true;
+    if (ok) {
+      sfx.correct();
+      diamondState[cellRef.ci].owner = p.id;
+      diamondState[cellRef.ci].spent = true;
+    } else {
+      sfx.wrong();
+      // إعادة تفعيل الخلية بسؤال مختلف من نفس الفئة
+      const currentCell = diamondState[cellRef.ci];
+      const cat = currentCell.category;
+      const allCatQs = gameDB.diamond.filter(x => x.cat === cat && x.q !== currentCell.q);
+      if(allCatQs.length > 0) {
+        const newQ = allCatQs[Math.floor(Math.random() * allCatQs.length)];
+        diamondState[cellRef.ci] = { category: newQ.cat, q: newQ.q, a: newQ.a, spent: false, owner: null };
+      } else {
+        diamondState[cellRef.ci].spent = false;
+        diamondState[cellRef.ci].owner = null;
+      }
+    }
   } else {
     const q = gameDB[stage][cellRef.ci].questions[cellRef.qi];
     if (ok) { sfx.correct(); p.score += q.v; }
-    else { sfx.wrong(); const fl = p.isBanked ? p.bankedValue : 0; p.score = Math.max(fl, p.score - Math.floor(q.v / 2)); }
+    else { sfx.wrong(); const fl = p.isBanked ? p.bankedValue : 0; p.score = Math.max(fl, p.score - q.v); }
     q.spent = true;
   }
   closeModal();
 }
 
 function closeModal() {
+  window._firstBuzzerId = null;
+  clearTimeout(window._buzzerLockTimer);
+  window._buzzerLockTimer = null;
   clearInterval(cdTimer);
   clearInterval(speedTimerInterval);
   sfx.stopAll();
@@ -1754,7 +1775,11 @@ function closeModal() {
   fbPut(`https://${FIREBASE_HOST}/rooms/${ROOM}/gameState/voting.json`, {active: false, locked: false, counts: {A:0,B:0,C:0,D:0}, total: 0});
 
   if (stage === 'diamond') {
-    diamondState[cellRef.ci].spent = true; renderDiamond(); checkWinner();
+    const currentDiamondCell = diamondState[cellRef.ci];
+    if (currentDiamondCell.owner !== null && currentDiamondCell.owner !== undefined) {
+      currentDiamondCell.spent = true;
+    }
+    renderDiamond(); checkWinner();
   } else {
     gameDB[stage][cellRef.ci].questions[cellRef.qi].spent = true;
     buildBoard(stage); refreshScores();
@@ -1873,6 +1898,24 @@ function updateBuzzerUI(data) {
   const flash = document.getElementById('buzz-flash');
   const flashName = document.getElementById('buzz-flash-name');
   if (data && data.winnerName) {
+    // حفظ أول ضاغط وبدء عداد 10 ثواني
+    if(!window._firstBuzzerId) {
+      window._firstBuzzerId = data.winnerId;
+      clearTimeout(window._buzzerLockTimer);
+      window._buzzerLockTimer = setTimeout(async () => {
+        if(window._firstBuzzerId !== null) {
+          // إعادة تفعيل البازر باستثناء الضاغط الأول
+          await fbPut(FB_URL_BUZZ, { 
+            winnerId: null, 
+            winnerName: null, 
+            ts: 0,
+            excludeId: window._firstBuzzerId 
+          });
+          window._firstBuzzerId = null;
+          updateBuzzerUI(null);
+        }
+      }, 10000);
+    }
     modalName.textContent = data.winnerName;
     modalBuzz.style.display = 'block';
     flashName.textContent = data.winnerName;

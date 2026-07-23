@@ -574,6 +574,7 @@ function resetBuzzUI(){
 window.pressBuzzer = async function(){
   if(!myPlayer){ return; }
   if(localLocked) return;
+  if(state.buzzer && state.buzzer.excludeId == myPlayer.id) return; // لا تسمح للمستبعد بالضغط
   // Only allow if question is active
   if(!latestState || !latestState.question || !latestState.question.active){
     const hint = document.getElementById('buzz-hint');
