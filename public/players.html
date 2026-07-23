@@ -86,6 +86,8 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 .winner-notice{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;padding:12px 24px;background:linear-gradient(135deg,rgba(240,165,0,.95),rgba(252,211,77,.9));color:#1a0e00;border-radius:50px;font-family:'Cairo',sans-serif;font-size:12pt;font-weight:900;letter-spacing:1px;box-shadow:0 10px 30px rgba(240,165,0,.5);display:none;animation:winPop .4s cubic-bezier(.34,1.56,.64,1)}
 .winner-notice.on{display:block}
 @keyframes winPop{from{transform:translate(-50%,-30px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+@keyframes buzzFlash{0%,100%{opacity:1}50%{opacity:0}}
+.buzz-flash{animation:buzzFlash .3s ease 3;animation-fill-mode:forwards}
 
 /* Waiting states */
 .play-waiting{text-align:center;padding:30px 20px;font-size:11pt;color:var(--muted);letter-spacing:1px}
@@ -543,7 +545,12 @@ function applyStateToPlayer(state){
   const buzzBtn = document.getElementById('buzz-btn');
   const buzzHint = document.getElementById('buzz-hint');
   if(b && (b.winnerId !== null && b.winnerId !== undefined)){
-    document.getElementById('winner-notice-name').textContent = b.winnerName || '—';
+    const winnerEl = document.getElementById('winner-notice-name');
+    winnerEl.textContent = b.winnerName || '—';
+    winnerEl.classList.add('buzz-flash');
+    winnerEl.style.animationFillMode = 'forwards';
+    winnerEl.style.opacity = '1';
+    setTimeout(() => { winnerEl.style.opacity = '0'; }, 900);
     notice.classList.add('on');
     if(Number(b.winnerId) === myPlayer.id){
       buzzBtn.classList.remove('locked'); buzzBtn.classList.add('won');

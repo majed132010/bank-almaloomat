@@ -1481,6 +1481,8 @@ function confirmBankBet() {
   bankBet = bv; bankMode = true;
   document.getElementById('modal-bank').style.display = 'none';
   showBankVideoQuestions(window._currentBankVideo);
+  document.getElementById('modal-judge').style.display = 'flex';
+  document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
 }
 
 function launchBankVideoMain() {
@@ -1748,16 +1750,26 @@ function judge(ok) {
       // البحث في diamond grid الأصلي عن سؤال مختلف من نفس الفئة
       const originalDiamond = [
         {cat:'قادة ورؤساء',      q:'من قاد مصر في حرب أكتوبر 1973؟',                   a:'الرئيس أنور السادات'},
+        {cat:'قادة ورؤساء',      q:'من هو فاتح القسطنطينية؟',                          a:'السلطان محمد الفاتح'},
         {cat:'ثقافة عامة',       q:'ما أطول نهر في العالم؟',                            a:'نهر النيل'},
+        {cat:'ثقافة عامة',       q:'ما اسم عاصمة المملكة العربية السعودية؟',            a:'الرياض'},
         {cat:'الدين والعلوم الإسلامية', q:'كم عدد سور القرآن الكريم؟',                  a:'114 سورة'},
+        {cat:'الدين والعلوم الإسلامية', q:'ما اسم أول بيت نزل من القرآن؟',            a:'بسم الله الرحمن الرحيم'},
         {cat:'اللغات والآداب',    q:'من هو الشاعر الملقب بالمتنبي؟',                    a:'أبو الطيب أحمد بن الحسين'},
+        {cat:'اللغات والآداب',    q:'ما هو اسم شاعر المعلقات؟',                         a:'امرؤ القيس'},
         {cat:'الطقس والمناخ والكون', q:'ما هي طبقة الغلاف الجوي التي تحمي الأرض من الأشعة فوق البنفسجية؟', a:'طبقة الأوزون'},
+        {cat:'الطقس والمناخ والكون', q:'ما هي أكبر كوكب في المجموعة الشمسية؟',              a:'المشتري'},
         {cat:'فكر بسرعة!',       q:'🚨 جولة دقيقة السرعة!',                             a:'اضغط أسماء الفرسان لمنح نقاط السرعة.', isSpeedRound:true},
+        {cat:'فكر بسرعة!',       q:'🚨 سؤال إضافي للسرعة!',                            a:'استمر في الضغط بسرعة.', isSpeedRound:true},
         {cat:'التكنولوجيا والاختراعات الحديثة', q:'من هو مؤسس شركة أمازون؟',            a:'جيف بيزوس'},
+        {cat:'التكنولوجيا والاختراعات الحديثة', q:'ما اسم نظام التشغيل الذي طورته شركة أبل؟',       a:'macOS'},
         {cat:'الألغاز والذكاء الرياضي', q:'ما هو ناتج جمع الأرقام من 1 إلى 10؟',        a:'55'},
-        {cat:'الثقافة والفنون التشكيلية والسينمائية', q:'من رسم لوحة الموناليزا؟',     a:'ليوناردو دافنشي'}
+        {cat:'الألغاز والذكاء الرياضي', q:'ما هو عدد أضلاع الشكل السداسي؟',                  a:'6'},
+        {cat:'الثقافة والفنون التشكيلية والسينمائية', q:'من رسم لوحة الموناليزا؟',     a:'ليوناردو دافنشي'},
+        {cat:'الثقافة والفنون التشكيلية والسينمائية', q:'ما اسم الفيلم الذي فاز بأوسكار أفضل فيلم؟',     a:'أوبرا وينفري'}
       ];
       const allCatQs = originalDiamond.filter(x => x.cat === cat && x.q !== currentCell.q);
+      console.log('cat:', cat, 'currentQ:', currentCell.q, 'found:', allCatQs.length);
       if(allCatQs.length > 0) {
         const newQ = allCatQs[Math.floor(Math.random() * allCatQs.length)];
         diamondState[cellRef.ci] = { category: newQ.cat, q: newQ.q, a: newQ.a, spent: false, owner: null };
