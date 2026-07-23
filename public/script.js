@@ -98,7 +98,7 @@ async function syncCloseQuestion() {
 }
 
 async function resetBuzzer() {
-  await fbPut(FB_URL_BUZZ, { winnerId: null, winnerName: null, ts: 0 });
+  await fbPut(FB_URL_BUZZ, { winnerId: null, winnerName: null, ts: 0, excludeId: null });
   updateBuzzerUI(null);
 }
 
@@ -1466,12 +1466,7 @@ async function launchBankIntroVideo() {
   }).then(() => {
     // إعادة الميكروفون
     if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
-    const resp = document.getElementById('modal-responder');
-    const bank = document.getElementById('modal-bank');
-    resp.style.display = 'block';
-    bank.style.display = 'block';
-    buildResponderBtns();
-    typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك\nاختر الفارس وحدد رهانه:', 35);
+    launchBankVideoMain();
   });
 }
 
@@ -1540,7 +1535,15 @@ function stopBankVideo() {
   if (window._currentBankVideo) showBankVideoQuestions(window._currentBankVideo);
 }
 
-function showBankVideoQuestions(video) {
+async function showBankVideoQuestions(video) {
+  const resp = document.getElementById('modal-responder');
+  const bank = document.getElementById('modal-bank');
+  resp.style.display = 'block';
+  bank.style.display = 'block';
+  buildResponderBtns();
+  await typewrite(document.getElementById('modal-q'), '🏛️ فقرة البنك\nاختر الفارس وحدد رهانه:', 35);
+  document.getElementById('modal-judge').style.display = 'none';
+
   // إعادة الميكروفون
   if (hostLocalStream) hostLocalStream.getAudioTracks().forEach(t => t.enabled = true);
   const ifr = document.getElementById('bank-video-iframe');
@@ -1742,7 +1745,21 @@ function judge(ok) {
       // إعادة تفعيل الخلية بسؤال مختلف من نفس الفئة
       const currentCell = diamondState[cellRef.ci];
       const cat = currentCell.category;
-      const allCatQs = gameDB.diamond.filter(x => x.cat === cat && x.q !== currentCell.q);
+      // البحث في كل بنوك الأسئلة عن سؤال من نفس الفئة
+      const allCatQs = [];
+      questionBanks.forEach(bank => {
+        const silverQs = (bank.silver || []).filter(col => col.cat === cat);
+        silverQs.forEach(col => (col.questions || []).forEach(q => {
+          if(q.q !== currentCell.q) allCatQs.push({cat: cat, q: q.q, a: q.a});
+        }));
+        const goldQs = (bank.gold || []).filter(col => col.cat === cat);
+        goldQs.forEach(col => (col.questions || []).forEach(q => {
+          if(q.q !== currentCell.q) allCatQs.push({cat: cat, q: q.q, a: q.a});
+        }));
+        (bank.speedBank || []).forEach(q => {
+          if(q.q !== currentCell.q) allCatQs.push({cat: cat, q: q.q, a: q.a});
+        });
+      });
       if(allCatQs.length > 0) {
         const newQ = allCatQs[Math.floor(Math.random() * allCatQs.length)];
         diamondState[cellRef.ci] = { category: newQ.cat, q: newQ.q, a: newQ.a, spent: false, owner: null };
@@ -1898,24 +1915,6 @@ function updateBuzzerUI(data) {
   const flash = document.getElementById('buzz-flash');
   const flashName = document.getElementById('buzz-flash-name');
   if (data && data.winnerName) {
-    // حفظ أول ضاغط وبدء عداد 10 ثواني
-    if(!window._firstBuzzerId) {
-      window._firstBuzzerId = data.winnerId;
-      clearTimeout(window._buzzerLockTimer);
-      window._buzzerLockTimer = setTimeout(async () => {
-        if(window._firstBuzzerId !== null) {
-          // إعادة تفعيل البازر باستثناء الضاغط الأول
-          await fbPut(FB_URL_BUZZ, { 
-            winnerId: null, 
-            winnerName: null, 
-            ts: 0,
-            excludeId: window._firstBuzzerId 
-          });
-          window._firstBuzzerId = null;
-          updateBuzzerUI(null);
-        }
-      }, 10000);
-    }
     modalName.textContent = data.winnerName;
     modalBuzz.style.display = 'block';
     flashName.textContent = data.winnerName;
