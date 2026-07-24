@@ -54,17 +54,13 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 .category-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.08)}
 .category-card.selected{border-color:var(--gold);background:rgba(240,165,0,.12)}
 .category-card.disabled{opacity:.45;cursor:not-allowed;transform:none}
-.category-icon{font-size:26pt}
-.category-name{font-size:11pt;font-weight:800;color:#fff;text-align:center;min-height:40px}
-.category-values{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
-.category-value{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#f8fafc;font-weight:700;text-align:center}
-.category-choose{width:100%;border:none;border-radius:12px;padding:10px 12px;background:linear-gradient(135deg,var(--purple),var(--purple-lt));color:#fff;font-size:11pt;font-weight:800;cursor:pointer;transition:background .18s}
-.category-choose:hover{background:linear-gradient(135deg,#8b5cf6,#c084fc)}
-.category-choose:disabled{background:rgba(100,116,139,.4);cursor:not-allowed}
-
-/* Buzzer */
-.buzz-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px 0 20px}
-.buzz-btn{
+  .category-card.disabled:hover{transform:none;background:rgba(255,255,255,.05)}
+  .category-icon{font-size:26pt}
+  .category-name{font-size:11pt;font-weight:800;color:#fff;text-align:center;min-height:40px}
+  .category-values{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
+  .category-value{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#f8fafc;font-weight:700;text-align:center}
+  .category-choose{width:100%;border:none;border-radius:12px;padding:10px 12px;background:linear-gradient(135deg,var(--purple),var(--purple-lt));color:#fff;font-size:11pt;font-weight:800;cursor:pointer;transition:background .18s;text-align:center}
+  .category-card.disabled .category-choose{background:rgba(100,116,139,.4);cursor:not-allowed}
   width:min(85vw,320px); height:min(85vw,320px); max-height:60vh;
   border-radius:50%; border:6px solid var(--stage-color);
   background:radial-gradient(circle at 30% 30%,var(--stage-color-lt),var(--stage-color) 55%,#1a0e00 100%);
@@ -476,15 +472,15 @@ function applyStateToPlayer(state){
           const isSelected = selectedCat && selectedCat.catIndex === ci;
           const categoryName = col.cat || col.category || 'فئة';
           return `
-            <div class="category-card ${allSpent ? 'disabled' : ''} ${isSelected ? 'selected' : ''}">
+            <div class="category-card ${allSpent ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" ${allSpent ? '' : `onclick="selectCategory(${ci})"`}>
               <div class="category-icon">${getCatIcon(categoryName)}</div>
               <div class="category-name">${categoryName}</div>
               <div class="category-values">
                 ${questionList.map(q => `<div class="category-value">${q.spent ? '✓' : q.v}</div>`).join('')}
               </div>
-              <button class="category-choose" ${allSpent ? 'disabled' : ''} onclick="selectCategory(${ci})">
-                ${isSelected ? 'محددة' : 'اختر الفئة'}
-              </button>
+              <div class="category-choose">
+                ${isSelected ? 'محددة' : 'اضغط لاختيار'}
+              </div>
             </div>
           `;
         }).join('');
