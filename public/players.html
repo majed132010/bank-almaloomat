@@ -384,6 +384,7 @@ window.joinAsPlayer = async function(){
 //   APPLY STATE TO PLAYER VIEW
 // ==============================
 function applyStateToPlayer(state){
+  console.log('state.board:', state?.board, 'state.boardStage:', state?.boardStage);
   if(!state || !myPlayer) return;
   const me = (state.players || []).find(p => Number(p.id) === myPlayer.id);
   if(me){
