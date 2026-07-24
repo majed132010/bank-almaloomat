@@ -49,6 +49,18 @@ body.stage-diamond{--stage-color:var(--cyan);--stage-color-lt:#67e8f9;--stage-gl
 .q-cat{font-size:9pt;letter-spacing:3px;color:var(--stage-color-lt);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed rgba(255,255,255,.1);font-weight:800}
 .q-text{font-family:'Cairo',sans-serif;font-size:17pt;font-weight:700;line-height:1.6;color:var(--text)}
 .q-empty{font-size:12pt;color:var(--muted);font-style:italic}
+.category-grid{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.category-card{flex:1 1 140px;min-width:120px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:transform .18s,background .18s,border-color .18s}
+.category-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.08)}
+.category-card.selected{border-color:var(--gold);background:rgba(240,165,0,.12)}
+.category-card.disabled{opacity:.45;cursor:not-allowed;transform:none}
+.category-icon{font-size:26pt}
+.category-name{font-size:11pt;font-weight:800;color:#fff;text-align:center;min-height:40px}
+.category-values{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
+.category-value{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#f8fafc;font-weight:700;text-align:center}
+.category-choose{width:100%;border:none;border-radius:12px;padding:10px 12px;background:linear-gradient(135deg,var(--purple),var(--purple-lt));color:#fff;font-size:11pt;font-weight:800;cursor:pointer;transition:background .18s}
+.category-choose:hover{background:linear-gradient(135deg,#8b5cf6,#c084fc)}
+.category-choose:disabled{background:rgba(100,116,139,.4);cursor:not-allowed}
 
 /* Buzzer */
 .buzz-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px 0 20px}
@@ -203,6 +215,7 @@ window.addEventListener('load', () => {
   <div class="q-box">
     <div class="q-cat" id="p-q-cat">في انتظار سؤال</div>
     <div class="q-text q-empty" id="p-q-text">سيظهر السؤال هنا حين يبدأ المُقدِّم…</div>
+    <div id="category-grid" class="category-grid" style="display:none"></div>
     <div id="p-media" style="margin-top:12px"></div>
   </div>
 
@@ -248,7 +261,7 @@ function normalizeRoom(code){
   return String(code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);
 }
 
-function startRoomSync(){
+window.startRoomSync = function(){
   if(stateUnsub){ stateUnsub(); stateUnsub = null; }
   if(!ROOM || ROOM.length !== 4) return;
   stateUnsub = onValue(ref(db, `${RP()}gameState`), (snap)=>{
@@ -336,6 +349,7 @@ let myPlayer = null;             // { id, name }
 let currentQuestionId = null;    // used to detect new questions & reset buzzer local lock
 let localLocked = false;
 let latestState = null;
+let localSelectedCategory = null;
 
 // ==============================
 //   POPULATE PLAYER LIST
@@ -433,37 +447,58 @@ function applyStateToPlayer(state){
   const q = state.question;
   const qCat = document.getElementById('p-q-cat');
   const qText = document.getElementById('p-q-text');
+  const categoryGrid = document.getElementById('category-grid');
   const media = document.getElementById('p-media');
   const answerInput = document.getElementById('text-answer-input');
   const answerBtn = document.getElementById('text-answer-btn');
   const answerHint = document.getElementById('text-answer-hint');
   if(!q || !q.active) {
-    if(Array.isArray(state.board) && state.board.length) {
-      const boardHtml = state.board.map(col => `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1">
-          <div style="font-size:24pt">${getCatIcon(col.cat)}</div>
-          <div style="font-size:9pt;font-weight:700;color:#f0a500;text-align:center">${col.cat}</div>
-          ${Array.isArray(col.questions) ? col.questions.map(q => `
-            <div style="width:100%;padding:10px;border-radius:10px;background:${q.spent ? 'rgba(255,255,255,.1)' : 'rgba(109,40,217,.4)'};color:${q.spent ? '#666' : '#fff'};font-weight:900;text-align:center;font-size:12pt">
-              ${q.spent ? '✓' : q.v}
-            </div>
-          `).join('') : ''}
-        </div>
-      `).join('');
-
-      const boardLabel = state.boardStage === 'silver' ? '⚪ الشاشة الفضية' : state.boardStage === 'gold' ? '🥇 الشاشة الذهبية' : '🏁 شاشة الفئات';
+    const board = Array.isArray(state.board) && state.board.length ? state.board
+      : Array.isArray(state.diamondState) && state.diamondState.length ? state.diamondState
+      : null;
+    const boardStage = state.boardStage || (Array.isArray(state.diamondState) && state.diamondState.length ? 'diamond' : 'silver');
+    if(board) {
+      const selectedCat = localSelectedCategory && localSelectedCategory.stage === boardStage
+        ? localSelectedCategory
+        : state.selectedCategory;
+      const boardLabel = boardStage === 'silver' ? '⚪ الشاشة الفضية' : boardStage === 'gold' ? '🥇 الشاشة الذهبية' : '🏁 شاشة الفئات';
       qCat.textContent = boardLabel;
-      qText.innerHTML = `
-        <div style="font-size:11pt;color:#f0a500;font-weight:700;margin-bottom:12px;text-align:center">
-          ${boardLabel}
-        </div>
-        <div style="display:flex;gap:10px;direction:rtl">${boardHtml}</div>
-      `;
+      qText.innerHTML = boardLabel === '🏁 شاشة الفئات'
+        ? 'اختر فئة للبدء، ثم اضغط البازر عندما تكون الإجابة واضحة.'
+        : 'اختر فئة من اللوحة التالية، ثم اضغط البازر.';
       qText.classList.remove('q-empty');
+
+      if(categoryGrid){
+        categoryGrid.style.display = 'flex';
+        categoryGrid.innerHTML = board.map((col, ci) => {
+          const questionList = Array.isArray(col.questions) ? col.questions : (col.q ? [{ v: col.v || 0, spent: !!col.spent }] : []);
+          const allSpent = questionList.length > 0 && questionList.every(q => q.spent);
+          const isSelected = selectedCat && selectedCat.catIndex === ci;
+          const categoryName = col.cat || col.category || 'فئة';
+          return `
+            <div class="category-card ${allSpent ? 'disabled' : ''} ${isSelected ? 'selected' : ''}">
+              <div class="category-icon">${getCatIcon(categoryName)}</div>
+              <div class="category-name">${categoryName}</div>
+              <div class="category-values">
+                ${questionList.map(q => `<div class="category-value">${q.spent ? '✓' : q.v}</div>`).join('')}
+              </div>
+              <button class="category-choose" ${allSpent ? 'disabled' : ''} onclick="selectCategory(${ci})">
+                ${isSelected ? 'محددة' : 'اختر الفئة'}
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
       if(media) media.innerHTML = '';
+    } else {
+      qCat.textContent = 'في انتظار سؤال';
+      qText.textContent = 'سيظهر السؤال هنا حين يبدأ المُقدِّم…';
+      qText.classList.add('q-empty');
+      if(categoryGrid) categoryGrid.style.display = 'none';
     }
   }
   if(q && q.active){
+    if(categoryGrid) categoryGrid.style.display = 'none';
     qCat.textContent = q.cat || 'سؤال';
     qText.textContent = q.text || '';
     qText.classList.remove('q-empty');
@@ -663,6 +698,30 @@ function getCatIcon(cat) {
   };
   return icons[cat] || '❓';
 }
+
+window.selectCategory = async function(ci) {
+  if(!myPlayer || !latestState) return;
+  const board = Array.isArray(latestState.board) && latestState.board.length ? latestState.board
+    : Array.isArray(latestState.diamondState) && latestState.diamondState.length ? latestState.diamondState
+    : null;
+  if(!board) return;
+  const category = board[ci];
+  if(!category) return;
+  const allSpent = Array.isArray(category.questions) ? category.questions.every(q => q.spent) : false;
+  if(allSpent) return;
+
+  const stage = latestState.boardStage || (Array.isArray(latestState.diamondState) && latestState.diamondState.length ? 'diamond' : 'silver');
+  const selected = { catIndex: ci, catName: category.cat, stage, ts: Date.now() };
+  localSelectedCategory = selected;
+  latestState.selectedCategory = selected;
+  applyStateToPlayer(latestState);
+
+  try {
+    await set(ref(db, `${RP()}playerSelections/${myPlayer.id}`), selected);
+  } catch (e) {
+    console.warn('selectCategory failed', e);
+  }
+};
 
 // ==============================
 //   BUZZER — atomic transaction
