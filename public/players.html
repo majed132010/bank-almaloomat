@@ -572,6 +572,17 @@ function applyStateToPlayer(state){
   const buzzBtn = document.getElementById('buzz-btn');
   const buzzHint = document.getElementById('buzz-hint');
   if(b && (b.winnerId !== null && b.winnerId !== undefined)){
+    const buzzerStale = b.ts && typeof b.ts === 'number' && Date.now() - b.ts > 10000;
+    if (buzzerStale) {
+      localLocked = false;
+      window._lastPlayerBuzzId = null;
+      clearTimeout(window._localBuzzerTimer);
+      window._localBuzzerTimer = null;
+      window._winnerNoticeTimer = null;
+      notice.classList.remove('on');
+      resetBuzzUI();
+      return;
+    }
     // Show flash only once per winner while buzzer state remains
     const pwid = b.winnerId !== null && b.winnerId !== undefined ? String(b.winnerId) : null;
     if (window._lastPlayerBuzzId !== pwid) {
@@ -604,10 +615,8 @@ function applyStateToPlayer(state){
       if(!window._localBuzzerTimer) {
         window._localBuzzerTimer = setTimeout(() => {
           window._localBuzzerTimer = null;
-          if(latestState?.buzzer?.winnerId !== null) {
-            localLocked = false;
-            resetBuzzUI();
-          }
+          localLocked = false;
+          resetBuzzUI();
         }, 10000);
       }
     } else {
