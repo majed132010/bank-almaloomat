@@ -21,10 +21,10 @@ body.in-game .rtc-panel,body.in-winner .rtc-panel{display:flex}
 .rtc-peers{font-size:8.5pt;color:#94a3b8;letter-spacing:1px}
 
 /* Buzzer winner flash — global visual cue */
-.buzz-flash{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:2400;background:linear-gradient(135deg,rgba(240,165,0,.95),rgba(252,211,77,.95));color:#1a0e00;padding:14px 28px;border-radius:50px;font-family:'Cairo',sans-serif;font-size:14pt;font-weight:900;letter-spacing:1.5px;box-shadow:0 8px 30px rgba(240,165,0,.5);display:none;animation:buzzPop .35s cubic-bezier(.34,1.56,.64,1)}
-.buzz-flash.on{display:block}
+.buzz-flash{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:2400;background:linear-gradient(135deg,rgba(240,165,0,.95),rgba(252,211,77,.95));color:#1a0e00;padding:14px 28px;border-radius:50px;font-family:'Cairo',sans-serif;font-size:14pt;font-weight:900;letter-spacing:1.5px;box-shadow:0 8px 30px rgba(240,165,0,.5);display:none;opacity:0}
+.buzz-flash.on{display:block;opacity:1;animation:buzzHostFlash .35s ease 3}
 .buzz-flash::before{content:'⚡';margin-left:10px;font-size:16pt}
-@keyframes buzzPop{from{transform:translate(-50%,-30px) scale(.7);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+@keyframes buzzHostFlash{0%,100%{transform:translate(-50%,0) scale(1);opacity:1}50%{transform:translate(-50%,-10px) scale(.96);opacity:0}}
 </style>
 </head>
 <body>

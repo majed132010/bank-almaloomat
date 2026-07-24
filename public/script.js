@@ -1925,6 +1925,22 @@ function watchTextAnswers() {
   }, 800);
 }
 
+function showBuzzerWinnerFlash(name, winnerId) {
+  const modalBuzz = document.getElementById('modal-buzz-winner');
+  const flash = document.getElementById('buzz-flash');
+  const flashName = document.getElementById('buzz-flash-name');
+  if (!flash || !flashName) return;
+  flashName.textContent = name || '—';
+  flash.classList.remove('on');
+  void flash.offsetWidth;
+  flash.classList.add('on');
+  clearTimeout(window._hostBuzzFlashTimer);
+  window._hostBuzzFlashTimer = setTimeout(() => {
+    flash.classList.remove('on');
+    if (modalBuzz) modalBuzz.style.display = 'none';
+  }, 1200);
+}
+
 function updateBuzzerUI(data) {
   const modalBuzz = document.getElementById('modal-buzz-winner');
   const modalName = document.getElementById('modal-buzz-name');
@@ -1936,7 +1952,6 @@ function updateBuzzerUI(data) {
     modalName.style.transition = 'opacity .3s ease';
     modalBuzz.style.display = 'block';
     flashName.textContent = data.winnerName;
-    flash.classList.add('on');
     showBuzzerWinnerFlash(data.winnerName, data.winnerId);
     if (data.winnerId !== null && data.winnerId !== undefined && document.getElementById('modal-overlay').style.display === 'flex') {
       selectResponder(Number(data.winnerId));
@@ -1948,8 +1963,9 @@ function updateBuzzerUI(data) {
   } else {
     clearTimeout(window._hostBuzzerResetTimer);
     window._hostBuzzerResetTimer = null;
-    modalBuzz.style.display = 'none';
-    flash.classList.remove('on');
+    clearTimeout(window._hostBuzzFlashTimer);
+    if (modalBuzz) modalBuzz.style.display = 'none';
+    if (flash) flash.classList.remove('on');
   }
 }
 
