@@ -1941,8 +1941,6 @@ function showBuzzerWinnerFlash(name, winnerId) {
   window._hostBuzzFlashTimer = setTimeout(() => {
     flash.classList.remove('on');
     if (modalBuzz) modalBuzz.style.display = 'none';
-    // clear last id after the flash completes so future buzzes can re-trigger
-    window._lastHostBuzzId = null;
   }, 1200);
 }
 
