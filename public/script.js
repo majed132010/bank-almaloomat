@@ -1930,6 +1930,9 @@ function showBuzzerWinnerFlash(name, winnerId) {
   const flash = document.getElementById('buzz-flash');
   const flashName = document.getElementById('buzz-flash-name');
   if (!flash || !flashName) return;
+  // Avoid re-triggering the flash repeatedly while it's already active
+  if (flash.classList.contains('on') && window._lastHostBuzzId === winnerId) return;
+  window._lastHostBuzzId = winnerId;
   flashName.textContent = name || '—';
   flash.classList.remove('on');
   void flash.offsetWidth;
@@ -1938,6 +1941,8 @@ function showBuzzerWinnerFlash(name, winnerId) {
   window._hostBuzzFlashTimer = setTimeout(() => {
     flash.classList.remove('on');
     if (modalBuzz) modalBuzz.style.display = 'none';
+    // clear last id after the flash completes so future buzzes can re-trigger
+    window._lastHostBuzzId = null;
   }, 1200);
 }
 
@@ -1966,6 +1971,8 @@ function updateBuzzerUI(data) {
     clearTimeout(window._hostBuzzFlashTimer);
     if (modalBuzz) modalBuzz.style.display = 'none';
     if (flash) flash.classList.remove('on');
+    // ensure last buzz id cleared when buzzer is reset
+    window._lastHostBuzzId = null;
   }
 }
 
