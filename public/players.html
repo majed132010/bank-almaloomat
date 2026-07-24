@@ -546,7 +546,8 @@ function applyStateToPlayer(state){
   const buzzHint = document.getElementById('buzz-hint');
   if(b && (b.winnerId !== null && b.winnerId !== undefined)){
     // Show flash only once per winner while buzzer state remains
-    if (window._lastPlayerBuzzId !== b.winnerId) {
+    const pwid = b.winnerId !== null && b.winnerId !== undefined ? String(b.winnerId) : null;
+    if (window._lastPlayerBuzzId !== pwid) {
       const winnerEl = document.getElementById('winner-notice-name');
       winnerEl.textContent = b.winnerName || '—';
       winnerEl.classList.remove('buzz-flash');
@@ -555,7 +556,7 @@ function applyStateToPlayer(state){
       winnerEl.style.animationFillMode = 'forwards';
       winnerEl.style.opacity = '1';
       notice.classList.add('on');
-      window._lastPlayerBuzzId = b.winnerId;
+      window._lastPlayerBuzzId = pwid;
       clearTimeout(window._winnerNoticeTimer);
       window._winnerNoticeTimer = setTimeout(() => {
         winnerEl.classList.remove('buzz-flash');

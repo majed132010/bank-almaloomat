@@ -1930,9 +1930,10 @@ function showBuzzerWinnerFlash(name, winnerId) {
   const flash = document.getElementById('buzz-flash');
   const flashName = document.getElementById('buzz-flash-name');
   if (!flash || !flashName) return;
-  // Avoid re-triggering the flash repeatedly for the same winner
-  if (window._lastHostBuzzId === winnerId) return;
-  window._lastHostBuzzId = winnerId;
+  // Normalize winner id to string to avoid type-mismatch retriggers
+  const wid = winnerId !== null && winnerId !== undefined ? String(winnerId) : null;
+  if (window._lastHostBuzzId === wid) return;
+  window._lastHostBuzzId = wid;
   flashName.textContent = name || '—';
   flash.classList.remove('on');
   void flash.offsetWidth;
