@@ -686,9 +686,11 @@ window.pressBuzzer = async function(){
   const buzzerRef = ref(db, `${RP()}gameState/buzzer`);
   try {
     const result = await runTransaction(buzzerRef, (current)=>{
-      // If already claimed, abort
-      if(current && current.winnerId !== null && current.winnerId !== undefined){
-        return; // abort
+      const staleWinner = current && current.winnerId !== null && current.winnerId !== undefined
+        && current.ts && typeof current.ts === 'number'
+        && Date.now() - current.ts > 10000;
+      if(current && current.winnerId !== null && current.winnerId !== undefined && !staleWinner){
+        return; // abort, active buzz already claimed
       }
       return {
         winnerId: myPlayer.id,
@@ -698,7 +700,7 @@ window.pressBuzzer = async function(){
       };
     });
     if(!result.committed){
-      // Someone else won
+      // Someone else won or stale reset failed
       localLocked = true;
     }
   } catch(e){
