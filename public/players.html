@@ -438,23 +438,24 @@ function applyStateToPlayer(state){
   const answerBtn = document.getElementById('text-answer-btn');
   const answerHint = document.getElementById('text-answer-hint');
   if(!q || !q.active) {
-    if(state.board && state.boardStage) {
+    if(Array.isArray(state.board) && state.board.length) {
       const boardHtml = state.board.map(col => `
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1">
           <div style="font-size:24pt">${getCatIcon(col.cat)}</div>
           <div style="font-size:9pt;font-weight:700;color:#f0a500;text-align:center">${col.cat}</div>
-          ${col.questions.map(q => `
+          ${Array.isArray(col.questions) ? col.questions.map(q => `
             <div style="width:100%;padding:10px;border-radius:10px;background:${q.spent ? 'rgba(255,255,255,.1)' : 'rgba(109,40,217,.4)'};color:${q.spent ? '#666' : '#fff'};font-weight:900;text-align:center;font-size:12pt">
               ${q.spent ? '✓' : q.v}
             </div>
-          `).join('')}
+          `).join('') : ''}
         </div>
       `).join('');
 
-      qCat.textContent = state.boardStage === 'silver' ? '⚪ الشاشة الفضية' : '🥇 الشاشة الذهبية';
+      const boardLabel = state.boardStage === 'silver' ? '⚪ الشاشة الفضية' : state.boardStage === 'gold' ? '🥇 الشاشة الذهبية' : '🏁 شاشة الفئات';
+      qCat.textContent = boardLabel;
       qText.innerHTML = `
         <div style="font-size:11pt;color:#f0a500;font-weight:700;margin-bottom:12px;text-align:center">
-          ${state.boardStage === 'silver' ? '⚪ الشاشة الفضية' : '🥇 الشاشة الذهبية'}
+          ${boardLabel}
         </div>
         <div style="display:flex;gap:10px;direction:rtl">${boardHtml}</div>
       `;
