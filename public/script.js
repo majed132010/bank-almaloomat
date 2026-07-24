@@ -1480,7 +1480,8 @@ function confirmBankBet() {
   }
   bankBet = bv; bankMode = true;
   document.getElementById('modal-bank').style.display = 'none';
-  launchBankVideoMain();
+  document.getElementById('modal-judge').style.display = 'flex';
+  document.getElementById('modal-judge').querySelectorAll('.judge-btn').forEach(b => b.disabled = false);
 }
 
 function launchBankVideoMain() {
