@@ -52,6 +52,7 @@ function buildGameStateForSync() {
     stage,
     players: players.map(p => ({ id: p.id, name: p.name, score: p.score, isBanked: p.isBanked, bankedValue: p.bankedValue })),
     board: (stage === 'silver' || stage === 'gold') ? gameDB[stage] : null,
+    boardStage: stage,
     diamondState: stage === 'diamond' ? diamondState : null,
     diamondPlayers: stage === 'diamond' ? diamondPlayers.map(p => ({ id: p.id, name: p.name })) : null,
     question: { active: false },
